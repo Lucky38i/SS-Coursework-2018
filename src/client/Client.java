@@ -33,8 +33,14 @@ public class Client {
 
     public static void main (String[] args)
     {
-        //Requests user to enter name
+        //Initialize JFrame
+        JFrame windowClient = new JFrame("Spotlike");
+        windowClient.setContentPane(new Client().mainPanel);
+        windowClient.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        windowClient.pack();
+        windowClient.setVisible(true);
 
+        //Requests user to enter name
         String readName = null;
         Scanner scan = new Scanner(System.in);
         System.out.println("Please enter usename");
@@ -54,7 +60,13 @@ public class Client {
         client.startClient(scan);
         
     }
-    
+
+    // Default Constructor
+    private Client()
+    {
+
+    }
+
     //Constructor
     private Client(String userName, String host, int portNumber)
     {
