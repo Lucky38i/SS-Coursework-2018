@@ -10,6 +10,7 @@ package client;
  * @author alexmcbean
  */
 
+import javax.swing.*;
 import java.net.*;
 import java.io.*;
 import java.util.*;
@@ -24,10 +25,16 @@ public class Client {
     private String userName;
     private String serverHost;
     private int serverPort;
-    
+    private JTabbedPane tabbedPanel;
+    private JPanel mainPanel;
+    private JPanel clientSocial;
+    private JPanel clientChat;
+    private JButton Enter;
+
     public static void main (String[] args)
     {
         //Requests user to enter name
+
         String readName = null;
         Scanner scan = new Scanner(System.in);
         System.out.println("Please enter usename");
@@ -48,7 +55,7 @@ public class Client {
         
     }
     
-    //Constructer 
+    //Constructor
     private Client(String userName, String host, int portNumber)
     {
         this.userName = userName;
@@ -88,6 +95,5 @@ public class Client {
             System.out.println("Interrupted");
         }
     }
-    
-    
+
 }
