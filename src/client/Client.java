@@ -5,7 +5,7 @@
  */
 package client;
 
-/**
+/*
  *
  * @author alexmcbean
  */
@@ -21,16 +21,12 @@ import java.io.*;
 import java.util.*;
 
 public class Client extends JFrame{
-    
-    //Static variables
-    private static final String host = "localhost";
-    private static final int portNumber = 4444;
+
     
     //Variables
     private String userName;
     private String serverHost;
     private int serverPort;
-    private String userChat;
     private ServerThread serverThread;
 
     //JFrame Variables
@@ -54,67 +50,35 @@ public class Client extends JFrame{
         this.textArea_Receive.append(value);
     }
 
+
     // Default Constructor
     public Client()
     {
-        textField_Send.addActionListener(new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                System.out.println("Text is: " + textField_Send.getText());
-                //userChat = textField_Send.getText();
-                userChat = textField_Send.getText().trim();
-                textField_Send.setText("");
-            }
-        });
-
-        textArea_Receive.setText("Test");
+        //textArea_Receive.setText("Test");
     }
 
     //Constructor
-    private Client(String userName, String host, int portNumber)
+    public Client(String userName, String host, int portNumber)
     {
         this.userName = userName;
         this.serverHost = host;
         this.serverPort = portNumber;
+
+        textArea_Receive.setText("Test");
+
     }
 
-    public static void main (String[] args)
+
+    public void startClient(Client client, Scanner scan)
     {
         //Initialize JFrame
         JFrame windowClient = new JFrame("Spotlike");
         windowClient.setContentPane(new Client().contentPanel);
-        windowClient.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        windowClient.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         windowClient.setLocationRelativeTo(null);
         windowClient.pack();
         windowClient.setVisible(true);
 
-        //Variables
-        //public String testingText;
-
-        //Requests user to enter name
-        String readName = null;
-        Scanner scan = new Scanner(System.in);
-        System.out.println("Please enter username");
-
-        //Loop to make sure username is not empty
-        while (readName == null || readName.trim().equals(""))
-        {
-            readName = scan.nextLine();
-            if (readName.trim().equals(""))
-            {
-                System.out.println("Invalid, please try again");
-            }
-        }
-
-        //Start client
-        Client client = new Client(readName, host, portNumber);
-        client.startClient(client, scan);
-
-    }
-
-    private void startClient(Client client, Scanner scan){
         try
         {
             //Create new socket and wait for network communication
