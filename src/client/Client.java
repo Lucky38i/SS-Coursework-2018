@@ -11,11 +11,16 @@ package client;
  */
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.net.*;
 import java.io.*;
 import java.util.*;
 
-public class Client {
+public class Client extends JFrame{
     
     //Static variables
     private static final String host = "localhost";
@@ -25,46 +30,46 @@ public class Client {
     private String userName;
     private String serverHost;
     private int serverPort;
-    private JTabbedPane tabbedPanel;
-    private JPanel mainPanel;
-    private JPanel clientSocial;
-    private JPanel clientChat;
-    private JButton Enter;
+    private String userChat;
+    private ServerThread serverThread;
 
-    public static void main (String[] args)
+    //JFrame Variables
+    private JPanel contentPanel;
+    private JTabbedPane panel_Social;
+    private JPanel jpanel_Social;
+    private JPanel jpanel_Chat;
+    private JTextArea textArea_Receive;
+    private JTextField textField_Send;
+    private JTextArea textArea_ClientList;
+    private JButton btn_Enter;
+
+
+    public JTextArea getTextArea_Receive()
     {
-        //Initialize JFrame
-        JFrame windowClient = new JFrame("Spotlike");
-        windowClient.setContentPane(new Client().mainPanel);
-        windowClient.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        windowClient.pack();
-        windowClient.setVisible(true);
+        return this.textArea_Receive;
+    }
 
-        //Requests user to enter name
-        String readName = null;
-        Scanner scan = new Scanner(System.in);
-        System.out.println("Please enter usename");
-        
-        //Loop to make sure username is not empty
-        while (readName == null || readName.trim().equals(""))
-        {
-            readName = scan.nextLine();
-            if (readName.trim().equals(""))
-            {
-                System.out.println("Invalid, please try again");
-            }
-        }
-        
-        //Start client
-        Client client = new Client(readName, host, portNumber);
-        client.startClient(scan);
-        
+    public void setTextArea_Receive(String value)
+    {
+        this.textArea_Receive.append(value);
     }
 
     // Default Constructor
-    private Client()
+    public Client()
     {
+        textField_Send.addActionListener(new ActionListener()
+        {
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+                System.out.println("Text is: " + textField_Send.getText());
+                //userChat = textField_Send.getText();
+                userChat = textField_Send.getText().trim();
+                textField_Send.setText("");
+            }
+        });
 
+        textArea_Receive.setText("Test");
     }
 
     //Constructor
@@ -74,8 +79,42 @@ public class Client {
         this.serverHost = host;
         this.serverPort = portNumber;
     }
-    
-    private void startClient(Scanner scan){
+
+    public static void main (String[] args)
+    {
+        //Initialize JFrame
+        JFrame windowClient = new JFrame("Spotlike");
+        windowClient.setContentPane(new Client().contentPanel);
+        windowClient.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        windowClient.setLocationRelativeTo(null);
+        windowClient.pack();
+        windowClient.setVisible(true);
+
+        //Variables
+        //public String testingText;
+
+        //Requests user to enter name
+        String readName = null;
+        Scanner scan = new Scanner(System.in);
+        System.out.println("Please enter username");
+
+        //Loop to make sure username is not empty
+        while (readName == null || readName.trim().equals(""))
+        {
+            readName = scan.nextLine();
+            if (readName.trim().equals(""))
+            {
+                System.out.println("Invalid, please try again");
+            }
+        }
+
+        //Start client
+        Client client = new Client(readName, host, portNumber);
+        client.startClient(client, scan);
+
+    }
+
+    private void startClient(Client client, Scanner scan){
         try
         {
             //Create new socket and wait for network communication
@@ -83,10 +122,9 @@ public class Client {
             Thread.sleep(1000);
             
             //Create thread and start it
-            ServerThread serverThread = new ServerThread(socket, userName);
+            serverThread = new ServerThread(client, socket, userName);
             Thread serverAccessThread = new Thread(serverThread);
             serverAccessThread.start();
-            
             
             while(serverAccessThread.isAlive())
             {
@@ -95,6 +133,7 @@ public class Client {
                 {
                     serverThread.addNextMessage(scan.nextLine());
                 }
+
             }
         }
         catch(IOException ex)
@@ -107,5 +146,6 @@ public class Client {
             System.out.println("Interrupted");
         }
     }
+
 
 }

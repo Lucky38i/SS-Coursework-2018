@@ -10,6 +10,7 @@ package client;
  * @author alexmcbean
  */
 
+import javax.swing.*;
 import java.net.*;
 import java.io.*;
 import java.util.*;
@@ -19,15 +20,16 @@ public class ServerThread implements Runnable
     
     private Socket socket;
     private String userName;
-    
     private boolean isAlived;
     private final LinkedList<String> messagesToSend;
     private boolean hasMessages = false;
-    
-    
+    private Client client;
+
+
     //Constructor
-    ServerThread(Socket socket,  String userName)
+    ServerThread(Client client, Socket socket,  String userName)
     {
+        this.client = client;
         this.socket = socket;
         this.userName = userName;
         messagesToSend = new LinkedList<String>();
@@ -45,7 +47,7 @@ public class ServerThread implements Runnable
     
     public void welcomeMessage()
     {
-        System.out.println("Welcome : " + userName);
+        System.out.println("Welcome to Spotlike!: " + userName);
         System.out.println("Local Port : " + socket.getLocalPort());
         System.out.println("Server = " + socket.getRemoteSocketAddress() + ":" + socket.getPort());
     }
@@ -60,7 +62,11 @@ public class ServerThread implements Runnable
             //Setup I/O
             PrintWriter serverOut = new PrintWriter(socket.getOutputStream(), false);   //Output to server
             InputStream serverInStream = socket.getInputStream();                       //Input from server
-            Scanner serverIn = new Scanner(serverInStream);                             
+            Scanner serverIn = new Scanner(serverInStream);
+
+            JTextArea test1 = this.client.getTextArea_Receive();
+            String serverString;
+
 
             while(!socket.isClosed())
             {
@@ -70,7 +76,10 @@ public class ServerThread implements Runnable
                     //Print out messages from the server
                     if(serverIn.hasNextLine())
                     {
-                        System.out.println(serverIn.nextLine());
+                        serverString = serverIn.nextLine();
+                        System.out.println(serverString);
+                        this.client.setTextArea_Receive(serverString + "");
+
                     }
                 }
                 
