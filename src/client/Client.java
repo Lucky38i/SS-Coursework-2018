@@ -5,58 +5,80 @@
  */
 package client;
 
-/**
+/*
  *
  * @author alexmcbean
  */
 
+import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.net.*;
 import java.io.*;
 import java.util.*;
 
-public class Client {
-    
-    //Static variables
-    private static final String host = "localhost";
-    private static final int portNumber = 4444;
+public class Client extends JFrame{
+
     
     //Variables
     private String userName;
     private String serverHost;
     private int serverPort;
-    
-    public static void main (String[] args)
+    private ServerThread serverThread;
+
+    //JFrame Variables
+    private JPanel contentPanel;
+    private JTabbedPane panel_Social;
+    private JPanel jpanel_Social;
+    private JPanel jpanel_Chat;
+    private JTextArea textArea_Receive;
+    private JTextField textField_Send;
+    private JTextArea textArea_ClientList;
+    private JButton btn_Enter;
+
+
+    public JTextArea getTextArea_Receive()
     {
-        //Requests user to enter name
-        String readName = null;
-        Scanner scan = new Scanner(System.in);
-        System.out.println("Please enter usename");
-        
-        //Loop to make sure username is not empty
-        while (readName == null || readName.trim().equals(""))
-        {
-            readName = scan.nextLine();
-            if (readName.trim().equals(""))
-            {
-                System.out.println("Invalid, please try again");
-            }
-        }
-        
-        //Start client
-        Client client = new Client(readName, host, portNumber);
-        client.startClient(scan);
-        
+        return this.textArea_Receive;
     }
-    
-    //Constructer 
-    private Client(String userName, String host, int portNumber)
+
+    public void setTextArea_Receive(String value)
+    {
+        this.textArea_Receive.append(value);
+    }
+
+
+    // Default Constructor
+    public Client()
+    {
+        //textArea_Receive.setText("Test");
+    }
+
+    //Constructor
+    public Client(String userName, String host, int portNumber)
     {
         this.userName = userName;
         this.serverHost = host;
         this.serverPort = portNumber;
+
+        textArea_Receive.setText("Test");
+
     }
-    
-    private void startClient(Scanner scan){
+
+
+    public void startClient(Client client, Scanner scan)
+    {
+        //Initialize JFrame
+        JFrame windowClient = new JFrame("Spotlike");
+        windowClient.setContentPane(new Client().contentPanel);
+        windowClient.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        windowClient.setLocationRelativeTo(null);
+        windowClient.pack();
+        windowClient.setVisible(true);
+
         try
         {
             //Create new socket and wait for network communication
@@ -64,10 +86,9 @@ public class Client {
             Thread.sleep(1000);
             
             //Create thread and start it
-            ServerThread serverThread = new ServerThread(socket, userName);
+            serverThread = new ServerThread(client, socket, userName);
             Thread serverAccessThread = new Thread(serverThread);
             serverAccessThread.start();
-            
             
             while(serverAccessThread.isAlive())
             {
@@ -76,6 +97,7 @@ public class Client {
                 {
                     serverThread.addNextMessage(scan.nextLine());
                 }
+
             }
         }
         catch(IOException ex)
@@ -88,6 +110,6 @@ public class Client {
             System.out.println("Interrupted");
         }
     }
-    
-    
+
+
 }
