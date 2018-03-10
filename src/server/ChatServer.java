@@ -5,24 +5,27 @@
  */
 package server;
 
-/**
+/*
  *
  * @author alexmcbean
  */
 
-import java.net.*;
-import java.io.*;
-import java.util.*;
 
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ChatServer
 {
+
     //Static variables
     private static final int portNumber = 4444;
     
     //Variables
     private int serverPort;
-    private List <ClientThread> clients;
+    private List<ClientThread> clients;
     
     
     public static void main(String[] args) 

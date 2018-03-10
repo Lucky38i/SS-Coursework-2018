@@ -5,15 +5,19 @@
  */
 package client;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintWriter;
+import java.net.Socket;
+import java.util.LinkedList;
+import java.util.Scanner;
+
 /**
  *
  * @author alexmcbean
  */
 
-import javax.swing.*;
-import java.net.*;
-import java.io.*;
-import java.util.*;
+
 
 public class ServerThread implements Runnable
 {
@@ -45,7 +49,7 @@ public class ServerThread implements Runnable
         }
     }
     
-    public void welcomeMessage()
+    private void welcomeMessage()
     {
         System.out.println("Welcome to Spotlike!: " + userName);
         System.out.println("Local Port : " + socket.getLocalPort());
@@ -64,7 +68,7 @@ public class ServerThread implements Runnable
             InputStream serverInStream = socket.getInputStream();                       //Input from server
             Scanner serverIn = new Scanner(serverInStream);
 
-            JTextArea test1 = this.client.getTextArea_Receive();
+            //JTextArea test1 = this.client.getTextArea_Receive();
             String serverString;
 
 
@@ -78,8 +82,7 @@ public class ServerThread implements Runnable
                     {
                         serverString = serverIn.nextLine();
                         System.out.println(serverString);
-                        this.client.setTextArea_Receive(serverString + "");
-
+                        //this.client.setTextArea_Receive(serverString);
                     }
                 }
                 

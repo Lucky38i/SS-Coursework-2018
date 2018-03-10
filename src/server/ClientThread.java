@@ -3,14 +3,19 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package server;
-import java.net.*;
-import java.io.*;
-import java.util.*;
-/**
+
+/*
  *
  * @author alexmcbean
  */
+package server;
+
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.Socket;
+import java.util.Scanner;
+
 public class ClientThread implements Runnable
 {
     private Socket socket;
@@ -60,7 +65,7 @@ public class ClientThread implements Runnable
                 }
             }
         } 
-        catch (IOException e) 
+        catch (IOException e)
         {
             e.printStackTrace();
         }
