@@ -10,6 +10,7 @@ import java.io.IOException;
 
 public class clientFX extends Application
 {
+
     @Override
     public void start(Stage primaryStage) throws IOException
     {
@@ -21,4 +22,5 @@ public class clientFX extends Application
         primaryStage.setScene(scene);
         primaryStage.show();
     }
+
 }

@@ -1,16 +1,28 @@
 package client;
 
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.text.Text;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
+
 
 public class clientFXHandler
 {
-    @FXML private Text actiontarget;
 
-    @FXML protected void handleSubmitButtonAction(ActionEvent event)
+    @FXML
+    public TextField textArea_Send;
+
+    @FXML
+    public TextArea textArea_Receive;
+
+    @FXML
+    public void printOut()
     {
-        actiontarget.setText("Sign in button pressed");
+        textArea_Receive.setText(textArea_Send.getText());
+    }
+    @FXML
+    public void appendTextArea_Receive(String message)
+    {
+        textArea_Receive.appendText(message);
     }
 
 }

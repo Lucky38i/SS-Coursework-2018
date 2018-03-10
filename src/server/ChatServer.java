@@ -25,7 +25,7 @@ public class ChatServer
     
     //Variables
     private int serverPort;
-    private List<ClientThread> clients;
+    private List<serverHandlerThread> clients;
     
     
     public static void main(String[] args) 
@@ -39,14 +39,14 @@ public class ChatServer
         serverPort = __portNumber;
     }
     
-    public List<ClientThread> getClients()
+    public List<serverHandlerThread> getClients()
     {
         return clients;
     }
     
     private void startServer()
     {
-        clients = new ArrayList<ClientThread>();
+        clients = new ArrayList<serverHandlerThread>();
         ServerSocket serverSocket = null;
         try
         {
@@ -61,7 +61,7 @@ public class ChatServer
     }
     
     
-    //Continuously accpt clients
+    //Continuously accept clients
     private void acceptClients(ServerSocket serverSocket)
     {
         System.out.println("Server starts port = " + serverSocket.getLocalSocketAddress());
@@ -71,7 +71,7 @@ public class ChatServer
             {
                 Socket socket = serverSocket.accept();
                 System.out.println("Accepts: " + socket.getRemoteSocketAddress());
-                ClientThread client = new ClientThread(this, socket);
+                serverHandlerThread client = new serverHandlerThread(this, socket);
                 Thread thread = new Thread(client);
                 thread.start();
                 clients.add(client);

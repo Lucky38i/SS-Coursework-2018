@@ -24,16 +24,13 @@ public class ServerThread implements Runnable
     
     private Socket socket;
     private String userName;
-    private boolean isAlived;
     private final LinkedList<String> messagesToSend;
     private boolean hasMessages = false;
-    private Client client;
 
 
     //Constructor
-    ServerThread(Client client, Socket socket,  String userName)
+    ServerThread(Socket socket,  String userName)
     {
-        this.client = client;
         this.socket = socket;
         this.userName = userName;
         messagesToSend = new LinkedList<String>();
@@ -68,12 +65,19 @@ public class ServerThread implements Runnable
             InputStream serverInStream = socket.getInputStream();                       //Input from server
             Scanner serverIn = new Scanner(serverInStream);
 
-            //JTextArea test1 = this.client.getTextArea_Receive();
             String serverString;
-
+            boolean sendUserName = true;
 
             while(!socket.isClosed())
             {
+                //Send the username to server
+                if (sendUserName)
+                {
+                    serverOut.println(userName);
+                    serverOut.flush();
+                    sendUserName = false;
+                }
+
                 //Print messages from server
                 if(serverInStream.available() > 0)
                 {
@@ -82,7 +86,9 @@ public class ServerThread implements Runnable
                     {
                         serverString = serverIn.nextLine();
                         System.out.println(serverString);
-                        //this.client.setTextArea_Receive(serverString);
+
+                        //Identify username
+                        String userName = (serverString.substring(0,serverString.indexOf(">"))).trim();
                     }
                 }
                 

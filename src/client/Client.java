@@ -48,7 +48,7 @@ public class Client{
             System.out.println("creating socket..");
 
             //Create thread and start it
-            serverThread = new ServerThread(client, socket, userName);
+            serverThread = new ServerThread(socket, userName);
             Thread serverAccessThread = new Thread(serverThread);
             serverAccessThread.start();
             System.out.println("Created thread");
