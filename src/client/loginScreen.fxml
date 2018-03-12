@@ -1,14 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.paint.*?>
+<?import javafx.scene.effect.*?>
+<?import javafx.scene.text.*?>
 <?import java.lang.*?>
 <?import java.util.*?>
 <?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="client.LoginScreen"
-            prefHeight="400.0" prefWidth="600.0">
 
+<AnchorPane prefHeight="274.0" prefWidth="452.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.clientUIHandler">
+   <children>
+      <Label layoutX="353.0" layoutY="243.0" text="SpotLike V0.1" />
+      <Pane layoutX="89.0" layoutY="43.0" prefHeight="189.0" prefWidth="275.0">
+         <children>
+            <Button fx:id="btn_Login" layoutX="177.0" layoutY="148.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="84.0" text="Login" />
+            <TextField fx:id="textField_Username" layoutX="54.0" layoutY="68.0" promptText="userName" />
+            <Label layoutX="52.0" layoutY="14.0" text="Sign in to start your session" />
+         </children>
+      </Pane>
+   </children>
 </AnchorPane>
