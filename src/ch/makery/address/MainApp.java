@@ -1,4 +1,4 @@
-package client;
+package ch.makery.address;
 
 import javafx.application.Application;
 import javafx.fxml.FXML;
@@ -11,11 +11,11 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 
-public class ClientUI extends Application
+public class MainApp extends Application
 {
 
     private Stage primaryStage;
-    private BorderPane rootLayout;
+    private String loginScreenFXML = "resources/FXML/loginScreen.fxml";
 
 
     public static void main(String[] args)
@@ -37,7 +37,7 @@ public class ClientUI extends Application
     {
         try {
             // Load root layout from fxml file.
-            Parent root = FXMLLoader.load(getClass().getResource("loginScreen.fxml"));
+            Parent root = FXMLLoader.load(getClass().getResource(loginScreenFXML));
 
             Scene scene = new Scene(root);
             primaryStage.setScene(scene);

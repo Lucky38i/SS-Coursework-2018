@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.*?>
 
 
-<AnchorPane prefHeight="274.0" prefWidth="452.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.clientUIHandler">
+<AnchorPane prefHeight="274.0" prefWidth="452.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ch.makery.address.clientUIHandler">
    <children>
       <Label layoutX="353.0" layoutY="243.0" text="SpotLike V0.1" />
       <Pane layoutX="89.0" layoutY="43.0" prefHeight="189.0" prefWidth="275.0">
