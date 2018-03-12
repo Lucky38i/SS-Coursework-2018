@@ -10,102 +10,75 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
+/**
+* Model class for for users
+*
+* @author Alex McBean
+*/
+
 public class Users
 {
 
-    private final StringProperty firstName;
-    private final StringProperty lastName;
-    private final StringProperty street;
-    private final IntegerProperty postalCode;
+    //Variables
+    private final StringProperty userName;
     private final StringProperty city;
     private final ObjectProperty<LocalDate> birthday;
+    private final StringProperty musicGenre;
 
     /**
      * Default constructor.
      */
-
-
     public Users()
     {
-        this(null,null);
+        this(null);
     }
 
     /**
      * Constructor with some initial data.
+     * Takes in a {@code String} and sets a reference
      *
-     * @param firstName
-     * @param lastName
+     * @param userName
+     *
      */
-    public Users(String firstName, String lastName)
+    public Users(String userName)
     {
-        this.firstName = new SimpleStringProperty(firstName);
-        this.lastName = new SimpleStringProperty(lastName);
+        this.userName = new SimpleStringProperty(userName);
 
         // Some initial dummy data, just for convenient testing.
-        this.street = new SimpleStringProperty("some street");
-        this.postalCode = new SimpleIntegerProperty(1234);
-        this.city = new SimpleStringProperty("some city");
-        this.birthday = new SimpleObjectProperty<LocalDate>(LocalDate.of(1999, 2, 21));
+        this.city = new SimpleStringProperty("Nottingham");
+        this.birthday = new SimpleObjectProperty<LocalDate>(LocalDate.of(1998, 2, 19));
+        this.musicGenre = new SimpleStringProperty("Hip-Hop");
     }
 
-    public String getFirstName()
+    //Setters and Getters
+    public String getUserName()
     {
-        return firstName.get();
+        return userName.get();
     }
 
-    public void setFirstName(String firstName)
+    public void setUserName(String userName)
     {
-        this.firstName.set(firstName);
+        this.userName.set(userName);
     }
 
-    public StringProperty firstNameProperty()
+    public StringProperty firstUserProperty()
     {
-        return firstName;
+        return userName;
     }
 
-    public String getLastName()
+    public String getMusicGenre()
     {
-        return lastName.get();
+        return musicGenre.get();
     }
 
-    public void setLastName(String lastName)
+    public void setMusicGenre(String musicGenre)
     {
-        this.lastName.set(lastName);
+        this.musicGenre.set(musicGenre);
     }
 
-    public StringProperty lastNameProperty()
+    public StringProperty musicGenreProperty()
     {
-        return lastName;
-    }
-
-    public String getStreet()
-    {
-        return street.get();
-    }
-
-    public void setStreet(String street)
-    {
-        this.street.set(street);
-    }
-
-    public StringProperty streetProperty()
-    {
-        return street;
-    }
-
-    public int getPostalCode()
-    {
-        return postalCode.get();
-    }
-
-    public void setPostalCode(int postalCode)
-    {
-        this.postalCode.set(postalCode);
-    }
-
-    public IntegerProperty postalCodeProperty()
-    {
-        return postalCode;
+        return musicGenre;
     }
 
     public String getCity()
@@ -137,4 +110,5 @@ public class Users
     {
         return birthday;
     }
+
 }

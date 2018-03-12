@@ -9,15 +9,34 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-
-<AnchorPane prefHeight="274.0" prefWidth="452.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ch.makery.address.clientUIHandler">
+<AnchorPane prefHeight="415.0" prefWidth="323.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ch.makery.address.view.loginScreenHandler">
    <children>
-      <Label layoutX="353.0" layoutY="243.0" text="SpotLike V0.1" />
-      <Pane layoutX="89.0" layoutY="43.0" prefHeight="189.0" prefWidth="275.0">
+      <Label layoutX="224.0" layoutY="384.0" text="SpotLike V0.1" />
+      <Pane layoutX="32.0" layoutY="34.0" prefHeight="340.0" prefWidth="253.0">
          <children>
-            <Button fx:id="btn_Login" layoutX="177.0" layoutY="148.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="84.0" text="Login" />
-            <TextField fx:id="textField_Username" layoutX="54.0" layoutY="68.0" promptText="userName" />
-            <Label layoutX="52.0" layoutY="14.0" text="Sign in to start your session" />
+            <TabPane prefHeight="340.0" prefWidth="253.0" tabClosingPolicy="UNAVAILABLE">
+              <tabs>
+                <Tab text="Login">
+                  <content>
+                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="269.0" prefWidth="253.0">
+                           <children>
+                              <TextField fx:id="textField_Username" layoutX="43.0" layoutY="86.0" promptText="Enter Username" />
+                              <Button fx:id="btn_Login" layoutX="97.0" layoutY="235.0" mnemonicParsing="false" onAction="#open_MainMenu" text="Login" />
+                              <Label layoutX="80.0" layoutY="51.0" text="Login into System">
+                                 <font>
+                                    <Font name="Arial Italic" size="11.0" />
+                                 </font>
+                              </Label>
+                           </children></AnchorPane>
+                  </content>
+                </Tab>
+                <Tab text="Register">
+                  <content>
+                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                  </content>
+                </Tab>
+              </tabs>
+            </TabPane>
          </children>
       </Pane>
    </children>
