@@ -1,4 +1,4 @@
-package ch.makery.address.model;
+package client.address.model;
 
 
 import java.time.LocalDate;

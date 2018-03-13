@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.text.*?>
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.address.view.mainWindowController">
+   <children>
+      <BorderPane prefHeight="600.0" prefWidth="800.0">
+         <center>
+            <TabPane prefHeight="386.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
+              <tabs>
+                <Tab text="Music" />
+                <Tab text="Social">
+                  <content>
+                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                  </content>
+                </Tab>
+              </tabs>
+            </TabPane>
+         </center>
+         <bottom>
+            <AnchorPane prefHeight="45.0" prefWidth="800.0" BorderPane.alignment="CENTER">
+               <children>
+                  <Button layoutX="725.0" layoutY="9.0" mnemonicParsing="false" onAction="#open_LoginScreen" text="Logout" />
+               </children>
+            </AnchorPane>
+         </bottom>
+         <top>
+            <AnchorPane prefHeight="25.0" prefWidth="800.0" BorderPane.alignment="CENTER">
+               <children>
+                  <Text fx:id="txt_UserName" layoutX="10.0" layoutY="17.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Welcome">
+                     <font>
+                        <Font name="Arial Italic" size="13.0" />
+                     </font>
+                  </Text>
+               </children>
+            </AnchorPane>
+         </top>
+      </BorderPane>
+   </children>
+</AnchorPane>
