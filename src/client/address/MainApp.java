@@ -45,6 +45,7 @@ public class MainApp extends Application
      * Returns the data as an observable list of Users
      * @return usersData
      */
+
     public ObservableList<Users> getUsersData()
     {
         return usersData;

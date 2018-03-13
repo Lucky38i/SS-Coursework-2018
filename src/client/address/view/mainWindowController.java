@@ -8,17 +8,12 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Priority;
+
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
+
 
 /**
  * Controller for the mainWindow FXML file
@@ -27,14 +22,20 @@ import java.io.StringWriter;
 public class mainWindowController
 {
 
+    //FXML Variables
     @FXML private Text txt_UserName;
+
+    //Variables
     private Alert alertInfo = new Alert(Alert.AlertType.INFORMATION);
     private String loginWindow = "loginWindow.fxml";
 
-
+    /**
+     * This method initializes the data for the user model
+     * @param user
+     */
     public void initData(Users user)
     {
-        txt_UserName.setText(txt_UserName.getText() + ": " + user.getUserName());
+        txt_UserName.setText(txt_UserName.getText() + ": " + user.getFirstName() + "!");
     }
 
     /**
