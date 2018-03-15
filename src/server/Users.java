@@ -7,6 +7,7 @@ import javafx.collections.ObservableList;
 
 import java.time.LocalDate;
 import java.time.Period;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -26,12 +27,13 @@ public class Users
     private final StringProperty city;
     private final ObjectProperty<LocalDate> birthday;
     private final ListProperty<String> musicGenre;
+    private List<String> musicGenres = new ArrayList<>();
     /**
      * Default constructor.
      */
     public Users()
     {
-        this(null,0,null,null,null,null, null);
+        this(null,0,null,null,null,null);
     }
 
     /**
@@ -41,7 +43,7 @@ public class Users
      * @param userName
      *
      */
-    public Users(String userName, int userID, String firstName, String lastName, String city, LocalDate birthday, List<String> musicGenres)
+    public Users(String userName, int userID, String firstName, String lastName, String city, LocalDate birthday)
     {
         this.userName = new SimpleStringProperty(userName);
 
@@ -51,7 +53,7 @@ public class Users
         this.lastName = new SimpleStringProperty(lastName);
         this.city = new SimpleStringProperty(city);
         this.birthday = new SimpleObjectProperty<LocalDate>(birthday);
-        ObservableList<String> observableList = FXCollections.observableArrayList(musicGenres);
+        ObservableList<String> observableList = FXCollections.observableArrayList(this.musicGenres);
         this.musicGenre = new SimpleListProperty<String>(observableList);
 
     }

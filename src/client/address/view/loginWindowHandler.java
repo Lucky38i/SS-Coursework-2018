@@ -29,6 +29,7 @@ public class loginWindowHandler implements Initializable
 
     //Variables
     private static final String mainWindow = "mainWindow.fxml";
+    private static final String registerWindow = "registerWindow.fxml";
     private Users user = new Users();
 
     private Alert alertInfo = new Alert(Alert.AlertType.INFORMATION);
@@ -85,14 +86,26 @@ public class loginWindowHandler implements Initializable
 
     }
 
-    public void change_Screen_Size(Event event)
+    public void open_RegisterWindow(ActionEvent actionEvent) throws IOException
     {
-        anchorPane.setPrefSize(anchorPane.getPrefWidth()*2,anchorPane.getPrefHeight());
-        System.out.println(anchorPane.getWidth() + " " + anchorPane.getHeight());
+        //Create a loader and set it's location to mainWindow
+        FXMLLoader loader = new FXMLLoader();
+        loader.setLocation(getClass().getResource(registerWindow));
+
+        //Set the scene to the loader's location
+        Parent registerWindowParent = loader.load();
+        Scene registerWindowScene = new Scene(registerWindowParent);
+
+        //Find the stage information
+        Stage window = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
+
+        window.setScene(registerWindowScene);
+        window.show();
     }
 
     @Override
-    public void initialize(URL url, ResourceBundle rb) {
+    public void initialize(URL url, ResourceBundle rb)
+    {
         // TODO
     }
 

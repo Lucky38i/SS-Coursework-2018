@@ -29,7 +29,7 @@ public class ChatServer
     //Variables
     private int serverPort;
     private List<serverHandlerThread> clients;
-    private List<server.Users> usersList;
+    private List<server.Users> usersList = new ArrayList<>();
 
     /**
      * Connects to the identified database and returns the Connections
@@ -82,7 +82,7 @@ public class ChatServer
                 user.setBirthday(resultSet.getDate("birthday").toLocalDate());
 
                 String findMusicGenres = "SELECT musicGenre FROM musicGenres a, Users b\n" +
-                        "WHeRE a.userID = " + resultSet.getInt("userID") + " AND  a.userID = b.userID";
+                        "WHERE a.userID = " + resultSet.getInt("userID") + " AND  a.userID = b.userID";
 
                 ResultSet musicResult = statement2.executeQuery(findMusicGenres);
                 while (musicResult.next())
@@ -91,12 +91,66 @@ public class ChatServer
                 }
                 usersList.add(user);
             }
+            System.out.println("Database built successfully ");
 
         }
         catch (SQLException e)
         {
             System.out.println(e.getMessage());
         }
+    }
+
+    /**
+     * Takes in a user's details and adds it to the database and executes then adds that user
+     * to the list of current users
+     * @param user received from the client
+     */
+    private void registerUsers(server.Users user)
+    {
+
+        String addUser = "INSERT INTO User(userName, firstName, lastName, birthday, City) VALUES(?,?,?,?,?)";
+        String findUserID = "SELECT userID FROM Users WHERE userName = " + user.getUserName();
+        String addMusicGenres = "INSERT INTO musicGenres(userID, musicGenre) VALUES(?,?)";
+        try
+        {
+            //Creates a connection
+            Connection conn = this.connect();
+
+            //A statement to update the database
+            PreparedStatement preparedStatement = conn.prepareStatement(addUser);
+
+            //A result set finding the userID
+            Statement statement = conn.createStatement();
+            ResultSet resultSet = statement.executeQuery(findUserID);
+
+            //Sets each value and executes the update
+            preparedStatement.setString(1,user.getUserName());
+            preparedStatement.setString(2,user.getFirstName());
+            preparedStatement.setString(3,user.getLastName());
+            preparedStatement.setDate(4,Date.valueOf(user.getBirthday()));
+            preparedStatement.setString(5, user.getCity());
+            preparedStatement.executeUpdate();
+
+            //A new statement to add musicGenres using the newly created user
+            PreparedStatement preparedStatement1 = conn.prepareStatement(addMusicGenres);
+            while(resultSet.next())
+            {
+                for (int i=0; i < user.getMusicGenre().size(); i++)
+                {
+                    preparedStatement1.setInt(1, resultSet.getInt("userID"));
+                    preparedStatement.setString(2, user.getMusicGenre().get(i));
+                    preparedStatement.executeUpdate();
+                }
+            }
+
+            usersList.add(user);
+        }
+
+        catch (SQLException e)
+        {
+            System.out.println(e.getMessage());
+        }
+
     }
     
     
