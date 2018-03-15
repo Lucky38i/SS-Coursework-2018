@@ -20,6 +20,7 @@ public class Users
 {
 
     //Variables
+    private final IntegerProperty userID;
     private final StringProperty userName;
     private final StringProperty firstName;
     private final StringProperty lastName;
@@ -46,6 +47,7 @@ public class Users
         this.userName = new SimpleStringProperty(userName);
 
         // Some initial dummy data, just for convenient testing.
+        this.userID = new SimpleIntegerProperty(1);
         this.firstName = new SimpleStringProperty("Alex");
         this.lastName = new SimpleStringProperty("McBean");
         this.city = new SimpleStringProperty("Nottingham");
@@ -57,6 +59,22 @@ public class Users
     }
 
     /* Setters and Getters */
+
+    public int getUserID()
+    {
+        return userID.get();
+    }
+
+    public void setUserID(int userID)
+    {
+        this.userID.set(userID);
+    }
+
+    public IntegerProperty userIDProperty()
+    {
+        return userID;
+    }
+
     public String getUserName()
     {
         return userName.get();
@@ -151,6 +169,7 @@ public class Users
     {
         return birthday;
     }
+
 
 
 }
