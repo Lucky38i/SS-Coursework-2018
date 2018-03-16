@@ -19,7 +19,10 @@ import javafx.collections.ObservableList;
 public class Users
 {
 
-    //Variables
+    /*
+    Variables
+    TODO Create a friend list
+    */
     private final IntegerProperty userID;
     private final StringProperty userName;
     private final StringProperty firstName;
@@ -27,12 +30,13 @@ public class Users
     private final StringProperty city;
     private final ObjectProperty<LocalDate> birthday;
     private final ListProperty<String> musicGenre;
+    private List<String> musicGenres = new ArrayList<>();
     /**
      * Default constructor.
      */
     public Users()
     {
-        this(null);
+        this(null,null,null,null,null);
     }
 
     /**
@@ -42,19 +46,16 @@ public class Users
      * @param userName
      *
      */
-    public Users(String userName)
+    public Users(String userName,  String firstName, String lastName, String city, LocalDate birthday)
     {
         this.userName = new SimpleStringProperty(userName);
-
-        // Some initial dummy data, just for convenient testing.
-        this.userID = new SimpleIntegerProperty(1);
-        this.firstName = new SimpleStringProperty("Alex");
-        this.lastName = new SimpleStringProperty("McBean");
-        this.city = new SimpleStringProperty("Nottingham");
-        this.birthday = new SimpleObjectProperty<LocalDate>(LocalDate.of(1998, 2, 19));
-        this.musicGenre = new SimpleListProperty<>(FXCollections.observableArrayList());
-
-        this.musicGenre.add("Hip-Hop");
+        this.userID = new SimpleIntegerProperty();
+        this.firstName = new SimpleStringProperty(firstName);
+        this.lastName = new SimpleStringProperty(lastName);
+        this.city = new SimpleStringProperty(city);
+        this.birthday = new SimpleObjectProperty<LocalDate>(birthday);
+        ObservableList<String> observableList = FXCollections.observableArrayList(this.musicGenres);
+        this.musicGenre = new SimpleListProperty<String>(observableList);
 
     }
 

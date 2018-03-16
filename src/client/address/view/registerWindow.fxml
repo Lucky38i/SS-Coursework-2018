@@ -16,11 +16,12 @@
                <children>
                   <AnchorPane prefHeight="316.0" prefWidth="230.0">
                      <children>
-                        <TextField fx:id="txt_FirstName" layoutX="39.0" layoutY="62.0" promptText="First Name" />
                         <TextField fx:id="txt_Username" layoutX="39.0" layoutY="28.0" promptText="Username" />
-                        <TextField fx:id="txt_LastName" layoutX="39.0" layoutY="95.0" promptText="Last Name" />
-                        <TextField fx:id="txt_City" layoutX="39.0" layoutY="127.0" promptText="City" />
-                        <DatePicker fx:id="Date_Birthday" layoutX="27.0" layoutY="172.0" promptText="Select your birthday" />
+                        <TextField fx:id="txt_FirstName" layoutX="39.0" layoutY="74.0" promptText="First Name" />
+                        <TextField fx:id="txt_LastName" layoutX="39.0" layoutY="107.0" promptText="Last Name" />
+                        <TextField fx:id="txt_City" layoutX="39.0" layoutY="139.0" promptText="City" />
+                        <DatePicker fx:id="date_Birthday" layoutX="27.0" layoutY="184.0" promptText="Select your birthday" />
+                        <Label layoutX="39.0" layoutY="6.0" text="Please enter a username" />
                      </children>
                   </AnchorPane>
                   <AnchorPane prefHeight="316.0" prefWidth="35.0" />
@@ -53,7 +54,7 @@
          <bottom>
             <AnchorPane prefHeight="36.0" prefWidth="600.0" BorderPane.alignment="CENTER">
                <children>
-                  <Button defaultButton="true" layoutX="14.0" layoutY="6.0" mnemonicParsing="false" text="Register" />
+                  <Button defaultButton="true" layoutX="14.0" layoutY="6.0" mnemonicParsing="false" onAction="#btn_registerUser" text="Register" />
                   <Label layoutX="81.0" layoutY="10.0" text="or" />
                   <Hyperlink fx:id="HL_Cancel" layoutX="97.0" layoutY="7.0" onAction="#open_LoginWindow" text="Cancel" visited="true" />
                </children></AnchorPane>

@@ -1,5 +1,8 @@
 package client.address.view;
 
+
+import client.address.model.Users;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -11,13 +14,17 @@ import javafx.scene.control.*;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectOutputStream;
+import java.io.PrintWriter;
+import java.net.Socket;
 import java.net.URL;
 import java.util.ResourceBundle;
 
 public class registerWindowController implements Initializable
 {
 
-    @FXML private DatePicker Date_Birthday;
+    @FXML private DatePicker date_Birthday;
     @FXML private TextField txt_FirstName;
     @FXML private TextField txt_Username;
     @FXML private TextField txt_LastName;
@@ -26,14 +33,19 @@ public class registerWindowController implements Initializable
     @FXML private TextArea txtArea_MuscList;
     @FXML private Hyperlink HL_Cancel;
 
+    private Alert alertError = new Alert(Alert.AlertType.ERROR);
     private String loginWindow = "loginWindow.fxml";
+    private Users user = new Users();
+
 
     public ChoiceBox getChoice_Genres()
     {
         return choice_Genres;
     }
+
     public void open_LoginWindow(ActionEvent actionEvent) throws IOException
     {
+
         //Create a loader and set it's location to mainWindow
         FXMLLoader loader = new FXMLLoader();
         loader.setLocation(getClass().getResource(loginWindow));
@@ -47,6 +59,80 @@ public class registerWindowController implements Initializable
 
         window.setScene(loginWindowScene);
         window.show();
+
+    }
+
+    public void btn_registerUser(ActionEvent actionEvent) throws IOException
+    {
+        if (txt_FirstName.getText().equals("") || txt_Username.getText().equals("") || txt_LastName.getText().equals("") || txt_City.getText().equals(""))
+        {
+            alertError.setTitle("");
+            alertError.setHeaderText(null);
+            alertError.setContentText("One of the fields is blank");
+            alertError.showAndWait();
+        }
+        else
+        {
+            user.setUserName(txt_Username.getText());
+            user.setFirstName(txt_FirstName.getText());
+            user.setLastName(txt_LastName.getText());
+            user.setCity(txt_City.getText());
+            user.setBirthday(date_Birthday.getValue()); //TODO Make sure this outputs the date it currently does now
+
+            Task<Void> task = new registerUser(user);
+            Thread thread = new Thread(task);
+            thread.setDaemon(true);
+            thread.start();
+        }
+    }
+
+    /**
+     * A class creates a seperates task along side the JAVAFX Thread
+     * that creates a connection with the server and sends the user object to be registered with the
+     * SQL database
+     */
+    private class registerUser extends Task<Void>
+    {
+        Users user;
+        private static final String code = ".register";
+        private static final String host = "localhost";
+        private static final int portNumber = 4444;
+        private clientThread clientThread;
+
+
+        public registerUser(Users user)
+        {
+            this.user = user;
+        }
+
+        @Override
+        protected Void call() throws Exception
+        {
+            try
+            {
+                Socket socket = new Socket(host, portNumber);
+                Thread.sleep(1000);
+
+                //Setup I/O
+                ObjectOutputStream outToServerObject = new ObjectOutputStream(socket.getOutputStream());
+                PrintWriter serverOutString = new PrintWriter(socket.getOutputStream(), false);
+                InputStream serverInString = socket.getInputStream();
+
+                serverOutString.println(code);
+                serverOutString.flush();
+
+                outToServerObject.writeObject(user);
+                outToServerObject.flush();
+
+                socket.close();
+            }
+            catch (IOException e)
+            {
+                System.err.println("Fatal Connection error!");
+                e.printStackTrace();
+            }
+            return null;
+        }
     }
 
     @Override
@@ -68,8 +154,5 @@ public class registerWindowController implements Initializable
         getChoice_Genres().getItems().add("Pop");
         getChoice_Genres().getItems().add("R&B and Soul");
         getChoice_Genres().getItems().add("Rock");
-
-
-
     }
 }

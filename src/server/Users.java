@@ -19,7 +19,10 @@ import java.util.List;
 public class Users
 {
 
-    //Variables
+    /*
+    Variables
+    TODO Create a friend list
+    */
     private final IntegerProperty userID;
     private final StringProperty userName;
     private final StringProperty firstName;
