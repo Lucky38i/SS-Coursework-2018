@@ -11,7 +11,10 @@
 package server;
 
 
+import Resources.Users;
+
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Scanner;
@@ -21,7 +24,6 @@ public class serverHandlerThread implements Runnable
     private Socket socket;
     private PrintWriter clientOut;
     private ChatServer server;
-    
     //Constructor
     public serverHandlerThread(ChatServer server, Socket socket)
     {
@@ -41,9 +43,14 @@ public class serverHandlerThread implements Runnable
         {
             //Setup I/O
             this.clientOut = new PrintWriter(socket.getOutputStream(), false);
-            Scanner in = new Scanner(socket.getInputStream());
+            ObjectInputStream inFromClientObject = new ObjectInputStream(socket.getInputStream());
 
+
+           // Scanner in = new Scanner(socket.getInputStream());
+            Users user = (Users) inFromClientObject.readObject();
+            server.registerUsers(user);
             // start communicating
+                /*
             while(!socket.isClosed())
             {
                 //If server has received a message
@@ -53,24 +60,32 @@ public class serverHandlerThread implements Runnable
                     String input = in.nextLine();
                     System.out.println(input);
 
+                    if (input.equals(".register"))
+                    {
+                        Object obj = inFromClientObject.readObject();
+                        Users user = (Users) obj;
+                        System.out.println("Username is: " + user);
+                        server.registerUsers(user);
+                    }
                     //Push message received to other clients
-                    for(serverHandlerThread thatClient : server.getClients())
+                    for (serverHandlerThread thatClient : server.getClients())
                     {
                         PrintWriter thatClientOut = thatClient.getWriter();
-                        if(thatClientOut != null){
+                        if (thatClientOut != null)
+                        {
                             thatClientOut.write(input + "\r\n");
                             thatClientOut.flush();
                         }
                     }
-                    /*
-                    String userName = (input.substring(0,input.indexOf(">"))).trim();
-                    System.out.println("username was: " + userName);*/
-
-
                 }
-            }
+
+            }*/
         } 
         catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        catch (ClassNotFoundException e)
         {
             e.printStackTrace();
         }

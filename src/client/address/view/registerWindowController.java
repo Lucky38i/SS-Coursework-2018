@@ -1,7 +1,7 @@
 package client.address.view;
 
 
-import client.address.model.Users;
+import Resources.Users;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -16,7 +16,6 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectOutputStream;
-import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -77,7 +76,8 @@ public class registerWindowController implements Initializable
             user.setFirstName(txt_FirstName.getText());
             user.setLastName(txt_LastName.getText());
             user.setCity(txt_City.getText());
-            user.setBirthday(date_Birthday.getValue()); //TODO Make sure this outputs the date it currently does now
+            user.setBirthday(date_Birthday.getValue());
+
 
             Task<Void> task = new registerUser(user);
             Thread thread = new Thread(task);
@@ -115,16 +115,14 @@ public class registerWindowController implements Initializable
 
                 //Setup I/O
                 ObjectOutputStream outToServerObject = new ObjectOutputStream(socket.getOutputStream());
-                PrintWriter serverOutString = new PrintWriter(socket.getOutputStream(), false);
+                //PrintWriter serverOutString = new PrintWriter(socket.getOutputStream(), false);
                 InputStream serverInString = socket.getInputStream();
 
-                serverOutString.println(code);
-                serverOutString.flush();
+                //serverOutString.println(code);
+               // serverOutString.flush();
 
                 outToServerObject.writeObject(user);
                 outToServerObject.flush();
-
-                socket.close();
             }
             catch (IOException e)
             {

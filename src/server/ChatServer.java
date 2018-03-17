@@ -11,7 +11,7 @@ package server;
  */
 
 
-import client.address.model.Users;
+import Resources.Users;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -29,7 +29,7 @@ public class ChatServer
     //Variables
     private int serverPort;
     private List<serverHandlerThread> clients;
-    private List<server.Users> usersList = new ArrayList<>();
+    private List<Users> usersList = new ArrayList<>();
 
     /**
      * Connects to the identified database and returns the Connections
@@ -37,7 +37,7 @@ public class ChatServer
      */
     private Connection connect()
     {
-        String url = "jdbc:sqlite:src/server/Resources/test.db";
+        String url = "jdbc:sqlite:src/Resources/test.db";
         Connection conn = null;
         try
         {
@@ -73,7 +73,7 @@ public class ChatServer
 
             while (resultSet.next())
             {
-                server.Users user = new server.Users();
+                Users user = new Users();
                 user.setUserID(resultSet.getInt("userID"));
                 user.setUserName(resultSet.getString("userName"));
                 user.setFirstName(resultSet.getString("firstName"));
@@ -105,7 +105,7 @@ public class ChatServer
      * to the list of current users
      * @param user received from the client
      */
-    private void registerUsers(server.Users user)
+    public void registerUsers(Users user)
     {
 
         String addUser = "INSERT INTO User(userName, firstName, lastName, birthday, City) VALUES(?,?,?,?,?)";
@@ -144,6 +144,7 @@ public class ChatServer
             }
 
             usersList.add(user);
+            System.out.println("User: " + user.getUserName() + " added to databse");
         }
 
         catch (SQLException e)

@@ -1,8 +1,7 @@
 package client.address.view;
 
-import client.address.model.Users;
+import Resources.Users;
 import javafx.event.ActionEvent;
-import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
