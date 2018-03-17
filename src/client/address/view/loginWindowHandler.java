@@ -30,6 +30,7 @@ public class loginWindowHandler implements Initializable
     private static final String mainWindow = "mainWindow.fxml";
     private static final String registerWindow = "registerWindow.fxml";
     private Users user = new Users();
+    private SceneSwitcher sceneSwitcher;
 
     private Alert alertInfo = new Alert(Alert.AlertType.INFORMATION);
     private Alert alertError = new Alert(Alert.AlertType.ERROR);
@@ -65,41 +66,17 @@ public class loginWindowHandler implements Initializable
             alertInfo.setContentText("Login successful");
             alertInfo.showAndWait();
 
-            //Create a loader and set it's location to mainWindow
-            FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(getClass().getResource(mainWindow));
+            sceneSwitcher = new SceneSwitcher(mainWindow, actionEvent);
+            sceneSwitcher.switchScene();
 
-            //Set the scene to the loader's location
-            Parent mainWindowParent = loader.load();
-            Scene mainWindowScene = new Scene(mainWindowParent);
-
-            mainWindowController controller = loader.getController();
-            controller.initData(user);
-
-            //Find the stage information
-            Stage window = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
-
-            window.setScene(mainWindowScene);
-            window.show();
         }
 
     }
 
     public void open_RegisterWindow(ActionEvent actionEvent) throws IOException
     {
-        //Create a loader and set it's location to mainWindow
-        FXMLLoader loader = new FXMLLoader();
-        loader.setLocation(getClass().getResource(registerWindow));
-
-        //Set the scene to the loader's location
-        Parent registerWindowParent = loader.load();
-        Scene registerWindowScene = new Scene(registerWindowParent);
-
-        //Find the stage information
-        Stage window = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
-
-        window.setScene(registerWindowScene);
-        window.show();
+        sceneSwitcher = new SceneSwitcher(registerWindow, actionEvent);
+        sceneSwitcher.switchScene();
     }
 
     @Override

@@ -44,13 +44,13 @@ public class serverHandlerThread implements Runnable
             //Setup I/O
             this.clientOut = new PrintWriter(socket.getOutputStream(), false);
             ObjectInputStream inFromClientObject = new ObjectInputStream(socket.getInputStream());
+            Scanner in = new Scanner(socket.getInputStream());
 
-
+            /*
            // Scanner in = new Scanner(socket.getInputStream());
             Users user = (Users) inFromClientObject.readObject();
-            server.registerUsers(user);
+            server.registerUsers(user); */
             // start communicating
-                /*
             while(!socket.isClosed())
             {
                 //If server has received a message
@@ -64,8 +64,8 @@ public class serverHandlerThread implements Runnable
                     {
                         Object obj = inFromClientObject.readObject();
                         Users user = (Users) obj;
-                        System.out.println("Username is: " + user);
                         server.registerUsers(user);
+                        in.close();
                     }
                     //Push message received to other clients
                     for (serverHandlerThread thatClient : server.getClients())
@@ -79,7 +79,7 @@ public class serverHandlerThread implements Runnable
                     }
                 }
 
-            }*/
+            }
         } 
         catch (IOException e)
         {

@@ -78,7 +78,7 @@ public class ChatServer
                 user.setUserName(resultSet.getString("userName"));
                 user.setFirstName(resultSet.getString("firstName"));
                 user.setLastName(resultSet.getString("lastName"));
-                user.setCity(resultSet.getString("City"));
+                user.setCity(resultSet.getString("city"));
                 user.setBirthday(resultSet.getDate("birthday").toLocalDate());
 
                 String findMusicGenres = "SELECT musicGenre FROM musicGenres a, Users b\n" +
@@ -87,7 +87,7 @@ public class ChatServer
                 ResultSet musicResult = statement2.executeQuery(findMusicGenres);
                 while (musicResult.next())
                 {
-                    user.addMusicGenre(musicResult.getString("musicGenre"));
+                    user.musicGenreProperty().get().add(musicResult.getString("musicGenre"));
                 }
                 usersList.add(user);
             }
@@ -108,8 +108,8 @@ public class ChatServer
     public void registerUsers(Users user)
     {
 
-        String addUser = "INSERT INTO User(userName, firstName, lastName, birthday, City) VALUES(?,?,?,?,?)";
-        String findUserID = "SELECT userID FROM Users WHERE userName = " + user.getUserName();
+        String addUser = "INSERT INTO Users(userName, firstName, lastName, birthday, City) VALUES(?,?,?,?,?)";
+        String findUserID = "SELECT userID FROM Users WHERE userName = '" + user.getUserName() + "'";
         String addMusicGenres = "INSERT INTO musicGenres(userID, musicGenre) VALUES(?,?)";
         try
         {
@@ -119,10 +119,6 @@ public class ChatServer
             //A statement to update the database
             PreparedStatement preparedStatement = conn.prepareStatement(addUser);
 
-            //A result set finding the userID
-            Statement statement = conn.createStatement();
-            ResultSet resultSet = statement.executeQuery(findUserID);
-
             //Sets each value and executes the update
             preparedStatement.setString(1,user.getUserName());
             preparedStatement.setString(2,user.getFirstName());
@@ -130,6 +126,10 @@ public class ChatServer
             preparedStatement.setDate(4,Date.valueOf(user.getBirthday()));
             preparedStatement.setString(5, user.getCity());
             preparedStatement.executeUpdate();
+
+            //A result set finding the userID
+            Statement statement = conn.createStatement();
+            ResultSet resultSet = statement.executeQuery(findUserID);
 
             //A new statement to add musicGenres using the newly created user
             PreparedStatement preparedStatement1 = conn.prepareStatement(addMusicGenres);

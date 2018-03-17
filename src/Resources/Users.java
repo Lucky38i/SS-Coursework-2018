@@ -8,6 +8,7 @@ import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.SimpleTimeZone;
 
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
@@ -46,16 +47,16 @@ public class Users implements Externalizable
     }
 
     /* Setters and Getters */
-    private IntegerProperty userID = new SimpleIntegerProperty(this, "id");
+    private transient IntegerProperty userID = new SimpleIntegerProperty(this, "id");
 
     public int getUserID()
     {
-        return userID.get();
+        return userIDProperty().get();
     }
 
     public void setUserID(int userID)
     {
-        this.userID.set(userID);
+        userIDProperty().set(userID);
     }
 
     public IntegerProperty userIDProperty()
@@ -64,16 +65,16 @@ public class Users implements Externalizable
     }
 
 
-    private StringProperty userName = new SimpleStringProperty(this,"userName");
+    private transient StringProperty userName = new SimpleStringProperty(this,"userName");
 
     public String getUserName()
     {
-        return userName.get();
+        return userNameProperty().get();
     }
 
     public void setUserName(String userName)
     {
-        this.userName.set(userName);
+        userNameProperty().set(userName);
     }
 
     public StringProperty userNameProperty()
@@ -82,16 +83,16 @@ public class Users implements Externalizable
     }
 
 
-    private StringProperty firstName = new SimpleStringProperty(this, "firstName");
+    private transient StringProperty firstName = new SimpleStringProperty(this, "firstName");
 
     public String getFirstName()
     {
-        return firstName.get();
+        return firstNameProperty().get();
     }
 
     public void setFirstName(String firstName)
     {
-        this.firstName.set(firstName);
+        firstNameProperty().set(firstName);
     }
 
     public StringProperty firstNameProperty()
@@ -100,16 +101,16 @@ public class Users implements Externalizable
     }
 
 
-    private StringProperty lastName = new SimpleStringProperty(this, "lastName");
+    private transient StringProperty lastName = new SimpleStringProperty(this, "lastName");
 
     public String getLastName()
     {
-        return lastName.get();
+        return lastNameProperty().get();
     }
 
     public void setLastName(String lastName)
     {
-       this.lastName.set(lastName);
+       lastNameProperty().set(lastName);
     }
 
     public StringProperty lastNameProperty()
@@ -118,41 +119,16 @@ public class Users implements Externalizable
     }
 
 
-    private List<String> musicGenres = new ArrayList<>();
-    ObservableList<String> observableList = FXCollections.observableArrayList();
-    private ListProperty<String> musicGenre = new SimpleListProperty<String>(this, "musicGenre", observableList);
-
-    public ObservableList<String> getMusicGenre()
-    {
-        return musicGenre.get();
-    }
-
-    public ListProperty<String> musicGenreProperty()
-    {
-        return musicGenre;
-    }
-
-    public void setMusicGenre(ObservableList<String> musicGenre)
-    {
-        this.musicGenre.set(musicGenre);
-    }
-
-    public void addToMusicGenre(String type)
-    {
-
-    }
-
-
-    private StringProperty city = new SimpleStringProperty(this, "city");
+    private transient StringProperty city = new SimpleStringProperty(this, "city");
 
     public String getCity()
     {
-        return city.get();
+        return cityProperty().get();
     }
 
     public void setCity(String city)
     {
-        this.city.set(city);
+        cityProperty().set(city);
     }
 
     public StringProperty cityProperty()
@@ -161,33 +137,45 @@ public class Users implements Externalizable
     }
 
 
-    private ObjectProperty<LocalDate> birthday = new SimpleObjectProperty<>(this, "birthday");
+    private transient ObjectProperty<LocalDate> birthday = new SimpleObjectProperty<>(this, "birthday");
 
     public LocalDate getBirthday()
     {
-        return birthday.get();
+        return birthdayProperty().get();
     }
 
     public int getAge()
     {
-         return Period.between(birthday.get(), LocalDate.now()).getYears();
+        return Period.between(birthdayProperty().get(), LocalDate.now()).getYears();
     }
 
     public void setBirthday(LocalDate birthday)
     {
-        this.birthday.set(birthday);
-    }
-
-    public void setBirthdayFromString(String birthday)
-    {
-        DateTimeFormatter formatter=DateTimeFormatter.ofPattern("yyyy-MMM-dd");
-        LocalDate localDate= LocalDate.parse(birthday,formatter);
-        setBirthday(localDate);
+        birthdayProperty().set(birthday);
     }
 
     public ObjectProperty<LocalDate> birthdayProperty()
     {
         return birthday;
+    }
+
+
+    private transient ObservableList<String> observableList = FXCollections.observableArrayList();
+    private transient ListProperty<String> musicGenre = new SimpleListProperty<>(this, "musicGenre", observableList);
+
+    public List<String> getMusicGenre()
+    {
+        return musicGenreProperty().get();
+    }
+
+    public void setMusicGenre(ObservableList musicGenre)
+    {
+        musicGenreProperty().set(musicGenre);
+    }
+
+    public ListProperty<String> musicGenreProperty()
+    {
+        return musicGenre;
     }
 
     @Override
@@ -198,7 +186,8 @@ public class Users implements Externalizable
         out.writeObject(getLastName());
         out.writeObject(getCity());
         out.writeObject(getBirthday());
-        out.writeObject(getMusicGenre());
+        //TODO Fix the musicGenre
+        //out.writeObject(getMusicGenre());
     }
 
     @Override
@@ -210,7 +199,8 @@ public class Users implements Externalizable
         setLastName((String) in.readObject());
         setCity((String) in.readObject());
         setBirthday((LocalDate) in.readObject());
-        setMusicGenre((ObservableList<String>) in.readObject());
+        //TODO fix reading the musicGenre
+        //setMusicGenre((ObservableList) in.readObject());
     }
 
 

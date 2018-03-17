@@ -3,7 +3,9 @@ package client.address.view;
 
 import Resources.Users;
 import javafx.concurrent.Task;
+import javafx.concurrent.WorkerStateEvent;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -11,63 +13,84 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.input.ContextMenuEvent;
 import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectOutputStream;
+import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.Scanner;
 
+/**
+ * Controller for registerWindow.fxml
+ */
 public class registerWindowController implements Initializable
 {
 
+    //FXML Controller Variables
     @FXML private DatePicker date_Birthday;
     @FXML private TextField txt_FirstName;
     @FXML private TextField txt_Username;
     @FXML private TextField txt_LastName;
     @FXML private TextField txt_City;
-    @FXML private ChoiceBox choice_Genres;
+    @FXML private ComboBox choice_Genres;
     @FXML private TextArea txtArea_MuscList;
     @FXML private Hyperlink HL_Cancel;
 
+    //Variables
     private Alert alertError = new Alert(Alert.AlertType.ERROR);
+    private Alert alert = new Alert(Alert.AlertType.INFORMATION);
     private String loginWindow = "loginWindow.fxml";
     private Users user = new Users();
+    private SceneSwitcher sceneSwitcher;
 
 
-    public ChoiceBox getChoice_Genres()
+    public void addChoice_Genres(String genre)
+    {
+        choice_GenresProperty().getItems().add(genre);
+    }
+
+    private ComboBox choice_GenresProperty()
     {
         return choice_Genres;
     }
 
+    /**
+     * Opens the login window scene
+     * @param actionEvent
+     * @throws IOException
+     */
     public void open_LoginWindow(ActionEvent actionEvent) throws IOException
     {
-
-        //Create a loader and set it's location to mainWindow
-        FXMLLoader loader = new FXMLLoader();
-        loader.setLocation(getClass().getResource(loginWindow));
-
-        //Set the scene to the loader's location
-        Parent loginWindowParent = loader.load();
-        Scene loginWindowScene = new Scene(loginWindowParent);
-
-        //Find the stage information
-        Stage window = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
-
-        window.setScene(loginWindowScene);
-        window.show();
-
+        sceneSwitcher = new SceneSwitcher(loginWindow,actionEvent);
+        sceneSwitcher.switchScene();
     }
 
+    /**
+     * Registers the user then if successful opens back the login window
+     * @param actionEvent
+     * @throws IOException
+     */
     public void btn_registerUser(ActionEvent actionEvent) throws IOException
     {
+        //Check that no fields are blank
         if (txt_FirstName.getText().equals("") || txt_Username.getText().equals("") || txt_LastName.getText().equals("") || txt_City.getText().equals(""))
         {
             alertError.setTitle("");
             alertError.setHeaderText(null);
             alertError.setContentText("One of the fields is blank");
+            alertError.showAndWait();
+        }
+        //Check if at least one genre is selcted
+        else if (user.musicGenreProperty().size() < 1)
+        {
+            alertError.setTitle("");
+            alertError.setHeaderText(null);
+            alertError.setContentText("Please select at least one music interest");
             alertError.showAndWait();
         }
         else
@@ -80,11 +103,64 @@ public class registerWindowController implements Initializable
 
 
             Task<Void> task = new registerUser(user);
+
+            //Receives a message from the task and either show a failure or success
+            task.addEventHandler(WorkerStateEvent.WORKER_STATE_SUCCEEDED,
+                    new EventHandler<WorkerStateEvent>()
+                    {
+                        @Override
+                        public void handle(WorkerStateEvent event)
+                        {
+                            if (task.getMessage().equals("Failed"))
+                            {
+                                alertError.setTitle("");
+                                alertError.setHeaderText(null);
+                                alertError.setContentText("Registration Failure");
+                                alertError.showAndWait();
+                            }
+                            else
+                            {
+                                alert.setTitle("");
+                                alert.setHeaderText(null);
+                                alert.setContentText("Registration Successful");
+                                alert.showAndWait();
+
+                                System.out.println(task.getMessage());
+
+                                sceneSwitcher = new SceneSwitcher(loginWindow, actionEvent);
+                                try
+                                {
+                                    sceneSwitcher.switchScene();
+                                }
+                                catch (IOException e)
+                                {
+                                    e.printStackTrace();
+                                }
+                            }
+
+                        }
+                    });
             Thread thread = new Thread(task);
             thread.setDaemon(true);
             thread.start();
+
+
         }
     }
+
+
+    /**
+     * Drops the selected item in the menu into the
+     * txtArea_MusicList
+     * @param actionEvent
+     */
+    public void add_Genre(ActionEvent actionEvent)
+    {
+        String selection = choice_GenresProperty().getSelectionModel().getSelectedItem().toString();
+        user.musicGenreProperty().get().add(selection);
+        txtArea_MuscList.appendText(selection + "\n");
+    }
+
 
     /**
      * A class creates a seperates task along side the JAVAFX Thread
@@ -97,7 +173,6 @@ public class registerWindowController implements Initializable
         private static final String code = ".register";
         private static final String host = "localhost";
         private static final int portNumber = 4444;
-        private clientThread clientThread;
 
 
         public registerUser(Users user)
@@ -115,42 +190,52 @@ public class registerWindowController implements Initializable
 
                 //Setup I/O
                 ObjectOutputStream outToServerObject = new ObjectOutputStream(socket.getOutputStream());
-                //PrintWriter serverOutString = new PrintWriter(socket.getOutputStream(), false);
-                InputStream serverInString = socket.getInputStream();
+                PrintWriter serverOutString = new PrintWriter(socket.getOutputStream(), false);
 
-                //serverOutString.println(code);
-               // serverOutString.flush();
+                serverOutString.println(code);
+                serverOutString.flush();
 
                 outToServerObject.writeObject(user);
                 outToServerObject.flush();
+
+                socket.close();
+
             }
             catch (IOException e)
             {
                 System.err.println("Fatal Connection error!");
                 e.printStackTrace();
+                updateMessage("Failed");
             }
             return null;
+        }
+
+        @Override
+        protected void succeeded()
+        {
+            super.done();
         }
     }
 
     @Override
     public void initialize(URL url, ResourceBundle rb)
     {
-        getChoice_Genres().getItems().add("African");
-        getChoice_Genres().getItems().add("Asian");
-        getChoice_Genres().getItems().add("Avant-Garde");
-        getChoice_Genres().getItems().add("Blues");
-        getChoice_Genres().getItems().add("Caribbean");
-        getChoice_Genres().getItems().add("Comedy");
-        getChoice_Genres().getItems().add("Country");
-        getChoice_Genres().getItems().add("Easy Listening");
-        getChoice_Genres().getItems().add("Electronic");
-        getChoice_Genres().getItems().add("Folk");
-        getChoice_Genres().getItems().add("Hip Hop");
-        getChoice_Genres().getItems().add("Jazz");
-        getChoice_Genres().getItems().add("Latin");
-        getChoice_Genres().getItems().add("Pop");
-        getChoice_Genres().getItems().add("R&B and Soul");
-        getChoice_Genres().getItems().add("Rock");
+        addChoice_Genres("African");
+        addChoice_Genres("Asian");
+        addChoice_Genres("Avant-Garde");
+        addChoice_Genres("Blues");
+        addChoice_Genres("Caribbean");
+        addChoice_Genres("Comedy");
+        addChoice_Genres("Country");
+        addChoice_Genres("Easy Listening");
+        addChoice_Genres("Electronic");
+        addChoice_Genres("Folk");
+        addChoice_Genres("Hip Hop");
+        addChoice_Genres("Jazz");
+        addChoice_Genres("Latin");
+        addChoice_Genres("Pop");
+        addChoice_Genres("R&B and Soul");
+        addChoice_Genres("Rock");
+        choice_GenresProperty().setTooltip(new Tooltip("Pick your music interests"));
     }
 }
