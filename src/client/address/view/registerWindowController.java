@@ -2,9 +2,11 @@ package client.address.view;
 
 
 import Resources.Users;
+import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -40,6 +42,7 @@ public class registerWindowController implements Initializable
     @FXML private ComboBox choice_Genres;
     @FXML private TextArea txtArea_MuscList;
     @FXML private Hyperlink HL_Cancel;
+    private Label testLabel = new Label("");
 
     //Variables
     private Alert alertError = new Alert(Alert.AlertType.ERROR);
@@ -102,49 +105,47 @@ public class registerWindowController implements Initializable
             user.setBirthday(date_Birthday.getValue());
 
 
-            Task<Void> task = new registerUser(user);
+
+            Task<Void> task = new javaFXWorker(user, ".register");
+
 
             //Receives a message from the task and either show a failure or success
-            task.addEventHandler(WorkerStateEvent.WORKER_STATE_SUCCEEDED,
-                    new EventHandler<WorkerStateEvent>()
+            task.setOnSucceeded(event ->
+            {
+                Platform.runLater(() ->
+                {
+                    if (task.getMessage().equals("Failed"))
                     {
-                        @Override
-                        public void handle(WorkerStateEvent event)
+                        alertError.setTitle("");
+                        alertError.setHeaderText(null);
+                        alertError.setContentText("Registration Failure");
+                        alertError.showAndWait();
+                    }
+                    else if (task.getMessage().equals("True"))
+                    {
+                        alert.setTitle("");
+                        alert.setHeaderText(null);
+                        alert.setContentText("Registration Successful");
+                        alert.showAndWait();
+
+                        System.out.println(task.getMessage());
+
+                        sceneSwitcher = new SceneSwitcher(loginWindow, actionEvent);
+                        try
                         {
-                            if (task.getMessage().equals("Failed"))
-                            {
-                                alertError.setTitle("");
-                                alertError.setHeaderText(null);
-                                alertError.setContentText("Registration Failure");
-                                alertError.showAndWait();
-                            }
-                            else
-                            {
-                                alert.setTitle("");
-                                alert.setHeaderText(null);
-                                alert.setContentText("Registration Successful");
-                                alert.showAndWait();
-
-                                System.out.println(task.getMessage());
-
-                                sceneSwitcher = new SceneSwitcher(loginWindow, actionEvent);
-                                try
-                                {
-                                    sceneSwitcher.switchScene();
-                                }
-                                catch (IOException e)
-                                {
-                                    e.printStackTrace();
-                                }
-                            }
-
+                            sceneSwitcher.switchScene();
+                        } catch (IOException e)
+                        {
+                            e.printStackTrace();
                         }
-                    });
+                    }
+                });
+            });
+
+
             Thread thread = new Thread(task);
             thread.setDaemon(true);
             thread.start();
-
-
         }
     }
 
@@ -159,62 +160,6 @@ public class registerWindowController implements Initializable
         String selection = choice_GenresProperty().getSelectionModel().getSelectedItem().toString();
         user.musicGenreProperty().get().add(selection);
         txtArea_MuscList.appendText(selection + "\n");
-    }
-
-
-    /**
-     * A class creates a seperates task along side the JAVAFX Thread
-     * that creates a connection with the server and sends the user object to be registered with the
-     * SQL database
-     */
-    private class registerUser extends Task<Void>
-    {
-        Users user;
-        private static final String code = ".register";
-        private static final String host = "localhost";
-        private static final int portNumber = 4444;
-
-
-        public registerUser(Users user)
-        {
-            this.user = user;
-        }
-
-        @Override
-        protected Void call() throws Exception
-        {
-            try
-            {
-                Socket socket = new Socket(host, portNumber);
-                Thread.sleep(1000);
-
-                //Setup I/O
-                ObjectOutputStream outToServerObject = new ObjectOutputStream(socket.getOutputStream());
-                PrintWriter serverOutString = new PrintWriter(socket.getOutputStream(), false);
-
-                serverOutString.println(code);
-                serverOutString.flush();
-
-                outToServerObject.writeObject(user);
-                outToServerObject.flush();
-
-                socket.close();
-
-            }
-            catch (IOException e)
-            {
-                System.err.println("Fatal Connection error!");
-                e.printStackTrace();
-                updateMessage("Failed");
-            }
-            return null;
-        }
-
-        @Override
-        protected void succeeded()
-        {
-            super.done();
-        }
     }
 
     @Override

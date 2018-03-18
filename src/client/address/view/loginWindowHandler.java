@@ -1,6 +1,10 @@
 package client.address.view;
 
 import Resources.Users;
+import com.sun.xml.internal.ws.api.pipe.FiberContextSwitchInterceptor;
+import javafx.application.Platform;
+import javafx.concurrent.Task;
+import javafx.concurrent.WorkerStateEvent;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -15,6 +19,9 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.PrintWriter;
+import java.net.Socket;
 import java.net.URL;
 import java.util.ResourceBundle;
 
@@ -22,9 +29,12 @@ public class loginWindowHandler implements Initializable
 {
 
     //FXML Variables
-    @FXML private AnchorPane anchorPane;
-    @FXML private Button btn_Login;
-    @FXML private TextField textField_Username;
+    @FXML
+    private AnchorPane anchorPane;
+    @FXML
+    private Button btn_Login;
+    @FXML
+    private TextField textField_Username;
 
     //Variables
     private static final String mainWindow = "mainWindow.fxml";
@@ -39,7 +49,7 @@ public class loginWindowHandler implements Initializable
     /**
      * This method checks if the user entered a name
      * if not then an error dialog appears
-     *
+     * <p>
      * otherwise the scene changes
      *
      * @param actionEvent
@@ -55,19 +65,55 @@ public class loginWindowHandler implements Initializable
             alertError.showAndWait();
 
 
-        }
-        else
+        } else
         {
             user.setUserName(textField_Username.getText());
 
-            //Setup the alert details and show it
-            alertInfo.setTitle("");
-            alertInfo.setHeaderText(null);
-            alertInfo.setContentText("Login successful");
-            alertInfo.showAndWait();
+            Task<Void> task = new javaFXWorker(user, ".findUser");
 
-            sceneSwitcher = new SceneSwitcher(mainWindow, actionEvent);
-            sceneSwitcher.switchScene();
+            task.setOnSucceeded(event ->
+            {
+                Platform.runLater(() ->
+                {
+                    if (task.getMessage().equals("Failed"))
+                    {
+                        alertError.setTitle("");
+                        alertError.setHeaderText(null);
+                        alertError.setContentText("Login Failure");
+                        alertError.showAndWait();
+                    }
+                    else if (task.getMessage().equals("False"))
+                    {
+                        alertError.setTitle("");
+                        alertError.setHeaderText(null);
+                        alertError.setContentText("User does not exist");
+                        alertError.showAndWait();
+                    }
+                    else if (task.getMessage().equals("True"))
+                    {
+                        //Setup the alert details and show it
+                        alertInfo.setTitle("");
+                        alertInfo.setHeaderText(null);
+                        alertInfo.setContentText("Login successful");
+                        alertInfo.showAndWait();
+
+                        sceneSwitcher = new SceneSwitcher(mainWindow, actionEvent);
+                        try
+                        {
+                            sceneSwitcher.switchScene();
+                        } catch (IOException e)
+                        {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+            });
+
+            Thread thread = new Thread(task);
+            thread.setDaemon(true);
+            thread.start();
+
+
 
         }
 
@@ -87,3 +133,4 @@ public class loginWindowHandler implements Initializable
 
 
 }
+

@@ -153,6 +153,33 @@ public class ChatServer
         }
 
     }
+
+    /**
+     * Find if the user exists in the database
+     * @param user
+     * @return true if a user is found otherwise false
+     */
+    public boolean findUsers(Users user)
+    {
+        boolean foundUser = false;
+        String findUser = "SELECT * FROM Users WHERE userName = '" + user.getUserName() + "'";
+        try
+        {
+            Connection conn = this.connect();
+
+            Statement statement = conn.createStatement();
+            ResultSet resultSet = statement.executeQuery(findUser);
+
+            //If column result is empty return empty
+            foundUser = resultSet.isBeforeFirst();
+        }
+
+        catch (SQLException e)
+        {
+            System.out.println(e.getMessage());
+        }
+        return foundUser;
+    }
     
     
     public static void main(String[] args) 

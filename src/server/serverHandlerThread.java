@@ -13,6 +13,7 @@ package server;
 
 import Resources.Users;
 
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.PrintWriter;
@@ -24,6 +25,7 @@ public class serverHandlerThread implements Runnable
     private Socket socket;
     private PrintWriter clientOut;
     private ChatServer server;
+
     //Constructor
     public serverHandlerThread(ChatServer server, Socket socket)
     {
@@ -43,14 +45,10 @@ public class serverHandlerThread implements Runnable
         {
             //Setup I/O
             this.clientOut = new PrintWriter(socket.getOutputStream(), false);
+            DataOutputStream outToClientString = new DataOutputStream(socket.getOutputStream());
             ObjectInputStream inFromClientObject = new ObjectInputStream(socket.getInputStream());
             Scanner in = new Scanner(socket.getInputStream());
 
-            /*
-           // Scanner in = new Scanner(socket.getInputStream());
-            Users user = (Users) inFromClientObject.readObject();
-            server.registerUsers(user); */
-            // start communicating
             while(!socket.isClosed())
             {
                 //If server has received a message
@@ -60,6 +58,7 @@ public class serverHandlerThread implements Runnable
                     String input = in.nextLine();
                     System.out.println(input);
 
+                    //If clients sets .register command then register new user
                     if (input.equals(".register"))
                     {
                         Object obj = inFromClientObject.readObject();
@@ -67,14 +66,34 @@ public class serverHandlerThread implements Runnable
                         server.registerUsers(user);
                         in.close();
                     }
-                    //Push message received to other clients
-                    for (serverHandlerThread thatClient : server.getClients())
+
+                    //If clients sends .findUser command then see if user exists in DB
+                    if (input.equals(".findUser"))
                     {
-                        PrintWriter thatClientOut = thatClient.getWriter();
-                        if (thatClientOut != null)
+                        Object obj = inFromClientObject.readObject();
+                        Users user = (Users) obj;
+                        if(server.findUsers(user))
                         {
-                            thatClientOut.write(input + "\r\n");
-                            thatClientOut.flush();
+                            outToClientString.writeUTF("True");
+                        }
+                        else
+                        {
+                            outToClientString.writeUTF("False");
+                        }
+
+                        in.close();
+                    }
+                    //Push message received to other clients
+                    else
+                    {
+                        for (serverHandlerThread thatClient : server.getClients())
+                        {
+                            PrintWriter thatClientOut = thatClient.getWriter();
+                            if (thatClientOut != null)
+                            {
+                                thatClientOut.write(input + "\r\n");
+                                thatClientOut.flush();
+                            }
                         }
                     }
                 }
