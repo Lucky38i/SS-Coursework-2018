@@ -1,10 +1,8 @@
 package client.address.view;
 
 import Resources.Users;
-import com.sun.xml.internal.ws.api.pipe.FiberContextSwitchInterceptor;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
-import javafx.concurrent.WorkerStateEvent;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -29,12 +27,9 @@ public class loginWindowHandler implements Initializable
 {
 
     //FXML Variables
-    @FXML
-    private AnchorPane anchorPane;
-    @FXML
-    private Button btn_Login;
-    @FXML
-    private TextField textField_Username;
+    @FXML private AnchorPane anchorPane;
+    @FXML private Button btn_Login;
+    @FXML private TextField textField_Username;
 
     //Variables
     private static final String mainWindow = "mainWindow.fxml";

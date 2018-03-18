@@ -2,11 +2,9 @@ package client.address.view;
 
 import Resources.Users;
 import javafx.concurrent.Task;
-import jdk.internal.util.xml.impl.Input;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.Scanner;
 
 /**
  * A class creates a seperates task along side the JAVAFX Thread
