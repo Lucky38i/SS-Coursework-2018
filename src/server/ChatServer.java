@@ -12,13 +12,18 @@ package server;
 
 
 import Resources.Users;
+import javafx.concurrent.Task;
 
+import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 public class ChatServer
 {
@@ -180,8 +185,7 @@ public class ChatServer
         }
         return foundUser;
     }
-    
-    
+
     public static void main(String[] args) 
     {
         ChatServer server  = new ChatServer(portNumber);
@@ -202,7 +206,7 @@ public class ChatServer
     
     private void startServer()
     {
-        clients = new ArrayList<serverHandlerThread>();
+        clients = new ArrayList<>();
         ServerSocket serverSocket = null;
         try
         {
@@ -215,8 +219,7 @@ public class ChatServer
             System.exit(1);
         }
     }
-    
-    
+
     //Continuously accept clients
     private void acceptClients(ServerSocket serverSocket)
     {
@@ -229,6 +232,7 @@ public class ChatServer
                 System.out.println("Accepts: " + socket.getRemoteSocketAddress());
                 serverHandlerThread client = new serverHandlerThread(this, socket);
                 Thread thread = new Thread(client);
+                thread.setDaemon(true);
                 thread.start();
                 clients.add(client);
             }
@@ -237,7 +241,106 @@ public class ChatServer
                 System.err.println("Accept failed on:" + serverPort);
             }
         }   
-    }   
+    }
+
+    /**
+     * Task that handles all connections received from the client
+     */
+    public class serverHandlerThread implements Runnable
+    {
+        private Socket socket;
+        private PrintWriter clientOut;
+        private ChatServer server;
+
+        //Constructor
+        public serverHandlerThread(ChatServer server, Socket socket)
+        {
+            this.server = server;
+            this.socket = socket;
+        }
+
+        private PrintWriter getWriter()
+        {
+            return clientOut;
+        }
+
+        @Override
+        public void run ()
+        {
+            try
+            {
+                //Setup I/O
+                this.clientOut = new PrintWriter(socket.getOutputStream(), false);
+                DataOutputStream outToClientString = new DataOutputStream(socket.getOutputStream());
+                ObjectInputStream inFromClientObject = new ObjectInputStream(socket.getInputStream());
+                Scanner in = new Scanner(socket.getInputStream());
+
+                while(!socket.isClosed())
+                {
+
+                    if (socket.getInputStream().read() == -1)
+                        {
+                            System.out.println("the socket is closing");
+                            socket.close();
+                            clients.remove(this);
+                        }
+
+                    //If server has received a message
+                    if(in.hasNextLine())
+                    {
+                        //Set received message to string and print
+                        String input = in.nextLine();
+                        System.out.println(input);
+
+                        //If clients sets .register command then register new user
+                        //TODO Fix this!
+                        if (input.equals(".register"))
+                        {
+                            Object obj = inFromClientObject.readObject();
+                            Users user = (Users) obj;
+                            server.registerUsers(user);
+                            in.close();
+                        }
+
+                        //If clients sends .findUser command then see if user exists in DB
+                        if (input.equals(".findUser"))
+                        {
+                            Object obj = inFromClientObject.readObject();
+                            Users user = (Users) obj;
+                            if(server.findUsers(user))
+                            {
+                                outToClientString.writeUTF("True");
+                            }
+                            else
+                            {
+                                outToClientString.writeUTF("False");
+                            }
+
+                            in.close();
+                        }
+                        //Push message received to other clients
+                        /*
+                        else
+                        {
+                            for (serverHandlerThread thatClient : server.getClients())
+                            {
+                                PrintWriter thatClientOut = thatClient.getWriter();
+                                if (thatClientOut != null)
+                                {
+                                    thatClientOut.write(input + "\r\n");
+                                    thatClientOut.flush();
+                                }
+                            }
+                        }*/
+                    }
+                }
+            }
+            catch (IOException | ClassNotFoundException e)
+            {
+                e.printStackTrace();
+            }
+        }
+    }
 }
 
 
