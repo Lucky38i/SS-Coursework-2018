@@ -20,6 +20,8 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Scanner;
 
+//TODO
+//Convert this into a task<Void>
 public class serverHandlerThread implements Runnable
 {
     private Socket socket;
@@ -51,6 +53,15 @@ public class serverHandlerThread implements Runnable
 
             while(!socket.isClosed())
             {
+                //TODO implement the following lines
+                /*
+                if (socket.getInputStream().read() == -1)
+					{
+						System.out.println("the socket is closing");
+						socket.close();
+						clientTasks.remove(this);
+					}*/
+            
                 //If server has received a message
                 if(in.hasNextLine())
                 {
