@@ -5,6 +5,7 @@ import javafx.concurrent.Task;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.Scanner;
 
 /**
  * A class creates a seperates task along side the JAVAFX Thread
@@ -28,54 +29,26 @@ public class javaFXWorker extends Task<Void>
     @Override
     protected Void call() throws Exception
     {
-        if (code.equals(".register"))
+        try(Socket socket = new Socket(host, portNumber);ObjectOutputStream outToServerObject = new ObjectOutputStream(socket.getOutputStream()))
         {
-            try
+
+            Thread.sleep(1000);
+
+            //Setup I/O
+
+            PrintWriter serverOutString = new PrintWriter(socket.getOutputStream(), false);
+            Scanner in = new Scanner(socket.getInputStream());
+
+            serverOutString.println(code);
+            serverOutString.flush();
+
+            outToServerObject.writeObject(user);
+            outToServerObject.flush();
+
+            if (code.equals(".findUser"))
             {
-                Socket socket = new Socket(host, portNumber);
-                Thread.sleep(1000);
+                String input = in.nextLine();
 
-                //Setup I/O
-                ObjectOutputStream outToServerObject = new ObjectOutputStream(socket.getOutputStream());
-                PrintWriter serverOutString = new PrintWriter(socket.getOutputStream(), false);
-
-                serverOutString.println(code);
-                serverOutString.flush();
-
-                outToServerObject.writeObject(user);
-                outToServerObject.flush();
-
-                socket.close();
-                updateMessage("True");
-
-            } catch (IOException e)
-            {
-                System.err.println("Fatal Connection error!");
-                e.printStackTrace();
-                updateMessage("Failed");
-            }
-        }
-
-        if (code.equals(".findUser"))
-        {
-            try
-            {
-                Socket socket = new Socket(host, portNumber);
-                Thread.sleep(1000);
-
-                //Setup I/O
-                ObjectOutputStream outToServer = new ObjectOutputStream(socket.getOutputStream());
-                PrintWriter serverOutString = new PrintWriter(socket.getOutputStream(), false);
-                DataInputStream in = new DataInputStream(socket.getInputStream());
-
-                serverOutString.println(code);
-                serverOutString.flush();
-
-                outToServer.writeObject(user);
-                outToServer.flush();
-
-
-                String input = in.readUTF();
                 if (input.equals("True"))
                 {
                     updateMessage("True");
@@ -84,17 +57,18 @@ public class javaFXWorker extends Task<Void>
                 {
                     updateMessage("False");
                 }
-
-                socket.close();
-
             }
-
-            catch (IOException e)
+            else
             {
-                updateMessage("Failed");
-                e.printStackTrace();
+                updateMessage("True");
             }
 
+        }
+        catch (IOException e)
+        {
+            System.err.println("Fatal Connection error!");
+            e.printStackTrace();
+            updateMessage("Failed");
         }
         return null;
     }

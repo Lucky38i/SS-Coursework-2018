@@ -111,19 +111,10 @@ public class registerWindowController implements Initializable
                     {
                         alert.setTitle("");
                         alert.setHeaderText(null);
-                        alert.setContentText("Registration Successful");
+                        alert.setContentText("Registration Successful\nPlease re-open the client");
                         alert.showAndWait();
 
-                        System.out.println(task.getMessage());
-
-                        sceneSwitcher = new SceneSwitcher(loginWindow, actionEvent);
-                        try
-                        {
-                            sceneSwitcher.switchScene();
-                        } catch (IOException e)
-                        {
-                            e.printStackTrace();
-                        }
+                        System.exit(0);
                     }
                 });
             });

@@ -14,10 +14,7 @@ package server;
 import Resources.Users;
 import javafx.concurrent.Task;
 
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.sql.*;
@@ -267,24 +264,14 @@ public class ChatServer
         @Override
         public void run ()
         {
-            try
+            try(ObjectInputStream inFromClientObject = new ObjectInputStream(socket.getInputStream()))
             {
                 //Setup I/O
                 this.clientOut = new PrintWriter(socket.getOutputStream(), false);
-                DataOutputStream outToClientString = new DataOutputStream(socket.getOutputStream());
-                ObjectInputStream inFromClientObject = new ObjectInputStream(socket.getInputStream());
                 Scanner in = new Scanner(socket.getInputStream());
 
                 while(!socket.isClosed())
                 {
-
-                    if (socket.getInputStream().read() == -1)
-                        {
-                            System.out.println("the socket is closing");
-                            socket.close();
-                            clients.remove(this);
-                        }
-
                     //If server has received a message
                     if(in.hasNextLine())
                     {
@@ -299,6 +286,10 @@ public class ChatServer
                             Object obj = inFromClientObject.readObject();
                             Users user = (Users) obj;
                             server.registerUsers(user);
+
+                            System.out.println("Closing socket: " + socket.getRemoteSocketAddress());
+                            socket.close();
+                            clients.remove(this);
                             in.close();
                         }
 
@@ -309,12 +300,18 @@ public class ChatServer
                             Users user = (Users) obj;
                             if(server.findUsers(user))
                             {
-                                outToClientString.writeUTF("True");
+                                this.clientOut.write("True");
+                                this.clientOut.flush();
                             }
                             else
                             {
-                                outToClientString.writeUTF("False");
+                                this.clientOut.write("false");
+                                this.clientOut.flush();
                             }
+
+                            System.out.println("Closing socket: " + socket.getRemoteSocketAddress());
+                            socket.close();
+                            clients.remove(this);
 
                             in.close();
                         }
