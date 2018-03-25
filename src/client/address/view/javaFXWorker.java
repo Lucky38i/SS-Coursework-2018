@@ -49,11 +49,11 @@ public class javaFXWorker extends Task<Void>
             {
                 String input = in.nextLine();
 
-                if (input.equals("True"))
+                if (input.equals("true"))
                 {
                     updateMessage("True");
                 }
-                else if (input.equals("False"))
+                else if (input.equals("false"))
                 {
                     updateMessage("False");
                 }
