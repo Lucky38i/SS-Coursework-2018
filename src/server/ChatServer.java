@@ -140,8 +140,8 @@ public class ChatServer
                 for (int i=0; i < user.getMusicGenre().size(); i++)
                 {
                     preparedStatement1.setInt(1, resultSet.getInt("userID"));
-                    preparedStatement.setString(2, user.getMusicGenre().get(i));
-                    preparedStatement.executeUpdate();
+                    preparedStatement1.setString(2, user.getMusicGenre().get(i));
+                    preparedStatement1.executeUpdate();
                 }
             }
 
