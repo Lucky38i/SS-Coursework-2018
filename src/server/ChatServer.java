@@ -119,7 +119,7 @@ public class ChatServer
      * to the list of current users
      * @param user received from the client
      */
-    public void registerUsers(Users user)
+    private void registerUsers(Users user)
     {
 
         String addUser = "INSERT INTO Users(userName, firstName, lastName, birthday, City) VALUES(?,?,?,?,?)";
@@ -170,10 +170,10 @@ public class ChatServer
 
     /**
      * Find if the user exists in the database
-     * @param user
+     * @param user finds the recevied user in an SQL query
      * @return true if a user is found otherwise false
      */
-    public boolean findUsers(Users user)
+    private boolean findUsers(Users user)
     {
         boolean foundUser = false;
         String findUser = "SELECT * FROM Users WHERE userName = '" + user.getUserName() + "'";
@@ -216,7 +216,7 @@ public class ChatServer
     private void startServer()
     {
         clients = new ArrayList<>();
-        ServerSocket serverSocket = null;
+        ServerSocket serverSocket;
         try
         {
             serverSocket = new ServerSocket(serverPort);
@@ -262,7 +262,7 @@ public class ChatServer
         private ChatServer server;
 
         //Constructor
-        public serverHandlerThread(ChatServer server, Socket socket)
+        serverHandlerThread(ChatServer server, Socket socket)
         {
             this.server = server;
             this.socket = socket;

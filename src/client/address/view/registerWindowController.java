@@ -1,7 +1,7 @@
 package client.address.view;
 
 
-import Resources.SceneSwitcher;
+import client.address.SceneSwitcher;
 import Resources.Users;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
@@ -28,18 +28,14 @@ public class registerWindowController implements Initializable
     @FXML private TextField txt_City;
     @FXML private ComboBox choice_Genres;
     @FXML private TextArea txtArea_MuscList;
-    @FXML private Hyperlink HL_Cancel;
-    private Label testLabel = new Label("");
 
     //Variables
     private Alert alertError = new Alert(Alert.AlertType.ERROR);
     private Alert alert = new Alert(Alert.AlertType.INFORMATION);
-    private String loginWindow = "loginWindow.fxml";
     private Users user = new Users();
-    private SceneSwitcher sceneSwitcher;
 
 
-    public void addChoice_Genres(String genre)
+    private void addChoice_Genres(String genre)
     {
         choice_GenresProperty().getItems().add(genre);
     }
@@ -51,21 +47,20 @@ public class registerWindowController implements Initializable
 
     /**
      * Opens the login window scene
-     * @param actionEvent
-     * @throws IOException
+     * @param actionEvent This is used to switch the scene
+     * @throws IOException Throws IOException is file does not exist
      */
     public void open_LoginWindow(ActionEvent actionEvent) throws IOException
     {
-        sceneSwitcher = new SceneSwitcher(loginWindow,actionEvent);
+        String loginWindow = "view/loginWindow.fxml";
+        SceneSwitcher sceneSwitcher = new SceneSwitcher(loginWindow, actionEvent);
         sceneSwitcher.switchScene();
     }
 
     /**
      * Registers the user then if successful opens back the login window
-     * @param actionEvent
-     * @throws IOException
      */
-    public void btn_registerUser(ActionEvent actionEvent) throws IOException
+    public void btn_registerUser()
     {
         //Check that no fields are blank
         if (txt_FirstName.getText().equals("") || txt_Username.getText().equals("") || txt_LastName.getText().equals("") || txt_City.getText().equals(""))
@@ -98,27 +93,25 @@ public class registerWindowController implements Initializable
 
             //Receives a message from the task and either show a failure or success
             task.setOnSucceeded(event ->
-            {
-                Platform.runLater(() ->
-                {
-                    if (task.getMessage().equals("Failed"))
+                    Platform.runLater(() ->
                     {
-                        alertError.setTitle("");
-                        alertError.setHeaderText(null);
-                        alertError.setContentText("Registration Failure");
-                        alertError.showAndWait();
-                    }
-                    else if (task.getMessage().equals("True"))
-                    {
-                        alert.setTitle("");
-                        alert.setHeaderText(null);
-                        alert.setContentText("Registration Successful\nPlease re-open the client");
-                        alert.showAndWait();
+                        if (task.getMessage().equals("Failed"))
+                        {
+                            alertError.setTitle("");
+                            alertError.setHeaderText(null);
+                            alertError.setContentText("Registration Failure");
+                            alertError.showAndWait();
+                        }
+                        else if (task.getMessage().equals("True"))
+                        {
+                            alert.setTitle("");
+                            alert.setHeaderText(null);
+                            alert.setContentText("Registration Successful\nPlease re-open the client");
+                            alert.showAndWait();
 
-                        System.exit(0);
-                    }
-                });
-            });
+                            System.exit(0);
+                        }
+                    }));
 
 
             Thread thread = new Thread(task);
@@ -131,9 +124,8 @@ public class registerWindowController implements Initializable
     /**
      * Drops the selected item in the menu into the
      * txtArea_MusicList
-     * @param actionEvent
      */
-    public void add_Genre(ActionEvent actionEvent)
+    public void add_Genre()
     {
         String selection = choice_GenresProperty().getSelectionModel().getSelectedItem().toString();
         user.musicGenreProperty().get().add(selection);

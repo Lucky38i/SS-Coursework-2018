@@ -20,10 +20,10 @@ public class javaFXWorker extends Task<Void>
     private static final int portNumber = 4444;
 
 
-    public javaFXWorker(Users user, String code)
+    javaFXWorker(Users user, String code)
     {
         this.user = user;
-        this.code = code;
+        javaFXWorker.code = code;
     }
 
     @Override

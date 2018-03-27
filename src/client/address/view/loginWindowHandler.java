@@ -1,6 +1,6 @@
 package client.address.view;
 
-import Resources.SceneSwitcher;
+import client.address.SceneSwitcher;
 import Resources.Users;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
@@ -25,10 +25,10 @@ public class loginWindowHandler implements Initializable
     @FXML private TextField textField_Username;
 
     //Variables
-    private static final String mainWindow = "client/address/view/mainWindow.fxml";
+    private static final String mainWindow = "view/mainWindow.fxml";
 
 
-    private static final String registerWindow = "client/address/view/registerWindow.fxml";
+    private static final String registerWindow = "view/registerWindow.fxml";
     private Users user = new Users();
     private SceneSwitcher sceneSwitcher;
 
@@ -43,9 +43,8 @@ public class loginWindowHandler implements Initializable
      * otherwise the scene changes
      *
      * @param actionEvent
-     * @throws IOException
      */
-    public void open_MainMenu(ActionEvent actionEvent) throws IOException
+    public void open_MainMenu(ActionEvent actionEvent)
     {
         if (textField_Username.getText().equals(""))
         {
