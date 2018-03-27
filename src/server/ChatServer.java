@@ -70,6 +70,7 @@ public class ChatServer
 
             Statement statement1 = conn.createStatement();
             Statement statement2 = conn.createStatement();
+            Statement statement3 = conn.createStatement();
 
             ResultSet resultSet = statement1.executeQuery(sqlQuery);
 
@@ -91,6 +92,16 @@ public class ChatServer
                 {
                     user.musicGenreProperty().get().add(musicResult.getString("musicGenre"));
                 }
+
+                String findFriendList = "SELECT userName FROM Users a, Friends b\n" +
+                        "WHERE b.userID = " + user.getUserID() + " AND a.userID = b.friendID";
+
+                ResultSet friendResult = statement3.executeQuery(findFriendList);
+                while (friendResult.next())
+                {
+                    user.friendsListProperty().get().add(friendResult.getString("userName"));
+                }
+
                 usersList.add(user);
             }
             System.out.println("Database built successfully ");

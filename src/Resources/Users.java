@@ -64,6 +64,9 @@ public class Users implements Serializable
         return musicGenre;
     }
 
+    private transient ListProperty<String> friendsList;
+    public ListProperty<String> friendsListProperty() { return friendsList; }
+
     /**
      * Default constructor.
      */
@@ -81,17 +84,18 @@ public class Users implements Serializable
         city = new SimpleStringProperty();
         birthday = new SimpleObjectProperty<>();
         musicGenre = new SimpleListProperty<>(FXCollections.observableArrayList());
+        friendsList = new SimpleListProperty<>(FXCollections.observableArrayList());
     }
 
     private void writeObject(ObjectOutputStream out) throws IOException
     {
-        WriteObjectsHelper.writeAllProp(out, userID,userName,firstName,lastName,city,birthday,musicGenre);
+        WriteObjectsHelper.writeAllProp(out, userID,userName,firstName,lastName,city,birthday,musicGenre, friendsList);
     }
 
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException
     {
         initInstance();
-        ReadObjectsHelper.readAllProp(in, userID,userName,firstName,lastName,city,birthday,musicGenre);
+        ReadObjectsHelper.readAllProp(in, userID,userName,firstName,lastName,city,birthday,musicGenre, friendsList);
     }
 
     /* Setters and Getters */
@@ -166,6 +170,15 @@ public class Users implements Serializable
     public void setMusicGenre(ObservableList musicGenre)
     {
         this.musicGenre.set(musicGenre);
+    }
+
+    public List<String> getFriendsList()
+    {
+        return friendsList.get();
+    }
+    public void setFriendsList(ObservableList friendsList)
+    {
+        this.friendsList.set(friendsList);
     }
 }
 
