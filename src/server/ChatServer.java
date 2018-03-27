@@ -12,7 +12,6 @@ package server;
 
 
 import Resources.Users;
-import javafx.concurrent.Task;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -62,20 +61,20 @@ public class ChatServer
     private void populateUsers()
     {
         String sqlQuery = "SELECT userName, firstName, lastName, birthday, City, userID FROM Users";
-
-
         try
         {
             Connection conn = this.connect();
 
-            Statement statement1 = conn.createStatement();
-            Statement statement2 = conn.createStatement();
-            Statement statement3 = conn.createStatement();
+            //Create statements to be executed
+            Statement userStatement = conn.createStatement();
+            Statement genresStatement = conn.createStatement();
+            Statement friendsStatement = conn.createStatement();
 
-            ResultSet resultSet = statement1.executeQuery(sqlQuery);
+            ResultSet resultSet = userStatement.executeQuery(sqlQuery);
 
             while (resultSet.next())
             {
+                //Create a new user and set its properties from SQL results
                 Users user = new Users();
                 user.setUserID(resultSet.getInt("userID"));
                 user.setUserName(resultSet.getString("userName"));
@@ -87,18 +86,20 @@ public class ChatServer
                 String findMusicGenres = "SELECT musicGenre FROM musicGenres a, Users b\n" +
                         "WHERE a.userID = " + resultSet.getInt("userID") + " AND  a.userID = b.userID";
 
-                ResultSet musicResult = statement2.executeQuery(findMusicGenres);
+                ResultSet musicResult = genresStatement.executeQuery(findMusicGenres);
                 while (musicResult.next())
                 {
+                    //Set the User's music genres based of SQL results
                     user.musicGenreProperty().get().add(musicResult.getString("musicGenre"));
                 }
 
                 String findFriendList = "SELECT userName FROM Users a, Friends b\n" +
                         "WHERE b.userID = " + user.getUserID() + " AND a.userID = b.friendID";
 
-                ResultSet friendResult = statement3.executeQuery(findFriendList);
+                ResultSet friendResult = friendsStatement.executeQuery(findFriendList);
                 while (friendResult.next())
                 {
+                    //Set the user's friend list based of SQL results
                     user.friendsListProperty().get().add(friendResult.getString("userName"));
                 }
 
@@ -157,7 +158,7 @@ public class ChatServer
             }
 
             usersList.add(user);
-            System.out.println("User: " + user.getUserName() + " added to databse");
+            System.out.println("User: " + user.getUserName() + " added to database");
         }
 
         catch (SQLException e)

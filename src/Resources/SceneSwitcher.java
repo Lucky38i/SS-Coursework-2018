@@ -1,4 +1,4 @@
-package client.address.view;
+package Resources;
 
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;

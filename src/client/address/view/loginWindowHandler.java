@@ -1,5 +1,6 @@
 package client.address.view;
 
+import Resources.SceneSwitcher;
 import Resources.Users;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
@@ -24,8 +25,10 @@ public class loginWindowHandler implements Initializable
     @FXML private TextField textField_Username;
 
     //Variables
-    private static final String mainWindow = "mainWindow.fxml";
-    private static final String registerWindow = "registerWindow.fxml";
+    private static final String mainWindow = "client/address/view/mainWindow.fxml";
+
+
+    private static final String registerWindow = "client/address/view/registerWindow.fxml";
     private Users user = new Users();
     private SceneSwitcher sceneSwitcher;
 
@@ -59,42 +62,40 @@ public class loginWindowHandler implements Initializable
             Task<Void> task = new javaFXWorker(user, ".findUser");
 
             task.setOnSucceeded(event ->
-            {
-                Platform.runLater(() ->
-                {
-                    if (task.getMessage().equals("Failed"))
+                    Platform.runLater(() ->
                     {
-                        alertError.setTitle("");
-                        alertError.setHeaderText(null);
-                        alertError.setContentText("Login Failure");
-                        alertError.showAndWait();
-                    }
-                    else if (task.getMessage().equals("False"))
-                    {
-                        alertError.setTitle("");
-                        alertError.setHeaderText(null);
-                        alertError.setContentText("User does not exist");
-                        alertError.showAndWait();
-                    }
-                    else if (task.getMessage().equals("True"))
-                    {
-                        //Setup the alert details and show it
-                        alertInfo.setTitle("");
-                        alertInfo.setHeaderText(null);
-                        alertInfo.setContentText("Login successful");
-                        alertInfo.showAndWait();
+                        switch (task.getMessage())
+                        {
+                            case "Failed":
+                                alertError.setTitle("");
+                                alertError.setHeaderText(null);
+                                alertError.setContentText("Login Failure");
+                                alertError.showAndWait();
+                                break;
+                            case "False":
+                                alertError.setTitle("");
+                                alertError.setHeaderText(null);
+                                alertError.setContentText("User does not exist");
+                                alertError.showAndWait();
+                                break;
+                            case "True":
+                                //Setup the alert details and show it
+                                alertInfo.setTitle("");
+                                alertInfo.setHeaderText(null);
+                                alertInfo.setContentText("Login successful");
+                                alertInfo.showAndWait();
 
-                        sceneSwitcher = new SceneSwitcher(mainWindow, actionEvent);
-                        try
-                        {
-                            sceneSwitcher.switchScene();
-                        } catch (IOException e)
-                        {
-                            e.printStackTrace();
+                                sceneSwitcher = new SceneSwitcher(mainWindow, actionEvent);
+                                try
+                                {
+                                    sceneSwitcher.switchScene();
+                                } catch (IOException e)
+                                {
+                                    e.printStackTrace();
+                                }
+                                break;
                         }
-                    }
-                });
-            });
+                    }));
 
             Thread thread = new Thread(task);
             thread.setDaemon(true);

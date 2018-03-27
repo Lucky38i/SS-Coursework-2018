@@ -14,7 +14,7 @@ import java.util.Scanner;
  */
 public class javaFXWorker extends Task<Void>
 {
-    Users user;
+    private Users user;
     private static String code;
     private static final String host = "localhost";
     private static final int portNumber = 4444;
@@ -35,34 +35,34 @@ public class javaFXWorker extends Task<Void>
             Thread.sleep(1000);
 
             //Setup I/O
-
             PrintWriter serverOutString = new PrintWriter(socket.getOutputStream(), false);
             Scanner in = new Scanner(socket.getInputStream());
 
-            serverOutString.println(code);
-            serverOutString.flush();
-
-            outToServerObject.writeObject(user);
-            outToServerObject.flush();
-
-            if (code.equals(".findUser"))
+            while (!socket.isClosed())
             {
-                String input = in.nextLine();
+                serverOutString.println(code);
+                serverOutString.flush();
 
-                if (input.equals("true"))
+                outToServerObject.writeObject(user);
+                outToServerObject.flush();
+
+                if (code.equals(".findUser"))
+                {
+                    String input = in.nextLine();
+
+                    if (input.equals("True"))
+                    {
+                        updateMessage("True");
+                    } else if (input.equals("false"))
+                    {
+                        updateMessage("False");
+                    }
+                } else
                 {
                     updateMessage("True");
                 }
-                else if (input.equals("false"))
-                {
-                    updateMessage("False");
-                }
+                socket.close();
             }
-            else
-            {
-                updateMessage("True");
-            }
-
         }
         catch (IOException e)
         {
