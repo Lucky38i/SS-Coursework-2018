@@ -58,7 +58,7 @@ public class loginWindowHandler implements Initializable
         {
             user.setUserName(textField_Username.getText());
 
-            Task<Void> task = new javaFXWorker(user, ".findUser");
+            Task<Users> task = new javaFXWorker(user, ".findUser");
 
             task.setOnSucceeded(event ->
                     Platform.runLater(() ->
@@ -83,6 +83,7 @@ public class loginWindowHandler implements Initializable
                                 alertInfo.setHeaderText(null);
                                 alertInfo.setContentText("Login successful");
                                 alertInfo.showAndWait();
+                                Users taskUser = task.getValue();
 
                                 sceneSwitcher = new SceneSwitcher(mainWindow, actionEvent);
                                 try

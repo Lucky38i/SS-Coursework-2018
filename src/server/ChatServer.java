@@ -11,6 +11,7 @@ package server;
  */
 
 
+import Resources.Pair;
 import Resources.Users;
 
 import java.io.*;
@@ -173,9 +174,10 @@ public class ChatServer
      * @param user finds the recevied user in an SQL query
      * @return true if a user is found otherwise false
      */
-    private boolean findUsers(Users user)
+    private Pair<Boolean, Users> findUsers(Users user)
     {
-        boolean foundUser = false;
+        Pair<Boolean, Users> foundUser = new Pair<>();
+        foundUser.setFirst(false);
         String findUser = "SELECT * FROM Users WHERE userName = '" + user.getUserName() + "'";
         try
         {
@@ -185,7 +187,20 @@ public class ChatServer
             ResultSet resultSet = statement.executeQuery(findUser);
 
             //If column result is empty return empty
-            foundUser = resultSet.isBeforeFirst();
+            foundUser.setFirst(resultSet.isBeforeFirst());
+
+            if (foundUser.getFirst())
+            {
+                Users temp = new Users();
+                for (Users i : usersList)
+                {
+                    if (i.getUserName().equals(user.getUserName()))
+                    {
+                       temp = i;
+                    }
+                }
+                foundUser.setSecond(temp);
+            }
         }
 
         catch (SQLException e)
@@ -276,11 +291,12 @@ public class ChatServer
         @Override
         public void run ()
         {
-            try(ObjectInputStream inFromClientObject = new ObjectInputStream(socket.getInputStream()))
+            try(InputStream fromClient = socket.getInputStream(); OutputStream toClient = socket.getOutputStream())
             {
                 //Setup I/O
-                this.clientOut = new PrintWriter(socket.getOutputStream(), false);
-                Scanner in = new Scanner(socket.getInputStream());
+                this.clientOut = new PrintWriter(toClient, false);
+                Scanner in = new Scanner(fromClient);
+                ObjectInputStream fromClientObject = new ObjectInputStream(fromClient);
 
                 while(!socket.isClosed())
                 {
@@ -295,7 +311,7 @@ public class ChatServer
                         //TODO Fix this!
                         if (input.equals(".register"))
                         {
-                            Object obj = inFromClientObject.readObject();
+                            Object obj = fromClientObject.readObject();
                             Users user = (Users) obj;
                             server.registerUsers(user);
 
@@ -308,9 +324,15 @@ public class ChatServer
                         //If clients sends .findUser command then see if user exists in DB
                         if (input.equals(".findUser"))
                         {
-                            Object obj = inFromClientObject.readObject();
+                            //Read object from client
+                            Object obj = fromClientObject.readObject();
                             Users user = (Users) obj;
-                            if(server.findUsers(user))
+
+                            //Create a pair and find the user
+                            Pair<Boolean,Users> findUsers;
+                            findUsers = server.findUsers(user);
+
+                            if(findUsers.getFirst())
                             {
                                 this.clientOut.write("True");
                                 this.clientOut.flush();

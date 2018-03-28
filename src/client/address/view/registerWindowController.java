@@ -88,28 +88,33 @@ public class registerWindowController implements Initializable
 
 
 
-            Task<Void> task = new javaFXWorker(user, ".register");
+            Task<Users> task = new javaFXWorker(user, ".register");
 
 
             //Receives a message from the task and either show a failure or success
             task.setOnSucceeded(event ->
                     Platform.runLater(() ->
                     {
-                        if (task.getMessage().equals("Failed"))
+                        switch (task.getMessage())
                         {
-                            alertError.setTitle("");
-                            alertError.setHeaderText(null);
-                            alertError.setContentText("Registration Failure");
-                            alertError.showAndWait();
-                        }
-                        else if (task.getMessage().equals("True"))
-                        {
-                            alert.setTitle("");
-                            alert.setHeaderText(null);
-                            alert.setContentText("Registration Successful\nPlease re-open the client");
-                            alert.showAndWait();
+                            case "Failed":
+                            {
+                                alertError.setTitle("");
+                                alertError.setHeaderText(null);
+                                alertError.setContentText("Registration Failure");
+                                alertError.showAndWait();
+                                break;
+                            }
+                            case "True":
+                            {
+                                alert.setTitle("");
+                                alert.setHeaderText(null);
+                                alert.setContentText("Registration Successful\nPlease re-open the client");
+                                alert.showAndWait();
 
-                            System.exit(0);
+                                System.exit(0);
+                                break;
+                            }
                         }
                     }));
 
