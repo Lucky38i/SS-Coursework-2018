@@ -1,7 +1,6 @@
 package client.address.view;
 
 import Resources.Users;
-import com.sun.tools.internal.xjc.reader.xmlschema.bindinfo.BIConversion;
 import javafx.concurrent.Task;
 
 import java.io.*;
@@ -30,42 +29,42 @@ public class javaFXWorker extends Task<Users>
     @Override
     protected Users call() throws Exception
     {
-        try(Socket socket = new Socket(host, portNumber);InputStream fromServer = socket.getInputStream(); OutputStream toServer = socket.getOutputStream())
+        try
         {
-
+            Socket socket = new Socket(host, portNumber);
+            InputStream fromServer = socket.getInputStream();
+            OutputStream toServer = socket.getOutputStream();
             Thread.sleep(1000);
 
             //Setup I/O
+            BufferedReader in = new BufferedReader(new InputStreamReader(fromServer));
             PrintWriter serverOutString = new PrintWriter(toServer, false);
             ObjectOutputStream toServerObject  = new ObjectOutputStream(toServer);
-            Scanner in = new Scanner(fromServer);
+            //ObjectInputStream fromServerObject = new ObjectInputStream(fromServer);
 
 
+            serverOutString.println(code);
+            serverOutString.flush();
 
-            while (!socket.isClosed())
+            toServerObject.writeObject(user);
+            toServerObject.flush();
+
+
+            if (code.equals(".findUser"))
             {
-                serverOutString.println(code);
-                serverOutString.flush();
+                //Object obj = fromServerObject.readObject();
+                String input = in.readLine();
 
-                toServerObject.writeObject(user);
-                toServerObject.flush();
-
-                if (code.equals(".findUser"))
-                {
-                    String input = in.nextLine();
-
-                    if (input.equals("True"))
-                    {
-                        updateMessage("True");
-                    } else if (input.equals("false"))
-                    {
-                        updateMessage("False");
-                    }
-                } else
+                if (input.equals("True"))
                 {
                     updateMessage("True");
+                } else if (input.equals("false"))
+                {
+                    updateMessage("False");
                 }
-                socket.close();
+            } else
+            {
+                updateMessage("True");
             }
         }
         catch (IOException e)

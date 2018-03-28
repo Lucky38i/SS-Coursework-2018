@@ -273,7 +273,7 @@ public class ChatServer
     public class serverHandlerThread implements Runnable
     {
         private Socket socket;
-        private PrintWriter clientOut;
+        private BufferedWriter clientOut;
         private ChatServer server;
 
         //Constructor
@@ -283,7 +283,7 @@ public class ChatServer
             this.socket = socket;
         }
 
-        private PrintWriter getWriter()
+        private BufferedWriter getWriter()
         {
             return clientOut;
         }
@@ -291,12 +291,14 @@ public class ChatServer
         @Override
         public void run ()
         {
-            try(InputStream fromClient = socket.getInputStream(); OutputStream toClient = socket.getOutputStream())
+            try
             {
                 //Setup I/O
-                this.clientOut = new PrintWriter(toClient, false);
-                Scanner in = new Scanner(fromClient);
-                ObjectInputStream fromClientObject = new ObjectInputStream(fromClient);
+                this.clientOut = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+                Scanner in = new Scanner(socket.getInputStream());
+                ObjectInputStream fromClientObject = new ObjectInputStream(socket.getInputStream());
+                //TODO Figure out how to send an object back to the client
+                ObjectOutputStream toClientObject = new ObjectOutputStream(socket.getOutputStream());
 
                 while(!socket.isClosed())
                 {
@@ -314,11 +316,6 @@ public class ChatServer
                             Object obj = fromClientObject.readObject();
                             Users user = (Users) obj;
                             server.registerUsers(user);
-
-                            System.out.println("Closing socket: " + socket.getRemoteSocketAddress());
-                            socket.close();
-                            clients.remove(this);
-                            in.close();
                         }
 
                         //If clients sends .findUser command then see if user exists in DB
@@ -336,18 +333,15 @@ public class ChatServer
                             {
                                 this.clientOut.write("True");
                                 this.clientOut.flush();
+
+                                toClientObject.writeObject(findUsers.getSecond());
+                                toClientObject.flush();
                             }
                             else
                             {
                                 this.clientOut.write("false");
                                 this.clientOut.flush();
                             }
-
-                            System.out.println("Closing socket: " + socket.getRemoteSocketAddress());
-                            socket.close();
-                            clients.remove(this);
-
-                            in.close();
                         }
                         //Push message received to other clients
                         /*
@@ -364,6 +358,9 @@ public class ChatServer
                             }
                         }*/
                     }
+                    System.out.println("Closing socket: " + socket.getRemoteSocketAddress());
+                    clients.remove(this);
+                    in.close();
                 }
             }
             catch (IOException | ClassNotFoundException e)
