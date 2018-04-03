@@ -16,7 +16,7 @@ import javafx.collections.ObservableList;
 /**
 * Model class for for users
 *
-* @author Alex McBean
+* @author alexmcbean
 */
 
 public class Users implements Serializable

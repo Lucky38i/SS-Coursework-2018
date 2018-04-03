@@ -1,5 +1,6 @@
 package client.address;
 
+import Resources.Users;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -15,10 +16,9 @@ import java.io.IOException;
 public class SceneSwitcher
 {
     //Variables
-    private FXMLLoader loader;
+    public FXMLLoader loader;
     private String sceneLoc;
     private ActionEvent actionEvent;
-
     /**
      * Constructor
      * @param sceneLoc
@@ -33,22 +33,28 @@ public class SceneSwitcher
     }
 
     /**
-     * This method does the actions switching of the scene
-     * @throws IOException
+     * Handles the switching of scenes
      */
-    public void switchScene() throws IOException
+    public void switchScene()
     {
-        //Create a loader and set it's location to mainWindow
-        loader.setLocation(getClass().getResource(sceneLoc));
+        try
+        {
+            //Create a loader and set it's location to mainWindow
+            loader.setLocation(getClass().getResource(sceneLoc));
 
-        //Set the scene to the loader's location
-        Parent windowParent = loader.load();
-        Scene windowScene = new Scene(windowParent);
+            //Set the scene to the loader's location
+            Parent windowParent = loader.load();
+            Scene windowScene = new Scene(windowParent);
 
-        //Find the stage information
-        Stage window = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
+            //Find the stage information
+            Stage window = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
 
-        window.setScene(windowScene);
-        window.show();
+            window.setScene(windowScene);
+            window.show();
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
     }
 }

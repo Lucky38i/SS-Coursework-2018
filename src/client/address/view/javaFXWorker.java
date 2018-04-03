@@ -11,6 +11,7 @@ import java.util.Scanner;
  * A class creates a seperates task along side the JAVAFX Thread
  * that creates a connection with the server and sends the user object to be registered with the
  * SQL database
+ * @author alexmcbean
  */
 public class javaFXWorker extends Task<Users>
 {
@@ -37,13 +38,14 @@ public class javaFXWorker extends Task<Users>
             Thread.sleep(1000);
 
             //Setup I/O
+            BufferedWriter serverOutString = new BufferedWriter(new OutputStreamWriter(toServer));
             BufferedReader in = new BufferedReader(new InputStreamReader(fromServer));
-            PrintWriter serverOutString = new PrintWriter(toServer, false);
+            ObjectInputStream fromServerObject = new ObjectInputStream(fromServer);
             ObjectOutputStream toServerObject  = new ObjectOutputStream(toServer);
-            //ObjectInputStream fromServerObject = new ObjectInputStream(fromServer);
 
 
-            serverOutString.println(code);
+
+            serverOutString.write(code);
             serverOutString.flush();
 
             toServerObject.writeObject(user);
@@ -52,12 +54,13 @@ public class javaFXWorker extends Task<Users>
 
             if (code.equals(".findUser"))
             {
-                //Object obj = fromServerObject.readObject();
+                Users readUser = (Users) fromServerObject.readObject();
                 String input = in.readLine();
 
                 if (input.equals("True"))
                 {
                     updateMessage("True");
+                    updateValue(readUser);
                 } else if (input.equals("false"))
                 {
                     updateMessage("False");

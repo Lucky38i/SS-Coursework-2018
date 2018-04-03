@@ -22,10 +22,7 @@ public class registerWindowController implements Initializable
 
     //FXML Controller Variables
     @FXML private DatePicker date_Birthday;
-    @FXML private TextField txt_FirstName;
-    @FXML private TextField txt_Username;
-    @FXML private TextField txt_LastName;
-    @FXML private TextField txt_City;
+    @FXML private TextField txt_FirstName, txt_Username, txt_LastName, txt_City;
     @FXML private ComboBox choice_Genres;
     @FXML private TextArea txtArea_MuscList;
 

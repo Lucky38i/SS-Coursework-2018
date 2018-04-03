@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.text.*?>
 <?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.address.view.mainWindowController">
    <children>
@@ -45,26 +43,24 @@
                                                 <Text strokeType="OUTSIDE" strokeWidth="0.0" text="City of Birth" GridPane.rowIndex="2" />
                                                 <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Birthday" GridPane.rowIndex="3" />
                                                  <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Age" GridPane.rowIndex="4" />
-                                                <TextField disable="true" editable="false" GridPane.columnIndex="1" />
-                                                <TextField disable="true" editable="false" prefHeight="27.0" prefWidth="215.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                                                <TextField disable="true" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                                                <TextField disable="true" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                                                <TextField disable="true" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                                                <TextField fx:id="txt_FirstName" disable="true" editable="false" GridPane.columnIndex="1" />
+                                                <TextField fx:id="txt_LastName" disable="true" editable="false" prefHeight="27.0" prefWidth="215.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                                <TextField fx:id="txt_City" disable="true" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                                <TextField fx:id="txt_Birthday" disable="true" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                                                <TextField fx:id="txt_Age" disable="true" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="4" />
                                              </children>
                                           </GridPane>
                                           <AnchorPane prefHeight="457.0" prefWidth="115.0" />
                                           <VBox prefHeight="457.0" prefWidth="477.0">
                                              <children>
-                                                <TableView prefHeight="228.0" prefWidth="368.0">
+                                                <AnchorPane prefHeight="70.0" prefWidth="396.0" />
+                                                <TableView fx:id="tbl_Profile" prefHeight="320.0" prefWidth="396.0">
                                                   <columns>
-                                                    <TableColumn prefWidth="299.0" text="Genres" />
+                                                    <TableColumn fx:id="column_Genres" prefWidth="201.0" text="Genres" />
+                                                      <TableColumn fx:id="column_Friends" prefWidth="194.0" text="Friends" />
                                                   </columns>
                                                 </TableView>
-                                                <TableView prefHeight="228.0" prefWidth="200.0">
-                                                  <columns>
-                                                    <TableColumn prefWidth="299.0" text="Friends" />
-                                                  </columns>
-                                                </TableView>
+                                                <AnchorPane prefHeight="70.0" prefWidth="396.0" />
                                              </children>
                                           </VBox>
                                        </children>

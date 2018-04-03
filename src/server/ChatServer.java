@@ -22,6 +22,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+/**
+ * This is the main server that handles all objects going in and out of the server
+ * such as registration, log in, friends, music streaming etc.
+ * @author alexmcbean
+ */
 public class ChatServer
 {
 
@@ -200,7 +205,10 @@ public class ChatServer
                     }
                 }
                 foundUser.setSecond(temp);
+                System.out.println("Found user: " + foundUser.getSecond().getFirstName());
             }
+            else
+                System.out.println("User not found");
         }
 
         catch (SQLException e)
@@ -294,8 +302,9 @@ public class ChatServer
             try
             {
                 //Setup I/O
-                this.clientOut = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+                //TODO Fix this, it's not ordering the inputs and outputs correctly
                 Scanner in = new Scanner(socket.getInputStream());
+                this.clientOut = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
                 ObjectInputStream fromClientObject = new ObjectInputStream(socket.getInputStream());
                 //TODO Figure out how to send an object back to the client
                 ObjectOutputStream toClientObject = new ObjectOutputStream(socket.getOutputStream());
@@ -358,9 +367,9 @@ public class ChatServer
                             }
                         }*/
                     }
-                    System.out.println("Closing socket: " + socket.getRemoteSocketAddress());
-                    clients.remove(this);
-                    in.close();
+                    //System.out.println("Closing socket: " + socket.getRemoteSocketAddress());
+                    //clients.remove(this);
+                    //in.close();
                 }
             }
             catch (IOException | ClassNotFoundException e)
