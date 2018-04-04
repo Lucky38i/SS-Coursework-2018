@@ -32,7 +32,7 @@ public class loginWindowHandler implements Initializable
     @FXML private TextField textField_Username;
 
     //Variables
-    private static final String mainWindow = "view/mainWindow.fxml";
+    private static final String mainWindow = "mainWindow.fxml";
 
 
     private static final String registerWindow = "view/registerWindow.fxml";

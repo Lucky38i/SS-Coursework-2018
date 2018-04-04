@@ -302,20 +302,16 @@ public class ChatServer
             try
             {
                 //Setup I/O
-                //TODO Fix this, it's not ordering the inputs and outputs correctly
-                Scanner in = new Scanner(socket.getInputStream());
-                this.clientOut = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-                ObjectInputStream fromClientObject = new ObjectInputStream(socket.getInputStream());
-                //TODO Figure out how to send an object back to the client
                 ObjectOutputStream toClientObject = new ObjectOutputStream(socket.getOutputStream());
+                ObjectInputStream fromClientObject = new ObjectInputStream(socket.getInputStream());
 
                 while(!socket.isClosed())
                 {
                     //If server has received a message
-                    if(in.hasNextLine())
+                    if(fromClientObject.available() > 0)
                     {
                         //Set received message to string and print
-                        String input = in.nextLine();
+                        String input = fromClientObject.readUTF();
                         System.out.println(input);
 
                         //If clients sets .register command then register new user
@@ -340,8 +336,8 @@ public class ChatServer
 
                             if(findUsers.getFirst())
                             {
-                                this.clientOut.write("True");
-                                this.clientOut.flush();
+                                toClientObject.writeUTF("True");
+                                toClientObject.flush();
 
                                 toClientObject.writeObject(findUsers.getSecond());
                                 toClientObject.flush();

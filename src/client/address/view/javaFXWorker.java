@@ -30,23 +30,15 @@ public class javaFXWorker extends Task<Users>
     @Override
     protected Users call() throws Exception
     {
-        try
+        try(Socket socket = new Socket(host, portNumber);
+        ObjectInputStream fromServerObject = new ObjectInputStream(socket.getInputStream());
+        ObjectOutputStream toServerObject  = new ObjectOutputStream(socket.getOutputStream()))
         {
-            Socket socket = new Socket(host, portNumber);
-            InputStream fromServer = socket.getInputStream();
-            OutputStream toServer = socket.getOutputStream();
             Thread.sleep(1000);
 
             //Setup I/O
-            BufferedWriter serverOutString = new BufferedWriter(new OutputStreamWriter(toServer));
-            BufferedReader in = new BufferedReader(new InputStreamReader(fromServer));
-            ObjectInputStream fromServerObject = new ObjectInputStream(fromServer);
-            ObjectOutputStream toServerObject  = new ObjectOutputStream(toServer);
-
-
-
-            serverOutString.write(code);
-            serverOutString.flush();
+            toServerObject.writeUTF(code);
+            toServerObject.flush();
 
             toServerObject.writeObject(user);
             toServerObject.flush();
@@ -54,8 +46,8 @@ public class javaFXWorker extends Task<Users>
 
             if (code.equals(".findUser"))
             {
+                String input = fromServerObject.readUTF();
                 Users readUser = (Users) fromServerObject.readObject();
-                String input = in.readLine();
 
                 if (input.equals("True"))
                 {
