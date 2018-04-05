@@ -5,7 +5,6 @@ import javafx.concurrent.Task;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.Scanner;
 
 /**
  * A class creates a seperates task along side the JAVAFX Thread
@@ -16,6 +15,7 @@ import java.util.Scanner;
 public class javaFXWorker extends Task<Users>
 {
     private Users user;
+    private Users readUser;
     private static String code;
     private static final String host = "localhost";
     private static final int portNumber = 4444;
@@ -31,29 +31,31 @@ public class javaFXWorker extends Task<Users>
     protected Users call() throws Exception
     {
         try(Socket socket = new Socket(host, portNumber);
-        ObjectInputStream fromServerObject = new ObjectInputStream(socket.getInputStream());
-        ObjectOutputStream toServerObject  = new ObjectOutputStream(socket.getOutputStream()))
+            ObjectInputStream fromServer = new ObjectInputStream(socket.getInputStream());
+            ObjectOutputStream toServer = new ObjectOutputStream(socket.getOutputStream()))
         {
             Thread.sleep(1000);
 
             //Setup I/O
-            toServerObject.writeUTF(code);
-            toServerObject.flush();
+            toServer.writeUTF(code);
+            toServer.flush();
 
-            toServerObject.writeObject(user);
-            toServerObject.flush();
+            toServer.writeObject(user);
+            toServer.flush();
 
 
             if (code.equals(".findUser"))
             {
-                String input = fromServerObject.readUTF();
-                Users readUser = (Users) fromServerObject.readObject();
+                String input = fromServer.readUTF();
+                readUser = (Users) fromServer.readObject();
 
                 if (input.equals("True"))
                 {
                     updateMessage("True");
                     updateValue(readUser);
-                } else if (input.equals("false"))
+                }
+
+                else if (input.equals("false"))
                 {
                     updateMessage("False");
                 }
@@ -68,7 +70,7 @@ public class javaFXWorker extends Task<Users>
             e.printStackTrace();
             updateMessage("Failed");
         }
-        return null;
+        return readUser;
     }
 
     @Override

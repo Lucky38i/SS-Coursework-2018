@@ -14,7 +14,36 @@
                 <Tab text="Music" />
                 <Tab text="Social">
                   <content>
-                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                           <children>
+                              <BorderPane layoutX="300.0" layoutY="133.0" prefHeight="497.0" prefWidth="800.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                 <top>
+                                    <AnchorPane prefHeight="60.0" prefWidth="800.0" BorderPane.alignment="CENTER">
+                                       <children>
+                                          <Label layoutX="23.0" layoutY="30.0" prefHeight="17.0" prefWidth="80.0" text="Posts" />
+                                       </children>
+                                    </AnchorPane>
+                                 </top>
+                                 <left>
+                                    <AnchorPane prefHeight="377.0" prefWidth="20.0" BorderPane.alignment="CENTER" />
+                                 </left>
+                                 <bottom>
+                                    <AnchorPane prefHeight="60.0" prefWidth="800.0" BorderPane.alignment="CENTER">
+                                       <children>
+                                          <TextField layoutX="62.0" layoutY="17.0" prefHeight="27.0" prefWidth="449.0" />
+                                          <Label layoutX="21.0" layoutY="22.0" text="Post:" />
+                                          <Button layoutX="526.0" layoutY="17.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="60.0" text="Send" />
+                                       </children>
+                                    </AnchorPane>
+                                 </bottom>
+                                 <right>
+                                    <AnchorPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
+                                 </right>
+                                 <center>
+                                    <TextArea editable="false" prefHeight="155.0" prefWidth="400.0" BorderPane.alignment="CENTER" />
+                                 </center>
+                              </BorderPane>
+                           </children></AnchorPane>
                   </content>
                 </Tab>
                   <Tab text="Profile">
@@ -43,11 +72,11 @@
                                                 <Text strokeType="OUTSIDE" strokeWidth="0.0" text="City of Birth" GridPane.rowIndex="2" />
                                                 <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Birthday" GridPane.rowIndex="3" />
                                                  <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Age" GridPane.rowIndex="4" />
-                                                <TextField fx:id="txt_FirstName" disable="true" editable="false" GridPane.columnIndex="1" />
-                                                <TextField fx:id="txt_LastName" disable="true" editable="false" prefHeight="27.0" prefWidth="215.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                                                <TextField fx:id="txt_City" disable="true" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                                                <TextField fx:id="txt_Birthday" disable="true" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                                                <TextField fx:id="txt_Age" disable="true" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                                                <TextField fx:id="txt_FirstName" editable="false" GridPane.columnIndex="1" />
+                                                <TextField fx:id="txt_LastName" editable="false" prefHeight="27.0" prefWidth="215.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                                <TextField fx:id="txt_City" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                                <TextField fx:id="txt_Birthday" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                                                <TextField fx:id="txt_Age" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="4" />
                                              </children>
                                           </GridPane>
                                           <AnchorPane prefHeight="457.0" prefWidth="115.0" />

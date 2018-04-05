@@ -20,7 +20,6 @@ import java.net.Socket;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 /**
  * This is the main server that handles all objects going in and out of the server
@@ -281,7 +280,8 @@ public class ChatServer
     public class serverHandlerThread implements Runnable
     {
         private Socket socket;
-        private BufferedWriter clientOut;
+        //private BufferedWriter clientOut;
+        private ObjectOutputStream toClient;
         private ChatServer server;
 
         //Constructor
@@ -291,9 +291,9 @@ public class ChatServer
             this.socket = socket;
         }
 
-        private BufferedWriter getWriter()
+        private ObjectOutputStream getWriter()
         {
-            return clientOut;
+            return toClient;
         }
 
         @Override
@@ -302,70 +302,66 @@ public class ChatServer
             try
             {
                 //Setup I/O
-                ObjectOutputStream toClientObject = new ObjectOutputStream(socket.getOutputStream());
-                ObjectInputStream fromClientObject = new ObjectInputStream(socket.getInputStream());
+                toClient = new ObjectOutputStream(socket.getOutputStream());
+                ObjectInputStream fromClient = new ObjectInputStream(socket.getInputStream());
 
                 while(!socket.isClosed())
                 {
                     //If server has received a message
-                    if(fromClientObject.available() > 0)
+                    if(fromClient.available() > 0)
                     {
-                        //Set received message to string and print
-                        String input = fromClientObject.readUTF();
+                        //Reads message and objects from client
+                        String input = fromClient.readUTF();
+                        Users user = (Users) fromClient.readObject();
                         System.out.println(input);
 
                         //If clients sets .register command then register new user
-                        //TODO Fix this!
                         if (input.equals(".register"))
                         {
-                            Object obj = fromClientObject.readObject();
-                            Users user = (Users) obj;
                             server.registerUsers(user);
+                            socket.close();
                         }
 
                         //If clients sends .findUser command then see if user exists in DB
                         if (input.equals(".findUser"))
                         {
-                            //Read object from client
-                            Object obj = fromClientObject.readObject();
-                            Users user = (Users) obj;
-
                             //Create a pair and find the user
                             Pair<Boolean,Users> findUsers;
                             findUsers = server.findUsers(user);
 
+                            //If user is found then send the user object to the client
                             if(findUsers.getFirst())
                             {
-                                toClientObject.writeUTF("True");
-                                toClientObject.flush();
+                                toClient.writeUTF("True");
+                                toClient.flush();
 
-                                toClientObject.writeObject(findUsers.getSecond());
-                                toClientObject.flush();
+                                toClient.writeObject(findUsers.getSecond());
+                                toClient.flush();
                             }
                             else
                             {
-                                this.clientOut.write("false");
-                                this.clientOut.flush();
+                                toClient.writeUTF("false");
+                                toClient.flush();
                             }
+                            socket.close();
                         }
+
                         //Push message received to other clients
-                        /*
                         else
                         {
                             for (serverHandlerThread thatClient : server.getClients())
                             {
-                                PrintWriter thatClientOut = thatClient.getWriter();
+                                ObjectOutputStream thatClientOut = thatClient.getWriter();
                                 if (thatClientOut != null)
                                 {
-                                    thatClientOut.write(input + "\r\n");
+                                    System.out.println("Sending message to clients");
+                                    thatClientOut.writeUTF( user.getUserName() + " "+ input + "\r\n");
                                     thatClientOut.flush();
                                 }
                             }
-                        }*/
+                        }
                     }
-                    //System.out.println("Closing socket: " + socket.getRemoteSocketAddress());
-                    //clients.remove(this);
-                    //in.close();
+
                 }
             }
             catch (IOException | ClassNotFoundException e)

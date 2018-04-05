@@ -42,16 +42,33 @@ public class mainWindowController implements Initializable
 
     //Variables
     private Alert alertInfo = new Alert(Alert.AlertType.INFORMATION);
-    private Users user = new Users();
+    private Users user;
 
     /**
      * This sets the received user to <code>this.user</code> to be used by this controller
      * @param user receives a user object from the registerWindowController
      */
-    public void initData(Users user)
+    void initData(Users user)
     {
         this.user = user;
+        //Initialize the user details
+        init();
+
     }
+
+    private void init()
+    {
+        txt_UserName.setText(txt_UserName.getText() + " " + user.getFirstName() + "!");
+        txt_FirstName.setText(user.getFirstName());
+        txt_LastName.setText(user.getLastName());
+        txt_City.setText(user.getCity());
+        txt_Birthday.setText(String.valueOf(user.getBirthday()));
+        txt_Age.setText(String.valueOf(user.getAge()));
+
+        column_Genres.setCellValueFactory(new PropertyValueFactory<>("musicGenre"));
+        column_Friends.setCellValueFactory(new PropertyValueFactory<>("friendsList"));
+    }
+
 
     /**
      * Method that changes the scene back to the login screen
@@ -73,16 +90,6 @@ public class mainWindowController implements Initializable
     @Override
     public void initialize(URL location, ResourceBundle resources)
     {
-        //Initialize the user details
-        txt_UserName.setText(txt_UserName.getText() + " " + user.getUserName());
-        txt_FirstName.setText(user.getFirstName());
-        txt_LastName.setText(user.getLastName());
-        txt_City.setText(user.getCity());
-        txt_Birthday.setText(String.valueOf(user.getBirthday()));
-        txt_Age.setText(String.valueOf(user.getAge()));
-
-        column_Genres.setCellValueFactory(new PropertyValueFactory<>("musicGenre"));
-        column_Friends.setCellValueFactory(new PropertyValueFactory<>("friendsList"));
-
+        //TODO
     }
 }
