@@ -319,7 +319,8 @@ public class ChatServer
                         if (input.equals(".register"))
                         {
                             server.registerUsers(user);
-                            socket.close();
+                            server.clients.remove(this);
+                            //socket.close();
                         }
 
                         //If clients sends .findUser command then see if user exists in DB
@@ -343,19 +344,21 @@ public class ChatServer
                                 toClient.writeUTF("false");
                                 toClient.flush();
                             }
-                            socket.close();
+                            server.clients.remove(this);
+                            //socket.close();
                         }
 
                         //Push message received to other clients
                         else
                         {
+                            System.out.println("Sending message to clients");
+                            server.clients.remove(this);
                             for (serverHandlerThread thatClient : server.getClients())
                             {
                                 ObjectOutputStream thatClientOut = thatClient.getWriter();
                                 if (thatClientOut != null)
                                 {
-                                    System.out.println("Sending message to clients");
-                                    thatClientOut.writeUTF( user.getUserName() + " "+ input + "\r\n");
+                                    thatClientOut.writeUTF(user.getUserName() +": "  + input + "\r\n");
                                     thatClientOut.flush();
                                 }
                             }

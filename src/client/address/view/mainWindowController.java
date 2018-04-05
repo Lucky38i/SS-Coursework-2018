@@ -2,23 +2,20 @@ package client.address.view;
 
 import Resources.Users;
 import client.address.SceneSwitcher;
-import javafx.collections.FXCollections;
+import javafx.application.Platform;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Alert;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.text.Text;
 
-import javax.jws.soap.SOAPBinding;
-import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.ResourceBundle;
 
 
@@ -28,6 +25,7 @@ import java.util.ResourceBundle;
  */
 public class mainWindowController implements Initializable
 {
+
 
     //FXML Controller Variables
     @FXML private Text txt_UserName;
@@ -39,10 +37,13 @@ public class mainWindowController implements Initializable
     @FXML private TableView<Users> tbl_Profile;
     @FXML private TableColumn<Users, ObservableList<String>> column_Genres;
     @FXML private TableColumn<Users, ObservableList<String>> column_Friends;
+    @FXML private TextArea txt_Messages;
+    @FXML private TextField txt_SendMessage;
 
     //Variables
     private Alert alertInfo = new Alert(Alert.AlertType.INFORMATION);
     private Users user;
+
 
     /**
      * This sets the received user to <code>this.user</code> to be used by this controller
@@ -65,6 +66,7 @@ public class mainWindowController implements Initializable
         txt_Birthday.setText(String.valueOf(user.getBirthday()));
         txt_Age.setText(String.valueOf(user.getAge()));
 
+        //TODO fix this
         column_Genres.setCellValueFactory(new PropertyValueFactory<>("musicGenre"));
         column_Friends.setCellValueFactory(new PropertyValueFactory<>("friendsList"));
     }
@@ -86,10 +88,62 @@ public class mainWindowController implements Initializable
         sceneSwitcher.switchScene();
     }
 
+    @FXML private void send_message(ActionEvent actionEvent)
+    {
+        //Starts a new task and connects to the server and sends the message
+        //Not proud of this implementation but it works
+        Task<Users> task = new javaFXWorker(user, txt_SendMessage.getText());
+        Thread thread = new Thread(task);
+        thread.setDaemon(true);
+        thread.start();
+    }
+
 
     @Override
     public void initialize(URL location, ResourceBundle resources)
     {
-        //TODO
+        //Connect to the server to receive messages
+        Task<Void> task = new backgroundThread(this);
+        Thread thread = new Thread(task);
+        thread.setDaemon(true);
+        thread.start();
+
+    }
+
+    /**
+     * This is a Task that connects to the server and receives messages to
+     * be appended to the text area
+     */
+    private class backgroundThread extends Task<Void>
+    {
+        private static final String host = "localhost";
+        private static final int portNumber = 4444;
+        private mainWindowController controller;
+
+        backgroundThread(mainWindowController controller)
+        {
+            this.controller = controller;
+        }
+
+        @Override
+        protected Void call() throws Exception
+        {
+            try(Socket socket = new Socket(host,portNumber);
+                ObjectInputStream fromServer = new ObjectInputStream(socket.getInputStream());
+                ObjectOutputStream toServer = new ObjectOutputStream(socket.getOutputStream()))
+            {
+                while (!socket.isClosed())
+                {
+                    //Print messages from server
+                    if (fromServer.available() > 0)
+                    {
+                        //Print out messages from the server and appends the text area
+                        String input = fromServer.readUTF();
+                        Platform.runLater(() -> controller.txt_Messages.appendText(input));
+                    }
+                }
+            }
+            return null;
+        }
     }
 }

@@ -1,7 +1,7 @@
 package client.address.view;
 
-import client.address.SceneSwitcher;
 import Resources.Users;
+import client.address.SceneSwitcher;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
@@ -12,9 +12,8 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -28,18 +27,18 @@ import java.util.ResourceBundle;
 public class loginWindowHandler implements Initializable
 {
 
+
     //FXML Variables
     @FXML private TextField textField_Username;
+    @FXML private Label txt_Version;
 
     //Variables
     private static final String mainWindow = "mainWindow.fxml";
-
-
     private static final String registerWindow = "view/registerWindow.fxml";
     private Users user = new Users();
-
     private Alert alertInfo = new Alert(Alert.AlertType.INFORMATION);
     private Alert alertError = new Alert(Alert.AlertType.ERROR);
+    private static final String version = "V0.2";
 
 
     /**
@@ -155,7 +154,7 @@ public class loginWindowHandler implements Initializable
     @Override
     public void initialize(URL url, ResourceBundle rb)
     {
-        // TODO
+        txt_Version.setText(version);
     }
 
 

@@ -5,6 +5,7 @@ import javafx.concurrent.Task;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.LinkedList;
 
 /**
  * A class creates a seperates task along side the JAVAFX Thread
@@ -21,11 +22,13 @@ public class javaFXWorker extends Task<Users>
     private static final int portNumber = 4444;
 
 
+
     javaFXWorker(Users user, String code)
     {
         this.user = user;
         javaFXWorker.code = code;
     }
+
 
     @Override
     protected Users call() throws Exception
@@ -36,13 +39,11 @@ public class javaFXWorker extends Task<Users>
         {
             Thread.sleep(1000);
 
-            //Setup I/O
             toServer.writeUTF(code);
             toServer.flush();
 
             toServer.writeObject(user);
             toServer.flush();
-
 
             if (code.equals(".findUser"))
             {
@@ -63,6 +64,8 @@ public class javaFXWorker extends Task<Users>
             {
                 updateMessage("True");
             }
+
+
         }
         catch (IOException e)
         {

@@ -37,7 +37,7 @@
          <bottom>
             <AnchorPane prefHeight="30.0" prefWidth="300.0" BorderPane.alignment="CENTER">
                <children>
-                  <Label layoutX="254.0" layoutY="11.0" text="V 0.0.1">
+                  <Label fx:id="txt_Version" layoutX="254.0" layoutY="11.0" text="V 0.0.1">
                      <font>
                         <Font name="Arial" size="10.0" />
                      </font>
