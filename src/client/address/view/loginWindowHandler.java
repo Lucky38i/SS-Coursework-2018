@@ -38,7 +38,9 @@ public class loginWindowHandler implements Initializable
     private Users user = new Users();
     private Alert alertInfo = new Alert(Alert.AlertType.INFORMATION);
     private Alert alertError = new Alert(Alert.AlertType.ERROR);
-    private static final String version = "V0.2";
+    private static final String version = "V0.3";
+    private static final String host = "localhost";
+    private static final int portNumber = 4444;
 
 
     /**
@@ -47,7 +49,7 @@ public class loginWindowHandler implements Initializable
      * <p>
      * otherwise the scene changes
      *
-     * @param actionEvent
+     * @param actionEvent not being used atm
      */
     @FXML private void open_MainMenu(ActionEvent actionEvent)
     {
@@ -63,7 +65,7 @@ public class loginWindowHandler implements Initializable
         {
             user.setUserName(textField_Username.getText());
 
-            Task<Users> task = new javaFXWorker(user, ".findUser");
+            Task<Users> task = new javaFXWorker(user, ".findUser",host,portNumber);
 
             task.setOnSucceeded(event ->
                     Platform.runLater(() ->
@@ -108,7 +110,7 @@ public class loginWindowHandler implements Initializable
 
     /**
      * Opens the register windows
-     * @param actionEvent
+     * @param actionEvent used to switch the scene
      */
     @FXML private void open_RegisterWindow(ActionEvent actionEvent)
     {
@@ -120,7 +122,7 @@ public class loginWindowHandler implements Initializable
      * This switches the scene to the main menu. This was made because
      * the SceneSwitcher class wouldn't be modular if it sent an object to the main window specifically making it's
      * use obsolete.
-     * @param actionEvent
+     * @param actionEvent used to switch the scene
      * @param user used to send to the main window controller
      */
     private void switchToMainMenu(ActionEvent actionEvent, Users user)

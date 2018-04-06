@@ -29,7 +29,7 @@ public class MainApp extends Application
 
     /**
      * The main entry point for JavaFX applications
-     * @param primaryStage
+     * @param primaryStage used as the.. primary stage
      *
      */
     @Override
@@ -45,6 +45,7 @@ public class MainApp extends Application
             Scene scene = new Scene(root);
             primaryStage.setScene(scene);
             primaryStage.show();
+
         }
         catch (IOException e)
         {

@@ -18,12 +18,9 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.sql.*;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -31,7 +28,7 @@ import java.util.List;
  * such as registration, log in, friends, music streaming etc.
  * @author alexmcbean
  */
-public class ChatServer
+public class MainServer
 {
 
     //Static variables
@@ -63,9 +60,13 @@ public class ChatServer
         return conn;
     }
 
+    /**
+     * Very basic logger that prints out
+     * the current time and date
+     * @param msg used when printing the log
+     */
     private void logger(String msg)
     {
-        LocalDate date = LocalDate.now();
         System.out.println(LocalDate.now()+ " " +LocalTime.now() + " - " +msg);
     }
 
@@ -276,14 +277,14 @@ public class ChatServer
         }
     }
 
-    public ChatServer (int portNumber)
+    public MainServer(int portNumber)
     {
         this.serverPort = portNumber;
     }
 
     public static void main(String[] args) 
     {
-        ChatServer server  = new ChatServer(portNumber);
+        MainServer server  = new MainServer(portNumber);
         server.populateUsers();
         server.startServer();
 
@@ -297,10 +298,10 @@ public class ChatServer
         private Socket socket;
         //private BufferedWriter clientOut;
         private ObjectOutputStream toClient;
-        private ChatServer server;
+        private MainServer server;
 
         //Constructor
-        serverHandlerThread(ChatServer server, Socket socket)
+        serverHandlerThread(MainServer server, Socket socket)
         {
             this.server = server;
             this.socket = socket;
@@ -328,7 +329,7 @@ public class ChatServer
                         //Reads message and objects from client
                         String input = fromClient.readUTF();
                         Users user = (Users) fromClient.readObject();
-                        //System.out.println(input);
+                        logger(input);
 
                         switch (input)
                         {
@@ -351,6 +352,24 @@ public class ChatServer
                             case ".register":
                                 server.registerUsers(user);
                                 server.clients.remove(this);
+                                break;
+
+                            //Sends out all the current online users
+                            case ".online":
+
+                                ArrayList<String> tempList = new ArrayList<>();
+                                for (Users i : usersList)
+                                {
+                                    if (i.getLoggedIn())
+                                    {
+                                        tempList.add(i.getUserName());
+                                    }
+                                }
+                                toClient.writeObject(tempList);
+                                toClient.flush();
+
+                                server.clients.remove(this);
+                                socket.close();
                                 break;
 
                             //If clients sends .findUser command then see if user exists in DB
@@ -406,7 +425,7 @@ public class ChatServer
 
                             //Push message received to other clients
                             default:
-                                //System.out.println("Sending message to clients");
+                                logger("Sending message to clients");
                                 server.clients.remove(this);
                                 for (serverHandlerThread thatClient : server.getClients())
                                 {

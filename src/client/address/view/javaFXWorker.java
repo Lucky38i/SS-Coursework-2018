@@ -18,15 +18,17 @@ public class javaFXWorker extends Task<Users>
     private Users user;
     private Users readUser;
     private static String code;
-    private static final String host = "localhost";
-    private static final int portNumber = 4444;
+    private static String host;
+    private static int portNumber;
 
 
 
-    javaFXWorker(Users user, String code)
+    javaFXWorker(Users user, String code, String host, int portNumber)
     {
         this.user = user;
         javaFXWorker.code = code;
+        javaFXWorker.host = host;
+        javaFXWorker.portNumber = portNumber;
     }
 
 
@@ -37,7 +39,7 @@ public class javaFXWorker extends Task<Users>
             ObjectInputStream fromServer = new ObjectInputStream(socket.getInputStream());
             ObjectOutputStream toServer = new ObjectOutputStream(socket.getOutputStream()))
         {
-            Thread.sleep(1000);
+            Thread.sleep(100);
 
             toServer.writeUTF(code);
             toServer.flush();
@@ -60,7 +62,9 @@ public class javaFXWorker extends Task<Users>
                 {
                     updateMessage("False");
                 }
-            } else
+            }
+
+            else
             {
                 updateMessage("True");
             }

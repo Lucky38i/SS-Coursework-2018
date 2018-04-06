@@ -30,6 +30,8 @@ public class registerWindowController implements Initializable
     private Alert alertError = new Alert(Alert.AlertType.ERROR);
     private Alert alert = new Alert(Alert.AlertType.INFORMATION);
     private Users user = new Users();
+    private static final String host = "localhost";
+    private static final int portNumber = 4444;
 
 
     private void addChoice_Genres(String genre)
@@ -45,9 +47,8 @@ public class registerWindowController implements Initializable
     /**
      * Opens the login window scene
      * @param actionEvent This is used to switch the scene
-     * @throws IOException Throws IOException is file does not exist
      */
-    public void open_LoginWindow(ActionEvent actionEvent) throws IOException
+    public void open_LoginWindow(ActionEvent actionEvent)
     {
         String loginWindow = "view/loginWindow.fxml";
         SceneSwitcher sceneSwitcher = new SceneSwitcher(loginWindow, actionEvent);
@@ -85,7 +86,7 @@ public class registerWindowController implements Initializable
 
 
 
-            Task<Users> task = new javaFXWorker(user, ".register");
+            Task<Users> task = new javaFXWorker(user, ".register",host,portNumber);
 
 
             //Receives a message from the task and either show a failure or success

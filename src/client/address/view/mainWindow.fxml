@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
-
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.address.view.mainWindowController">
    <children>
       <BorderPane prefHeight="600.0" prefWidth="800.0">
@@ -12,7 +10,7 @@
             <TabPane prefHeight="386.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
               <tabs>
                 <Tab text="Music" />
-                <Tab text="Social">
+                <Tab fx:id="tab_Social" onSelectionChanged="#getOnlineUsers" text="Social">
                   <content>
                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                            <children>
@@ -37,7 +35,18 @@
                                     </AnchorPane>
                                  </bottom>
                                  <right>
-                                    <AnchorPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
+                                    <AnchorPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+                                       <children>
+                                          <ListView fx:id="lst_OnlineUsers" layoutX="21.0" onInputMethodTextChanged="#open_ContextMenuUsers" prefHeight="378.0" prefWidth="158.0">
+                                             <contextMenu>
+                                                <ContextMenu fx:id="users_Menu">
+                                                  <items>
+                                                    <MenuItem mnemonicParsing="false" text="Send user request" />
+                                                  </items>
+                                                </ContextMenu>
+                                             </contextMenu>
+                                          </ListView>
+                                       </children></AnchorPane>
                                  </right>
                                  <center>
                                     <TextArea fx:id="txt_Messages" editable="false" prefHeight="155.0" prefWidth="400.0" BorderPane.alignment="CENTER" />
@@ -82,14 +91,33 @@
                                           <AnchorPane prefHeight="457.0" prefWidth="115.0" />
                                           <VBox prefHeight="457.0" prefWidth="477.0">
                                              <children>
-                                                <AnchorPane prefHeight="70.0" prefWidth="396.0" />
-                                                <TableView fx:id="tbl_Profile" prefHeight="320.0" prefWidth="396.0">
-                                                  <columns>
-                                                    <TableColumn fx:id="column_Genres" prefWidth="201.0" text="Genres" />
-                                                      <TableColumn fx:id="column_Friends" prefWidth="194.0" text="Friends" />
-                                                  </columns>
-                                                </TableView>
-                                                <AnchorPane prefHeight="70.0" prefWidth="396.0" />
+                                                <VBox prefHeight="62.0" prefWidth="396.0">
+                                                   <children>
+                                                      <HBox alignment="BOTTOM_CENTER" prefHeight="100.0" prefWidth="200.0">
+                                                         <children>
+                                                            <Label prefHeight="17.0" prefWidth="111.0" text="Genre interests" />
+                                                            <AnchorPane prefHeight="62.0" prefWidth="157.0" />
+                                                            <Label prefHeight="17.0" prefWidth="64.0" text="Friends" textAlignment="CENTER" />
+                                                         </children>
+                                                      </HBox>
+                                                   </children>
+                                                </VBox>
+                                                <HBox prefHeight="157.0" prefWidth="396.0">
+                                                   <children>
+                                                      <ListView fx:id="lst_Genres" disable="true" prefHeight="100.0" prefWidth="200.0" />
+                                                      <AnchorPane prefHeight="100.0" prefWidth="117.0" />
+                                                      <ListView fx:id="lst_Friends" onContextMenuRequested="#open_contextMenuFriends" prefHeight="100.0" prefWidth="200.0">
+                                                         <contextMenu>
+                                                            <ContextMenu fx:id="friends_Menu">
+                                                              <items>
+                                                                  <MenuItem mnemonicParsing="false" text="Private message" />
+                                                                <MenuItem mnemonicParsing="false" text="Delete Friend" />
+                                                              </items>
+                                                            </ContextMenu>
+                                                         </contextMenu>
+                                                      </ListView>
+                                                   </children>
+                                                </HBox>
                                              </children>
                                           </VBox>
                                        </children>
