@@ -73,19 +73,33 @@ public class mainWindowController implements Initializable
 
 
     /**
-     * Method that changes the scene back to the login screen
+     * Method that changes the scene back to the login screen and logs the user out
      * @param actionEvent Takes the local action event to find the source and switch scene
      */
     @FXML private void open_LoginScreen(ActionEvent actionEvent)
     {
-        alertInfo.setTitle("");
-        alertInfo.setHeaderText(null);
-        alertInfo.setContentText("Successfully logged out");
-        alertInfo.showAndWait();
+        //Starts a new task and connects to the server and logs the user out
+        //Not proud of this implementation but it works
+        javaFXWorker task = new javaFXWorker(user, ".logout");
+        task.setOnSucceeded(event ->
+        Platform.runLater(() ->
+        {
+            alertInfo.setTitle("");
+            alertInfo.setHeaderText(null);
+            alertInfo.setContentText("Successfully logged out");
+            alertInfo.showAndWait();
 
-        String loginWindow = "view/loginWindow.fxml";
-        SceneSwitcher sceneSwitcher = new SceneSwitcher(loginWindow,actionEvent);
-        sceneSwitcher.switchScene();
+
+            String loginWindow = "view/loginWindow.fxml";
+            SceneSwitcher sceneSwitcher = new SceneSwitcher(loginWindow,actionEvent);
+            sceneSwitcher.switchScene();
+        }));
+        Thread thread = new Thread(task);
+        thread.setDaemon(true);
+        thread.start();
+
+
+
     }
 
     @FXML private void send_message(ActionEvent actionEvent)
@@ -93,6 +107,13 @@ public class mainWindowController implements Initializable
         //Starts a new task and connects to the server and sends the message
         //Not proud of this implementation but it works
         Task<Users> task = new javaFXWorker(user, txt_SendMessage.getText());
+        /*
+        task.setOnSucceeded(event ->
+        Platform.runLater(()->
+        {
+            txt_SendMessage.setText("");
+        }));*/
+        txt_SendMessage.setText("");
         Thread thread = new Thread(task);
         thread.setDaemon(true);
         thread.start();

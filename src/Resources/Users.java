@@ -9,6 +9,7 @@ import java.util.List;
 
 import client.address.ReadObjectsHelper;
 import client.address.WriteObjectsHelper;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -66,6 +67,12 @@ public class Users implements Serializable
     private transient ListProperty<String> friendsList;
     public ListProperty<String> friendsListProperty() { return friendsList; }
 
+    private transient BooleanProperty loggedIn;
+    private BooleanProperty loggedInProperty()
+    {
+        return loggedIn;
+    }
+
     /**
      * Default constructor.
      */
@@ -84,6 +91,7 @@ public class Users implements Serializable
         birthday = new SimpleObjectProperty<>();
         musicGenre = new SimpleListProperty<>(FXCollections.observableArrayList());
         friendsList = new SimpleListProperty<>(FXCollections.observableArrayList());
+        loggedIn = new SimpleBooleanProperty();
     }
 
     private void writeObject(ObjectOutputStream out) throws IOException
@@ -178,6 +186,15 @@ public class Users implements Serializable
     public void setFriendsList(ObservableList friendsList)
     {
         this.friendsList.set(friendsList);
+    }
+
+    public Boolean getLoggedIn()
+    {
+        return loggedIn.get();
+    }
+    public void setLoggedIn(Boolean state)
+    {
+        this.loggedIn.set(state);
     }
 }
 

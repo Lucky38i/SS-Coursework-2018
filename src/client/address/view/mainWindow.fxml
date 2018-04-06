@@ -30,7 +30,7 @@
                                  <bottom>
                                     <AnchorPane prefHeight="60.0" prefWidth="800.0" BorderPane.alignment="CENTER">
                                        <children>
-                                          <TextField fx:id="txt_SendMessage" layoutX="62.0" layoutY="17.0" prefHeight="27.0" prefWidth="449.0" />
+                                          <TextField fx:id="txt_SendMessage" layoutX="62.0" layoutY="17.0" onAction="#send_message" prefHeight="27.0" prefWidth="449.0" />
                                           <Label layoutX="21.0" layoutY="22.0" text="Post:" />
                                           <Button fx:id="btn_SendMessage" layoutX="526.0" layoutY="17.0" mnemonicParsing="false" onAction="#send_message" prefHeight="27.0" prefWidth="60.0" text="Send" />
                                        </children>
