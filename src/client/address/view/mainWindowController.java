@@ -52,7 +52,7 @@ public class mainWindowController implements Initializable
     private Users user;
     private static final String host = "localhost";
     private static final int portNumber = 4444;
-    Timeline theLittleTimerThatCould;
+    private Timeline theLittleTimerThatCould;
 
 
     /**
@@ -62,15 +62,7 @@ public class mainWindowController implements Initializable
     void initData(Users user)
     {
         this.user = user;
-        init();
 
-    }
-
-    /**
-     * and extension of initData() that sets all the data in the profile view
-     */
-    private void init()
-    {
         txt_UserName.setText(txt_UserName.getText() + " " + user.getFirstName() + "!");
         txt_FirstName.setText(user.getFirstName());
         txt_LastName.setText(user.getLastName());
@@ -78,10 +70,18 @@ public class mainWindowController implements Initializable
         txt_Birthday.setText(String.valueOf(user.getBirthday()));
         txt_Age.setText(String.valueOf(user.getAge()));
 
-        //TODO fix this
         lst_Genres.setItems(user.musicGenreProperty().get());
         lst_Friends.setItems(user.friendsListProperty().get());
+
+        //Connect to the server to receive messages
+        Task<Void> task = new backgroundThread(this,host,portNumber, user);
+        Thread thread = new Thread(task);
+        thread.setDaemon(true);
+        thread.start();
+
     }
+
+
 
 
     /**
@@ -207,11 +207,7 @@ public class mainWindowController implements Initializable
     @Override
     public void initialize(URL location, ResourceBundle resources)
     {
-        //Connect to the server to receive messages
-        Task<Void> task = new backgroundThread(this,host,portNumber);
-        Thread thread = new Thread(task);
-        thread.setDaemon(true);
-        thread.start();
+
     }
 
 
@@ -225,12 +221,16 @@ public class mainWindowController implements Initializable
         private String host;
         private int portNumber;
         private mainWindowController controller;
+        private Users userViewer;
 
-        backgroundThread(mainWindowController controller, String host, int portNumber)
+
+        backgroundThread(mainWindowController controller, String host, int portNumber, Users user)
         {
             this.controller = controller;
             this.host = host;
             this.portNumber = portNumber;
+            userViewer = new Users();
+            userViewer.setUserName(user.getUserName()+"Viewer");
         }
 
         @Override
@@ -238,8 +238,14 @@ public class mainWindowController implements Initializable
         {
             try(Socket socket = new Socket(host,portNumber);
                 ObjectInputStream fromServer = new ObjectInputStream(socket.getInputStream());
-                ObjectOutputStream ToServer = new ObjectOutputStream(socket.getOutputStream()))
+                ObjectOutputStream toServer = new ObjectOutputStream(socket.getOutputStream()))
             {
+                toServer.writeUTF(".Viewer");
+                toServer.flush();
+
+                toServer.writeObject(userViewer);
+                toServer.flush();
+
                 while (!socket.isClosed())
                 {
                     Thread.sleep(100);

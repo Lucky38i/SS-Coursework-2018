@@ -1,8 +1,8 @@
 package client.address.view;
 
 
-import client.address.SceneSwitcher;
 import Resources.Users;
+import client.address.SceneSwitcher;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
@@ -10,7 +10,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
@@ -110,6 +109,7 @@ public class registerWindowController implements Initializable
                                 alert.setContentText("Registration Successful\nPlease re-open the client");
                                 alert.showAndWait();
 
+                                //TODO fix this so that it doesn't close
                                 System.exit(0);
                                 break;
                             }

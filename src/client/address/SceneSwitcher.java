@@ -1,13 +1,12 @@
 package client.address;
 
-import Resources.Users;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-import javafx.event.ActionEvent;
 import java.io.IOException;
 
 /**
@@ -16,13 +15,13 @@ import java.io.IOException;
 public class SceneSwitcher
 {
     //Variables
-    public FXMLLoader loader;
+    private FXMLLoader loader;
     private String sceneLoc;
     private ActionEvent actionEvent;
     /**
      * Constructor
-     * @param sceneLoc
-     * @param actionEvent
+     * @param sceneLoc the location of the scene
+     * @param actionEvent the action even given by the class using it
      */
     public SceneSwitcher(String sceneLoc,ActionEvent actionEvent)
     {

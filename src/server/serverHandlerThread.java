@@ -3,12 +3,9 @@ package server;
 import Resources.Pair;
 import Resources.Users;
 
-import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.ArrayList;
 
 /**
@@ -16,20 +13,21 @@ import java.util.ArrayList;
  */
 public class serverHandlerThread implements Runnable
 {
+    //Variables
     private Socket socket;
     private ObjectOutputStream toClient;
     private ClientManager clientManagerTemp;
-    //private MainServer server;
     private Users user;
-    private volatile boolean isRunning;
 
-    //Constructor
-    serverHandlerThread(MainServer server, Socket socket, ClientManager clientManagerTemp)
+    /**
+     * The main constructor
+     * @param socket The accepted socket
+     * @param clientManagerTemp The client Manager to handle all data between threads
+     */
+    serverHandlerThread(Socket socket, ClientManager clientManagerTemp)
     {
-        this.server = server;
         this.socket = socket;
         this.clientManagerTemp = clientManagerTemp;
-        isRunning = false;
     }
 
     private ObjectOutputStream getWriter()
@@ -37,15 +35,12 @@ public class serverHandlerThread implements Runnable
         return toClient;
     }
 
-    private void logger(String msg)
+    /**
+     * This removes the current client from the list of clients
+     */
+    private void logoff()
     {
-        System.out.println(LocalDate.now()+ " " +LocalTime.now() + " - " +msg);
-    }
-
-
-    private Users getUser()
-    {
-        return user;
+        clientManagerTemp.removeClient(this);
     }
 
     @Override
@@ -53,7 +48,6 @@ public class serverHandlerThread implements Runnable
     {
         try
         {
-            isRunning = true;
             //Setup I/O
             toClient = new ObjectOutputStream(socket.getOutputStream());
             ObjectInputStream fromClient = new ObjectInputStream(socket.getInputStream());
@@ -67,47 +61,57 @@ public class serverHandlerThread implements Runnable
                     String input = fromClient.readUTF();
                     Object obj = fromClient.readObject();
 
-                    //logger(input);
+                    //attach the username to the list of clients
+                    user = (Users) obj;
+                    int testint = clientManagerTemp.clientlist().indexOf(this);
+                    clientManagerTemp.clientlist().get(testint).user.setUserName(user.getUserName());
 
                     switch (input)
                     {
-                        case ".request":
-
-                            break;
                         //Logout the user
                         case ".logout":
-                            //Set the user to being logged out and print the log
-                            user = (Users) obj;
 
-                            clientManagerTemp.removeClient(this);
+                            //Find the the user board viewer and remove it
+                            for (int i=0; i < clientManagerTemp.clientlist().size(); i++)
+                            {
+                               if (clientManagerTemp.clientlist().get(i).user.getUserName().equals(user.getUserName()+"Viewer"))
+                               {
+                                   clientManagerTemp.removeClient(clientManagerTemp.clientlist().get(i));
+                               }
+                            }
+                            logoff();
 
+                            //Set the user's log in state to false
                             for (int i = 0; i < clientManagerTemp.usersList().size(); i++)
                             {
                                 if (user.getUserName().equals(clientManagerTemp.usersList().get(i).getUserName()))
                                 {
                                     clientManagerTemp.usersList().get(i).setLoggedIn(false);
-                                    logger(user.getUserName() + " has logged out");
+                                    clientManagerTemp.logger(user.getUserName() + " has logged out");
                                 }
                             }
+
+                            toClient.writeUTF("Done");
+                            toClient.flush();
+
+                            socket.close();
 
                             break;
 
                         //If clients sets .register command then register new user
                         case ".register":
+                            logoff();
 
-                            clientManagerTemp.removeClient(this);
-
-                            user = (Users) obj;
-                            server.registerUsers(user);
+                            //user = (Users) obj;
+                            clientManagerTemp.registerUsers(user);
 
                             break;
 
                         //Sends out all the current online users
                         case ".online":
-                            user = (Users) obj;
+                            logoff();
 
-                            clientManagerTemp.removeClient(this);
-
+                            //Gathers a list of all the users that are online
                             ArrayList<String> tempList = new ArrayList<>();
                             for (Users i : clientManagerTemp.usersList())
                             {
@@ -116,22 +120,23 @@ public class serverHandlerThread implements Runnable
                                     tempList.add(i.getUserName());
                                 }
                             }
+
                             toClient.writeObject(tempList);
                             toClient.flush();
 
                             socket.close();
+
                             break;
 
                         //If clients sends .findUser command then see if user exists in DB
                         case ".findUser":
-                            user = (Users) obj;
+
                             //Create a pair and find the user
                             Pair<Boolean, Users> findUsers;
 
-                            clientManagerTemp.removeClient(this);
+                            findUsers = clientManagerTemp.findUsers(user);
 
-                            findUsers = server.findUsers(user);
-
+                            //If the user is already logged in then return false to prevent duplicate log in
                             if (findUsers.getSecond().getLoggedIn().equals(true))
                             {
                                 toClient.writeUTF("false");
@@ -140,7 +145,7 @@ public class serverHandlerThread implements Runnable
                                 toClient.writeObject(findUsers.getSecond());
                                 toClient.flush();
 
-                                logger("IP: " + socket.getRemoteSocketAddress() + " tried to access an already logged in account");
+                                clientManagerTemp.logger("IP: " + socket.getRemoteSocketAddress() + " tried to access an already logged in account");
                             }
 
                             else
@@ -160,12 +165,12 @@ public class serverHandlerThread implements Runnable
                                         if (findUsers.getSecond().getUserName().equals(clientManagerTemp.usersList().get(i).getUserName()))
                                         {
                                             clientManagerTemp.usersList().get(i).setLoggedIn(true);
-                                            logger(findUsers.getSecond().getUserName() + " has logged in");
+                                            clientManagerTemp.logger(findUsers.getSecond().getUserName() + " has logged in");
                                         }
                                     }
                                 }
 
-                                else
+                                else if (!findUsers.getFirst())
                                 {
                                     toClient.writeUTF("false");
                                     toClient.flush();
@@ -174,21 +179,22 @@ public class serverHandlerThread implements Runnable
                                     toClient.flush();
                                 }
                             }
+
+                            logoff();
+
                             break;
 
                         //Push message received to other clients
                         default:
-                            logger("Sending message to clients");
-                            user = (Users) obj;
-
-                            clientManagerTemp.removeClient(this);
-                            logger("Clientmanager temp is:" + String.valueOf(clientManagerTemp.clientlist().size()));
-
-                            for (serverHandlerThread thatClient : clientManagerTemp.clientlist())
+                            if (!input.equals(".Viewer"))
                             {
-                                ObjectOutputStream thatClientOut = thatClient.getWriter();
-                                if (thatClient.isRunning)
+
+                                logoff();
+
+                                //Write the client input to all clients
+                                for (serverHandlerThread thatClient : clientManagerTemp.clientlist())
                                 {
+                                    ObjectOutputStream thatClientOut = thatClient.getWriter();
                                     if (thatClientOut != null)
                                     {
                                         thatClientOut.writeUTF(user.getUserName() + ": " + input + "\r\n");
@@ -196,16 +202,14 @@ public class serverHandlerThread implements Runnable
                                     }
                                 }
                             }
-
                             break;
                     }
                 }
-
             }
-        } catch (Exception e)
+        }
+        catch (Exception e)
         {
             e.printStackTrace();
-            isRunning=false;
         }
     }
 }

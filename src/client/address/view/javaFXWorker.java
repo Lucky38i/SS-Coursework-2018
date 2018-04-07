@@ -3,9 +3,10 @@ package client.address.view;
 import Resources.Users;
 import javafx.concurrent.Task;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.util.LinkedList;
 
 /**
  * A class creates a seperates task along side the JAVAFX Thread
@@ -47,26 +48,32 @@ public class javaFXWorker extends Task<Users>
             toServer.writeObject(user);
             toServer.flush();
 
-            if (code.equals(".findUser"))
+            switch (code)
             {
-                String input = fromServer.readUTF();
-                readUser = (Users) fromServer.readObject();
-
-                if (input.equals("True"))
+                case ".findUser":
                 {
+                    String input = fromServer.readUTF();
+                    readUser = (Users) fromServer.readObject();
+
+                    if (input.equals("True"))
+                    {
+                        updateMessage("True");
+                        updateValue(readUser);
+                    } else if (input.equals("false"))
+                    {
+                        updateMessage("False");
+                    }
+                    break;
+                }
+                case ".logout":
+                {
+                    String input = fromServer.readUTF();
+                    System.out.println(input);
+                    break;
+                }
+                default:
                     updateMessage("True");
-                    updateValue(readUser);
-                }
-
-                else if (input.equals("false"))
-                {
-                    updateMessage("False");
-                }
-            }
-
-            else
-            {
-                updateMessage("True");
+                    break;
             }
 
 

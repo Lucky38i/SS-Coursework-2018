@@ -2,17 +2,19 @@ package Resources;
 
 
 
-import java.io.*;
-import java.time.LocalDate;
-import java.time.Period;
-import java.util.List;
-
 import client.address.ReadObjectsHelper;
 import client.address.WriteObjectsHelper;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.time.LocalDate;
+import java.time.Period;
+import java.util.List;
 
 /**
 * Model class for for users
@@ -92,6 +94,7 @@ public class Users implements Serializable
         musicGenre = new SimpleListProperty<>(FXCollections.observableArrayList());
         friendsList = new SimpleListProperty<>(FXCollections.observableArrayList());
         loggedIn = new SimpleBooleanProperty();
+        loggedIn.set(false);
     }
 
     private void writeObject(ObjectOutputStream out) throws IOException

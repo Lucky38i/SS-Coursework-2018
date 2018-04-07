@@ -6,10 +6,20 @@ import javafx.collections.FXCollections;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 
+/**
+ * This class is used to automate the process of serializing objects
+ * @author Elloco
+ * solution was found here: https://stackoverflow.com/questions/18791566/notserializableexception-on-simplelistproperty
+ */
 public class ReadObjectsHelper
 {
-
-    // Read a ListProperty from ObjectInputStream (and return it)
+    /**
+     * Read a ListProperty from ObjectInputStream (and return it)
+     * @param s the ObjectInputStream being used
+     * @return returns the list property that has been read from the stread
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
     public static ListProperty readListProp(ObjectInputStream s) throws IOException, ClassNotFoundException {
         ListProperty lst=new SimpleListProperty(FXCollections.observableArrayList());
         int loop=s.readInt();
@@ -21,6 +31,14 @@ public class ReadObjectsHelper
     }
 
     // automatic fill a set of properties with values contained in ObjectInputStream
+
+    /**
+     * automatic fill a set of properties with values contained in ObjectInputStream
+     * @param s the objectinput stream being used
+     * @param properties The list of properties to be read
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
     public static void readAllProp(ObjectInputStream s, Property... properties) throws IOException, ClassNotFoundException {
         for(Property prop:properties) {
             if(prop instanceof IntegerProperty) ((IntegerProperty)prop).setValue(s.readInt());
