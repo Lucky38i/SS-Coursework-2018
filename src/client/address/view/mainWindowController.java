@@ -52,6 +52,7 @@ public class mainWindowController implements Initializable
     private Users user;
     private static final String host = "localhost";
     private static final int portNumber = 4444;
+    Timeline theLittleTimerThatCould;
 
 
     /**
@@ -95,6 +96,8 @@ public class mainWindowController implements Initializable
         task.setOnSucceeded(event ->
         Platform.runLater(() ->
         {
+            theLittleTimerThatCould.stop();
+
             alertInfo.setTitle("");
             alertInfo.setHeaderText(null);
             alertInfo.setContentText("Successfully logged out");
@@ -152,7 +155,7 @@ public class mainWindowController implements Initializable
     @FXML private void getOnlineUsers(Event event)
     {
         //A periodic timer that finds new users every 5 seconds
-        Timeline theLittleTimerThatCould = new Timeline(new KeyFrame(Duration.seconds(5), new EventHandler<ActionEvent>()
+        theLittleTimerThatCould = new Timeline(new KeyFrame(Duration.seconds(5), new EventHandler<ActionEvent>()
         {
             @Override
             public void handle(ActionEvent event)

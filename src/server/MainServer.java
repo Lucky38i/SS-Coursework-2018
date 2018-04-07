@@ -21,7 +21,9 @@ import java.sql.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This is the main server that handles all objects going in and out of the server
@@ -36,8 +38,10 @@ public class MainServer
     
     //Variables
     private int serverPort;
-    private List<serverHandlerThread> clients;
-    private List<Users> usersList = new ArrayList<>();
+    private final List<serverHandlerThread> clients = new ArrayList<>();
+    private final List<Users> usersList = new ArrayList<>();
+    private final Map<serverHandlerThread,Socket> testMap = new HashMap<>();
+    private final ClientManager clientManagerTemp = new ClientManager();
 
     /**
      * Connects to the identified database and returns the Connections
@@ -240,7 +244,6 @@ public class MainServer
     //Starts the server and begins accepting clients
     private void startServer()
     {
-        clients = new ArrayList<>();
         ServerSocket serverSocket;
         try
         {
@@ -268,7 +271,16 @@ public class MainServer
                 Thread thread = new Thread(client);
                 thread.setDaemon(true);
                 thread.start();
-                clients.add(client);
+
+                clientManagerTemp.add(client);
+                synchronized (clients)
+                {
+                    clients.add(client);
+                }
+                synchronized (testMap)
+                {
+                    testMap.put(client,socket);
+                }
             }
             catch (IOException e)
             {
@@ -299,6 +311,7 @@ public class MainServer
         //private BufferedWriter clientOut;
         private ObjectOutputStream toClient;
         private MainServer server;
+        private Users user;
 
         //Constructor
         serverHandlerThread(MainServer server, Socket socket)
@@ -310,6 +323,23 @@ public class MainServer
         private ObjectOutputStream getWriter()
         {
             return toClient;
+        }
+
+        private void deleteClient(serverHandlerThread obj)
+        {
+            synchronized (clients)
+            {
+                clients.remove(obj);
+            }
+            synchronized (testMap)
+            {
+                testMap.remove(obj);
+            }
+        }
+
+        private Users getUser()
+        {
+            return user;
         }
 
         @Override
@@ -328,14 +358,23 @@ public class MainServer
                     {
                         //Reads message and objects from client
                         String input = fromClient.readUTF();
-                        Users user = (Users) fromClient.readObject();
-                        logger(input);
+                        Object obj = fromClient.readObject();
+
+                        //logger(input);
 
                         switch (input)
                         {
+                            case ".request":
+
+                                break;
                             //Logout the user
                             case ".logout":
                                 //Set the user to being logged out and print the log
+                                user = (Users) obj;
+
+                                deleteClient(this);
+                                clientManagerTemp.remove(this);
+
                                 for (int i = 0; i < server.usersList.size(); i++)
                                 {
                                     if (user.getUserName().equals(server.usersList.get(i).getUserName()))
@@ -345,17 +384,26 @@ public class MainServer
                                     }
                                 }
 
-                                server.clients.remove(this);
                                 break;
 
                             //If clients sets .register command then register new user
                             case ".register":
+
+                                deleteClient(this);
+                                clientManagerTemp.remove(this);
+
+                                user = (Users) obj;
                                 server.registerUsers(user);
-                                server.clients.remove(this);
+
+                                logger(String.valueOf(server.testMap.size()));
                                 break;
 
                             //Sends out all the current online users
                             case ".online":
+                                user = (Users) obj;
+
+                                deleteClient(this);
+                                clientManagerTemp.remove(this);
 
                                 ArrayList<String> tempList = new ArrayList<>();
                                 for (Users i : usersList)
@@ -368,14 +416,18 @@ public class MainServer
                                 toClient.writeObject(tempList);
                                 toClient.flush();
 
-                                server.clients.remove(this);
                                 socket.close();
                                 break;
 
                             //If clients sends .findUser command then see if user exists in DB
                             case ".findUser":
+                                user = (Users) obj;
                                 //Create a pair and find the user
                                 Pair<Boolean, Users> findUsers;
+
+                                deleteClient(this);
+                                clientManagerTemp.remove(this);
+
                                 findUsers = server.findUsers(user);
 
                                 if (findUsers.getSecond().getLoggedIn().equals(true))
@@ -420,20 +472,33 @@ public class MainServer
                                         toClient.flush();
                                     }
                                 }
-                                server.clients.remove(this);
                                 break;
 
                             //Push message received to other clients
                             default:
                                 logger("Sending message to clients");
-                                server.clients.remove(this);
-                                for (serverHandlerThread thatClient : server.getClients())
+                                user = (Users) obj;
+
+                                deleteClient(this);
+                                clientManagerTemp.remove(this);
+                                logger("Clientmanager temp is:" + String.valueOf(clientManagerTemp.list().size()));
+                                //logger("hash map size is: " + String.valueOf(server.testMap.size()));
+                                synchronized (clients)
                                 {
-                                    ObjectOutputStream thatClientOut = thatClient.getWriter();
-                                    if (thatClientOut != null)
+                                    logger("clients size is: " + String.valueOf(clients.size()));
+                                }
+
+
+                                synchronized (clients)
+                                {
+                                    for (serverHandlerThread thatClient : getClients())
                                     {
-                                        thatClientOut.writeUTF(user.getUserName() + ": " + input + "\r\n");
-                                        thatClientOut.flush();
+                                        ObjectOutputStream thatClientOut = thatClient.getWriter();
+                                        if (thatClientOut != null)
+                                        {
+                                            thatClientOut.writeUTF(user.getUserName() + ": " + input + "\r\n");
+                                            thatClientOut.flush();
+                                        }
                                     }
                                 }
                                 break;
