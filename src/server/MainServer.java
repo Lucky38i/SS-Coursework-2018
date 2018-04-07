@@ -21,9 +21,10 @@ import java.sql.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
 
 /**
  * This is the main server that handles all objects going in and out of the server
@@ -38,10 +39,10 @@ public class MainServer
     
     //Variables
     private int serverPort;
-    private final List<serverHandlerThread> clients = new ArrayList<>();
-    private final List<Users> usersList = new ArrayList<>();
-    private final Map<serverHandlerThread,Socket> testMap = new HashMap<>();
+    //public final List<Users> usersList = new ArrayList<>();
+    //private final Map<serverHandlerThread,Socket> testMap = new HashMap<>();
     private final ClientManager clientManagerTemp = new ClientManager();
+    private Socket socket;
 
     /**
      * Connects to the identified database and returns the Connections
@@ -125,7 +126,8 @@ public class MainServer
                     user.friendsListProperty().get().add(friendResult.getString("userName"));
                 }
 
-                usersList.add(user);
+                //usersList.add(user);
+                clientManagerTemp.addUser(user);
             }
             logger("Database built successfully ");
 
@@ -142,61 +144,14 @@ public class MainServer
      * to the list of current users
      * @param user received from the client
      */
-    private void registerUsers(Users user)
-    {
 
-        String addUser = "INSERT INTO Users(userName, firstName, lastName, birthday, City) VALUES(?,?,?,?,?)";
-        String findUserID = "SELECT userID FROM Users WHERE userName = '" + user.getUserName() + "'";
-        String addMusicGenres = "INSERT INTO musicGenres(userID, musicGenre) VALUES(?,?)";
-        try
-        {
-            //Creates a connection
-            Connection conn = this.connect();
-
-            //A statement to update the database
-            PreparedStatement preparedStatement = conn.prepareStatement(addUser);
-
-            //Sets each value and executes the update
-            preparedStatement.setString(1,user.getUserName());
-            preparedStatement.setString(2,user.getFirstName());
-            preparedStatement.setString(3,user.getLastName());
-            preparedStatement.setDate(4,Date.valueOf(user.getBirthday()));
-            preparedStatement.setString(5, user.getCity());
-            preparedStatement.executeUpdate();
-
-            //A result set finding the userID
-            Statement statement = conn.createStatement();
-            ResultSet resultSet = statement.executeQuery(findUserID);
-
-            //A new statement to add musicGenres using the newly created user
-            PreparedStatement preparedStatement1 = conn.prepareStatement(addMusicGenres);
-            while(resultSet.next())
-            {
-                for (int i=0; i < user.getMusicGenre().size(); i++)
-                {
-                    preparedStatement1.setInt(1, resultSet.getInt("userID"));
-                    preparedStatement1.setString(2, user.getMusicGenre().get(i));
-                    preparedStatement1.executeUpdate();
-                }
-            }
-
-            usersList.add(user);
-            logger("User: " + user.getUserName() + " added to database");
-        }
-
-        catch (SQLException e)
-        {
-            System.out.println(e.getMessage());
-        }
-
-    }
 
     /**
      * Find if the user exists in the database
      * @param user finds the recevied user in an SQL query
      * @return true if a user is found otherwise false
      */
-    private Pair<Boolean, Users> findUsers(Users user)
+    public Pair<Boolean, Users> findUsers(Users user)
     {
         Pair<Boolean, Users> foundUser = new Pair<>();
         foundUser.setFirst(false);
@@ -214,7 +169,7 @@ public class MainServer
             if (foundUser.getFirst())
             {
                 Users temp = new Users();
-                for (Users i : usersList)
+                for (Users i : clientManagerTemp.usersList())
                 {
                     if (i.getUserName().equals(user.getUserName()))
                     {
@@ -235,12 +190,6 @@ public class MainServer
         return foundUser;
     }
 
-
-    private List<serverHandlerThread> getClients()
-    {
-        return clients;
-    }
-
     //Starts the server and begins accepting clients
     private void startServer()
     {
@@ -257,30 +206,34 @@ public class MainServer
         }
     }
 
+    serverHandlerThread Client1(Socket socket1)
+    {
+        serverHandlerThread client2 = new serverHandlerThread(this,socket1,clientManagerTemp);
+        clientManagerTemp.addClient(client2);
+        return client2;
+    }
+
     //Continuously accept clients
     private void acceptClients(ServerSocket serverSocket)
     {
         logger("Server starts port = " + serverSocket.getLocalSocketAddress());
+        ExecutorService executorService = Executors.newCachedThreadPool();
         while (true)
         {
             try
             {
-                Socket socket = serverSocket.accept();
+                socket = serverSocket.accept();
                 //logger("Accepts: " + socket.getRemoteSocketAddress());
-                serverHandlerThread client = new serverHandlerThread(this, socket);
+                //serverHandlerThread client = new serverHandlerThread(this, socket,clientManagerTemp);
+                /*
                 Thread thread = new Thread(client);
                 thread.setDaemon(true);
-                thread.start();
+                thread.start();*/
 
-                clientManagerTemp.add(client);
-                synchronized (clients)
-                {
-                    clients.add(client);
-                }
-                synchronized (testMap)
-                {
-                    testMap.put(client,socket);
-                }
+
+                FutureTask futureTask = new FutureTask(Client1(socket),null);
+                executorService.execute(futureTask);
+
             }
             catch (IOException e)
             {
@@ -300,218 +253,6 @@ public class MainServer
         server.populateUsers();
         server.startServer();
 
-    }
-
-    /**
-     * Task that handles all connections received from the client
-     */
-    public class serverHandlerThread implements Runnable
-    {
-        private Socket socket;
-        //private BufferedWriter clientOut;
-        private ObjectOutputStream toClient;
-        private MainServer server;
-        private Users user;
-
-        //Constructor
-        serverHandlerThread(MainServer server, Socket socket)
-        {
-            this.server = server;
-            this.socket = socket;
-        }
-
-        private ObjectOutputStream getWriter()
-        {
-            return toClient;
-        }
-
-        private void deleteClient(serverHandlerThread obj)
-        {
-            synchronized (clients)
-            {
-                clients.remove(obj);
-            }
-            synchronized (testMap)
-            {
-                testMap.remove(obj);
-            }
-        }
-
-        private Users getUser()
-        {
-            return user;
-        }
-
-        @Override
-        public void run ()
-        {
-            try
-            {
-                //Setup I/O
-                toClient = new ObjectOutputStream(socket.getOutputStream());
-                ObjectInputStream fromClient = new ObjectInputStream(socket.getInputStream());
-
-                while(!socket.isClosed())
-                {
-                    //If server has received a message
-                    if(fromClient.available() > 0)
-                    {
-                        //Reads message and objects from client
-                        String input = fromClient.readUTF();
-                        Object obj = fromClient.readObject();
-
-                        //logger(input);
-
-                        switch (input)
-                        {
-                            case ".request":
-
-                                break;
-                            //Logout the user
-                            case ".logout":
-                                //Set the user to being logged out and print the log
-                                user = (Users) obj;
-
-                                deleteClient(this);
-                                clientManagerTemp.remove(this);
-
-                                for (int i = 0; i < server.usersList.size(); i++)
-                                {
-                                    if (user.getUserName().equals(server.usersList.get(i).getUserName()))
-                                    {
-                                        server.usersList.get(i).setLoggedIn(false);
-                                        logger(user.getUserName() + " has logged out");
-                                    }
-                                }
-
-                                break;
-
-                            //If clients sets .register command then register new user
-                            case ".register":
-
-                                deleteClient(this);
-                                clientManagerTemp.remove(this);
-
-                                user = (Users) obj;
-                                server.registerUsers(user);
-
-                                logger(String.valueOf(server.testMap.size()));
-                                break;
-
-                            //Sends out all the current online users
-                            case ".online":
-                                user = (Users) obj;
-
-                                deleteClient(this);
-                                clientManagerTemp.remove(this);
-
-                                ArrayList<String> tempList = new ArrayList<>();
-                                for (Users i : usersList)
-                                {
-                                    if (i.getLoggedIn())
-                                    {
-                                        tempList.add(i.getUserName());
-                                    }
-                                }
-                                toClient.writeObject(tempList);
-                                toClient.flush();
-
-                                socket.close();
-                                break;
-
-                            //If clients sends .findUser command then see if user exists in DB
-                            case ".findUser":
-                                user = (Users) obj;
-                                //Create a pair and find the user
-                                Pair<Boolean, Users> findUsers;
-
-                                deleteClient(this);
-                                clientManagerTemp.remove(this);
-
-                                findUsers = server.findUsers(user);
-
-                                if (findUsers.getSecond().getLoggedIn().equals(true))
-                                {
-                                    toClient.writeUTF("false");
-                                    toClient.flush();
-
-                                    toClient.writeObject(findUsers.getSecond());
-                                    toClient.flush();
-
-                                    logger("IP: " + socket.getRemoteSocketAddress() + " tried to access an already logged in account");
-                                }
-
-                                else
-                                {
-                                    //If user is found then send the user object to the client
-                                    if (findUsers.getFirst())
-                                    {
-                                        toClient.writeUTF("True");
-                                        toClient.flush();
-
-                                        toClient.writeObject(findUsers.getSecond());
-                                        toClient.flush();
-
-                                        //Set the user to being logged in and print the log
-                                        for (int i = 0; i < server.usersList.size(); i++)
-                                        {
-                                            if (findUsers.getSecond().getUserName().equals(server.usersList.get(i).getUserName()))
-                                            {
-                                                server.usersList.get(i).setLoggedIn(true);
-                                                logger(findUsers.getSecond().getUserName() + " has logged in");
-                                            }
-                                        }
-                                    }
-
-                                    else
-                                    {
-                                        toClient.writeUTF("false");
-                                        toClient.flush();
-
-                                        toClient.writeObject(findUsers.getSecond());
-                                        toClient.flush();
-                                    }
-                                }
-                                break;
-
-                            //Push message received to other clients
-                            default:
-                                logger("Sending message to clients");
-                                user = (Users) obj;
-
-                                deleteClient(this);
-                                clientManagerTemp.remove(this);
-                                logger("Clientmanager temp is:" + String.valueOf(clientManagerTemp.list().size()));
-                                //logger("hash map size is: " + String.valueOf(server.testMap.size()));
-                                synchronized (clients)
-                                {
-                                    logger("clients size is: " + String.valueOf(clients.size()));
-                                }
-
-
-                                synchronized (clients)
-                                {
-                                    for (serverHandlerThread thatClient : getClients())
-                                    {
-                                        ObjectOutputStream thatClientOut = thatClient.getWriter();
-                                        if (thatClientOut != null)
-                                        {
-                                            thatClientOut.writeUTF(user.getUserName() + ": " + input + "\r\n");
-                                            thatClientOut.flush();
-                                        }
-                                    }
-                                }
-                                break;
-                        }
-                    }
-
-                }
-            }
-            catch (IOException | ClassNotFoundException e)
-            {
-                e.printStackTrace();
-            }
-        }
     }
 }
 
