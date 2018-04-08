@@ -66,143 +66,155 @@ public class serverHandlerThread implements Runnable
                     int testint = clientManagerTemp.clientlist().indexOf(this);
                     clientManagerTemp.clientlist().get(testint).user.setUserName(user.getUserName());
 
-                    switch (input)
+                    //Send a request to the user
+                    if (input.contains(".Request"))
                     {
-                        //Logout the user
-                        case ".logout":
-
-                            //Find the the user board viewer and remove it
-                            for (int i=0; i < clientManagerTemp.clientlist().size(); i++)
+                        String[] names = input.split("[.]");
+                        System.out.println(names.length + ": " + names[2]);
+                        Users findUser = new Users();
+                        findUser.setUserName(names[2]+"Viewer");
+                        Socket findSocket = new Socket();
+                        for (int i = 0; i < clientManagerTemp.clientlist().size(); i++)
+                        {
+                            if (clientManagerTemp.clientlist().get(i).user.getUserName().equals(findUser.getUserName() + "Viewer"))
                             {
-                               if (clientManagerTemp.clientlist().get(i).user.getUserName().equals(user.getUserName()+"Viewer"))
-                               {
-                                   clientManagerTemp.removeClient(clientManagerTemp.clientlist().get(i));
-                               }
+                                findSocket = clientManagerTemp.clientlist().get(i).socket;
                             }
-                            logoff();
+                        }
+                        System.out.println(findSocket.getRemoteSocketAddress());
+                        ObjectOutputStream sendRequest = new ObjectOutputStream(findSocket.getOutputStream());
+                        sendRequest.writeUTF(".Request");
 
-                            //Set the user's log in state to false
-                            for (int i = 0; i < clientManagerTemp.usersList().size(); i++)
+                        logoff();
+                    }
+                    //Logout the user
+                    else if (".logout".equals(input))
+                    {//Find the the user board viewer and remove it
+                        for (int i = 0; i < clientManagerTemp.clientlist().size(); i++)
+                        {
+                            if (clientManagerTemp.clientlist().get(i).user.getUserName().equals(user.getUserName() + "Viewer"))
                             {
-                                if (user.getUserName().equals(clientManagerTemp.usersList().get(i).getUserName()))
-                                {
-                                    clientManagerTemp.usersList().get(i).setLoggedIn(false);
-                                    clientManagerTemp.logger(user.getUserName() + " has logged out");
-                                }
+                                clientManagerTemp.removeClient(clientManagerTemp.clientlist().get(i));
                             }
+                        }
+                        logoff();
 
-                            toClient.writeUTF("Done");
-                            toClient.flush();
+                        //Set the user's log in state to false
+                        for (int i = 0; i < clientManagerTemp.usersList().size(); i++)
+                        {
+                            if (user.getUserName().equals(clientManagerTemp.usersList().get(i).getUserName()))
+                            {
+                                clientManagerTemp.usersList().get(i).setLoggedIn(false);
+                                clientManagerTemp.logger(user.getUserName() + " has logged out");
+                            }
+                        }
 
-                            socket.close();
+                        toClient.writeUTF("Done");
+                        toClient.flush();
 
-                            break;
+                        socket.close();
+
 
                         //If clients sets .register command then register new user
-                        case ".register":
-                            logoff();
+                    } else if (".register".equals(input))
+                    {
+                        logoff();
 
-                            //user = (Users) obj;
-                            clientManagerTemp.registerUsers(user);
+                        //user = (Users) obj;
+                        clientManagerTemp.registerUsers(user);
 
-                            break;
 
                         //Sends out all the current online users
-                        case ".online":
-                            logoff();
+                    } else if (".online".equals(input))
+                    {
+                        logoff();
 
-                            //Gathers a list of all the users that are online
-                            ArrayList<String> tempList = new ArrayList<>();
-                            for (Users i : clientManagerTemp.usersList())
+                        //Gathers a list of all the users that are online
+                        ArrayList<String> tempList = new ArrayList<>();
+                        for (Users i : clientManagerTemp.usersList())
+                        {
+                            if (i.getLoggedIn())
                             {
-                                if (i.getLoggedIn())
-                                {
-                                    tempList.add(i.getUserName());
-                                }
+                                tempList.add(i.getUserName());
                             }
+                        }
 
-                            toClient.writeObject(tempList);
-                            toClient.flush();
+                        toClient.writeObject(tempList);
+                        toClient.flush();
 
-                            socket.close();
+                        socket.close();
 
-                            break;
 
                         //If clients sends .findUser command then see if user exists in DB
-                        case ".findUser":
+                    } else if (".findUser".equals(input))
+                    {//Create a pair and find the user
+                        Pair<Boolean, Users> findUsers;
 
-                            //Create a pair and find the user
-                            Pair<Boolean, Users> findUsers;
+                        findUsers = clientManagerTemp.findUsers(user);
 
-                            findUsers = clientManagerTemp.findUsers(user);
+                        //If the user is already logged in then return false to prevent duplicate log in
+                        if (findUsers.getSecond().getLoggedIn().equals(true))
+                        {
+                            toClient.writeUTF("false");
+                            toClient.flush();
 
-                            //If the user is already logged in then return false to prevent duplicate log in
-                            if (findUsers.getSecond().getLoggedIn().equals(true))
+                            toClient.writeObject(findUsers.getSecond());
+                            toClient.flush();
+
+                            clientManagerTemp.logger("IP: " + socket.getRemoteSocketAddress() + " tried to access an already logged in account");
+                        } else
+                        {
+                            //If user is found then send the user object to the client
+                            if (findUsers.getFirst())
+                            {
+                                toClient.writeUTF("True");
+                                toClient.flush();
+
+                                toClient.writeObject(findUsers.getSecond());
+                                toClient.flush();
+
+                                //Set the user to being logged in and print the log
+                                for (int i = 0; i < clientManagerTemp.usersList().size(); i++)
+                                {
+                                    if (findUsers.getSecond().getUserName().equals(clientManagerTemp.usersList().get(i).getUserName()))
+                                    {
+                                        clientManagerTemp.usersList().get(i).setLoggedIn(true);
+                                        clientManagerTemp.logger(findUsers.getSecond().getUserName() + " has logged in");
+                                    }
+                                }
+                            } else if (!findUsers.getFirst())
                             {
                                 toClient.writeUTF("false");
                                 toClient.flush();
 
                                 toClient.writeObject(findUsers.getSecond());
                                 toClient.flush();
-
-                                clientManagerTemp.logger("IP: " + socket.getRemoteSocketAddress() + " tried to access an already logged in account");
                             }
+                        }
 
-                            else
-                            {
-                                //If user is found then send the user object to the client
-                                if (findUsers.getFirst())
-                                {
-                                    toClient.writeUTF("True");
-                                    toClient.flush();
+                        logoff();
 
-                                    toClient.writeObject(findUsers.getSecond());
-                                    toClient.flush();
 
-                                    //Set the user to being logged in and print the log
-                                    for (int i = 0; i < clientManagerTemp.usersList().size(); i++)
-                                    {
-                                        if (findUsers.getSecond().getUserName().equals(clientManagerTemp.usersList().get(i).getUserName()))
-                                        {
-                                            clientManagerTemp.usersList().get(i).setLoggedIn(true);
-                                            clientManagerTemp.logger(findUsers.getSecond().getUserName() + " has logged in");
-                                        }
-                                    }
-                                }
-
-                                else if (!findUsers.getFirst())
-                                {
-                                    toClient.writeUTF("false");
-                                    toClient.flush();
-
-                                    toClient.writeObject(findUsers.getSecond());
-                                    toClient.flush();
-                                }
-                            }
+                        //Push message received to other clients
+                    } else
+                    {
+                        if (!input.equals(".Viewer"))
+                        {
 
                             logoff();
 
-                            break;
-
-                        //Push message received to other clients
-                        default:
-                            if (!input.equals(".Viewer"))
+                            //Write the client input to all clients
+                            for (serverHandlerThread thatClient : clientManagerTemp.clientlist())
                             {
-
-                                logoff();
-
-                                //Write the client input to all clients
-                                for (serverHandlerThread thatClient : clientManagerTemp.clientlist())
+                                ObjectOutputStream thatClientOut = thatClient.getWriter();
+                                if (thatClientOut != null)
                                 {
-                                    ObjectOutputStream thatClientOut = thatClient.getWriter();
-                                    if (thatClientOut != null)
-                                    {
-                                        thatClientOut.writeUTF(user.getUserName() + ": " + input + "\r\n");
-                                        thatClientOut.flush();
-                                    }
+                                    thatClientOut.writeUTF(user.getUserName() + ": " + input + "\r\n");
+                                    thatClientOut.flush();
                                 }
                             }
-                            break;
+                        }
+
                     }
                 }
             }

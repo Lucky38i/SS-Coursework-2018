@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
+
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.address.view.mainWindowController">
    <children>
       <BorderPane prefHeight="600.0" prefWidth="800.0">
@@ -37,15 +39,39 @@
                                  <right>
                                     <AnchorPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
                                        <children>
-                                          <ListView fx:id="lst_OnlineUsers" layoutX="21.0" onInputMethodTextChanged="#open_ContextMenuUsers" prefHeight="378.0" prefWidth="158.0">
-                                             <contextMenu>
-                                                <ContextMenu fx:id="users_Menu">
-                                                  <items>
-                                                    <MenuItem mnemonicParsing="false" text="Send user request" />
-                                                  </items>
-                                                </ContextMenu>
-                                             </contextMenu>
-                                          </ListView>
+                                          <HBox prefHeight="377.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                             <children>
+                                                <AnchorPane prefHeight="377.0" prefWidth="49.0" />
+                                                <VBox prefHeight="377.0" prefWidth="200.0">
+                                                   <children>
+                                                      <ListView fx:id="lst_OnlineUsers" onInputMethodTextChanged="#open_ContextMenuUsers" prefHeight="167.0" prefWidth="176.0">
+                                                         <contextMenu>
+                                                            <ContextMenu fx:id="users_Menu">
+                                                              <items>
+                                                                <MenuItem fx:id="menuItem_SendRequest" mnemonicParsing="false" onAction="#send_FriendRequest" text="Send user request" />
+                                                              </items>
+                                                            </ContextMenu>
+                                                         </contextMenu>
+                                                      </ListView>
+                                                      <AnchorPane prefHeight="46.0" prefWidth="176.0">
+                                                         <children>
+                                                            <Label layoutX="3.0" layoutY="29.0" text="Friend requests" />
+                                                         </children>
+                                                      </AnchorPane>
+                                                      <ListView fx:id="lst_Requests" onContextMenuRequested="#open_ContextMenuRequests" prefHeight="164.0" prefWidth="176.0">
+                                                         <contextMenu>
+                                                            <ContextMenu fx:id="requests_Menu">
+                                                              <items>
+                                                                <MenuItem fx:id="menuItem_Accept" mnemonicParsing="false" text="Unspecified Action" />
+                                                                  <MenuItem fx:id="menuItem_Decline" mnemonicParsing="false" text="Unspecified Action" />
+                                                              </items>
+                                                            </ContextMenu>
+                                                         </contextMenu>
+                                                      </ListView>
+                                                   </children>
+                                                </VBox>
+                                             </children>
+                                          </HBox>
                                        </children></AnchorPane>
                                  </right>
                                  <center>

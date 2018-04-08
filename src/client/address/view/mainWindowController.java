@@ -34,18 +34,11 @@ public class mainWindowController implements Initializable
 {
     //FXML Controller Variables
     @FXML private Text txt_UserName;
-    @FXML private TextField txt_FirstName;
-    @FXML private TextField txt_LastName;
-    @FXML private TextField txt_City;
-    @FXML private TextField txt_Birthday;
-    @FXML private TextField txt_Age;
-    @FXML private ListView<String> lst_Genres;
-    @FXML private ListView<String> lst_Friends;
-    @FXML private ListView<String> lst_OnlineUsers;
+    @FXML private TextField txt_FirstName, txt_LastName, txt_City, txt_Birthday, txt_Age, txt_SendMessage;
+    @FXML private ListView<String> lst_Genres, lst_Friends, lst_OnlineUsers, lst_Requests;
     @FXML private TextArea txt_Messages;
-    @FXML private TextField txt_SendMessage;
-    @FXML private ContextMenu friends_Menu;
-    @FXML private ContextMenu users_Menu;
+    @FXML private ContextMenu friends_Menu, users_Menu, requests_Menu;
+    @FXML private MenuItem menuItem_Decline, menuItem_Accept, menuItem_SendRequest;
 
     //Variables
     private Alert alertInfo = new Alert(Alert.AlertType.INFORMATION);
@@ -90,6 +83,7 @@ public class mainWindowController implements Initializable
      */
     @FXML private void open_LoginScreen(ActionEvent actionEvent)
     {
+        //TODO Convert this so it uses the existing background task
         //Starts a new task and connects to the server and logs the user out
         //Not proud of this implementation but it works
         javaFXWorker task = new javaFXWorker(user, ".logout","localhost",4444);
@@ -120,6 +114,7 @@ public class mainWindowController implements Initializable
      */
     @FXML private void send_message(ActionEvent actionEvent)
     {
+        //TODO convert this so it uses the existing background task
         //Starts a new task and connects to the server and sends the message
         //Not proud of this implementation but it works
         Task<Users> task = new javaFXWorker(user, txt_SendMessage.getText(),"localhost",4444);
@@ -130,21 +125,16 @@ public class mainWindowController implements Initializable
     }
 
     /**
-     * Opens the context menu for friends list view
-     * @param contextMenuEvent needed to get menu's X Y coordinate
+     * This sends a friend request to the user specified
+     * @param actionEvent
      */
-    @FXML private void open_contextMenuFriends(ContextMenuEvent contextMenuEvent)
+    @FXML private void send_FriendRequest(ActionEvent actionEvent)
     {
-        friends_Menu.show(lst_Friends, contextMenuEvent.getScreenX(),contextMenuEvent.getScreenY());
-    }
-
-    /**
-     * Opens the context menu for the online users list view
-     * @param contextMenuEvent needed to get menu's X & Y coordinate
-     */
-    @FXML private void open_ContextMenuUsers(ContextMenuEvent contextMenuEvent)
-    {
-        users_Menu.show(lst_OnlineUsers,contextMenuEvent.getScreenX(),contextMenuEvent.getScreenY());
+        Task<Users> task = new javaFXWorker(user, ".Request."+ lst_OnlineUsers.getSelectionModel().getSelectedItem(),"localhost",4444);
+        txt_SendMessage.setText("");
+        Thread thread = new Thread(task);
+        thread.setDaemon(true);
+        thread.start();
     }
 
     /**
@@ -187,6 +177,7 @@ public class mainWindowController implements Initializable
 
                             Object obj = fromServer.readObject();
                             ArrayList<String> templist = (ArrayList<String>) obj;
+                            //TODO marks users friends as (friend)
                             onlineUserList.addAll(templist);
                             Platform.runLater(()-> lst_OnlineUsers.setItems(onlineUserList));
                         }
@@ -204,12 +195,48 @@ public class mainWindowController implements Initializable
         theLittleTimerThatCould.play();
     }
 
+    /**
+     * This method retrieves all the friend request that has been sent to the user and updates
+     * the list
+     * @param event
+     */
+    @FXML private void getFriendRequests(Event event)
+    {
+        //TODO
+    }
+
+    /**
+     * Opens the context menu for friends list view
+     * @param contextMenuEvent needed to get menu's X Y coordinate
+     */
+    @FXML private void open_contextMenuFriends(ContextMenuEvent contextMenuEvent)
+    {
+        friends_Menu.show(lst_Friends, contextMenuEvent.getScreenX(),contextMenuEvent.getScreenY());
+    }
+
+    /**
+     * Opens the context menu for the online users list view
+     * @param contextMenuEvent needed to get menu's X & Y coordinate
+     */
+    @FXML private void open_ContextMenuUsers(ContextMenuEvent contextMenuEvent)
+    {
+        users_Menu.show(lst_OnlineUsers,contextMenuEvent.getScreenX(),contextMenuEvent.getScreenY());
+    }
+
+    /**
+     * opens the context menu for the requests list view
+     * @param contextMenuEvent needed to get the menu's X & y coordinates
+     */
+    public void open_ContextMenuRequests(ContextMenuEvent contextMenuEvent)
+    {
+        requests_Menu.show(lst_Requests,contextMenuEvent.getScreenX(),contextMenuEvent.getScreenY());
+    }
+
     @Override
     public void initialize(URL location, ResourceBundle resources)
     {
-
+        //TODO
     }
-
 
 
     /**
