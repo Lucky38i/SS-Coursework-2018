@@ -134,12 +134,6 @@ public class mainWindowController implements Initializable
      */
     @FXML private void send_FriendRequest(ActionEvent actionEvent)
     {
-        /*
-        Task<Users> task = new javaFXWorker(user, ".Request."+ lst_OnlineUsers.getSelectionModel().getSelectedItem(),"localhost",4444);
-        txt_SendMessage.setText("");
-        Thread thread = new Thread(task);
-        thread.setDaemon(true);
-        thread.start();*/
         bgThread.addNextMessage(".Request."+lst_OnlineUsers.getSelectionModel().getSelectedItem());
     }
 
