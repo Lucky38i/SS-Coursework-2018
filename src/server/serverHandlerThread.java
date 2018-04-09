@@ -116,7 +116,9 @@ public class serverHandlerThread implements Runnable
 
 
                         //If clients sets .register command then register new user
-                    } else if (".register".equals(input))
+                    }
+
+                    else if (".register".equals(input))
                     {
                         logoff();
 
@@ -125,7 +127,9 @@ public class serverHandlerThread implements Runnable
 
 
                         //Sends out all the current online users
-                    } else if (".online".equals(input))
+                    }
+
+                    else if (".online".equals(input))
                     {
                         logoff();
 
@@ -146,7 +150,9 @@ public class serverHandlerThread implements Runnable
 
 
                         //If clients sends .findUser command then see if user exists in DB
-                    } else if (".findUser".equals(input))
+                    }
+
+                    else if (".findUser".equals(input))
                     {//Create a pair and find the user
                         Pair<Boolean, Users> findUsers;
 
@@ -162,7 +168,9 @@ public class serverHandlerThread implements Runnable
                             toClient.flush();
 
                             clientManagerTemp.logger("IP: " + socket.getRemoteSocketAddress() + " tried to access an already logged in account");
-                        } else
+                        }
+
+                        else
                         {
                             //If user is found then send the user object to the client
                             if (findUsers.getFirst())
@@ -182,7 +190,9 @@ public class serverHandlerThread implements Runnable
                                         clientManagerTemp.logger(findUsers.getSecond().getUserName() + " has logged in");
                                     }
                                 }
-                            } else if (!findUsers.getFirst())
+                            }
+
+                            else if (!findUsers.getFirst())
                             {
                                 toClient.writeUTF("false");
                                 toClient.flush();
@@ -196,7 +206,9 @@ public class serverHandlerThread implements Runnable
 
 
                         //Push message received to other clients
-                    } else
+                    }
+
+                    else
                     {
                         if (!input.equals(".Viewer"))
                         {

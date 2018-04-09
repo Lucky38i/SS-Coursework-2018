@@ -23,6 +23,7 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.ResourceBundle;
 
 
@@ -240,7 +241,7 @@ public class mainWindowController implements Initializable
 
 
     /**
-     * This is a Task that connects to the server and receives messages to
+     * This is a Task that connects to the s1erver and receives messages to
      * be appended to the text area
      */
     private class backgroundThread extends Task<Void>
@@ -249,6 +250,8 @@ public class mainWindowController implements Initializable
         private int portNumber;
         private mainWindowController controller;
         private Users userViewer;
+        private final LinkedList<String> messagesToSend;
+        private boolean hasMessages = false;
 
 
         backgroundThread(mainWindowController controller, String host, int portNumber, Users user)
@@ -256,8 +259,18 @@ public class mainWindowController implements Initializable
             this.controller = controller;
             this.host = host;
             this.portNumber = portNumber;
+            messagesToSend = new LinkedList<>();
             userViewer = new Users();
             userViewer.setUserName(user.getUserName()+"Viewer");
+        }
+
+        public void addNextMessage(String msg)
+        {
+            synchronized (messagesToSend)
+            {
+                hasMessages = true;
+                messagesToSend.push(msg);
+            }
         }
 
         @Override
@@ -267,11 +280,12 @@ public class mainWindowController implements Initializable
                 ObjectInputStream fromServer = new ObjectInputStream(socket.getInputStream());
                 ObjectOutputStream toServer = new ObjectOutputStream(socket.getOutputStream()))
             {
+                /*
                 toServer.writeUTF(".Viewer");
                 toServer.flush();
 
                 toServer.writeObject(userViewer);
-                toServer.flush();
+                toServer.flush(); */
 
                 while (!socket.isClosed())
                 {
@@ -282,6 +296,19 @@ public class mainWindowController implements Initializable
                         //Print out messages from the server and appends the text area
                         String input = fromServer.readUTF();
                         Platform.runLater(() -> controller.txt_Messages.appendText(input));
+                    }
+
+                    if (hasMessages)
+                    {
+                        String nextSend = "";
+                        synchronized (messagesToSend)
+                        {
+                            nextSend = messagesToSend.pop();
+                            hasMessages = !messagesToSend.isEmpty();
+                        }
+
+                        toServer.writeUTF(nextSend);
+                        toServer.flush();
                     }
                 }
             }
