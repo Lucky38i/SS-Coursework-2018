@@ -84,8 +84,12 @@ public class serverHandlerThread implements Runnable
                             }
                         }
 
-                        //TODO Send the message to the below socket
+                        //TODO create a code for the client to interpret
+                        //This sends the request to the appropriate user
                         System.out.println(findUser.socket.getRemoteSocketAddress());
+                        ObjectOutputStream toFindUser = findUser.getWriter();
+                        toFindUser.writeUTF("A request has been sent!"+"\r\n");
+                        toFindUser.flush();
 
 
                     }
@@ -145,9 +149,10 @@ public class serverHandlerThread implements Runnable
                         socket.close();
 
 
-                        //If clients sends .findUser command then see if user exists in DB
+
                     }
 
+                    //If clients sends .findUser command then see if user exists in DB
                     else if (".findUser".equals(input))
                     {//Create a pair and find the user
 
