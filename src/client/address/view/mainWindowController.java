@@ -192,7 +192,7 @@ public class mainWindowController implements Initializable
         }));
 
         theLittleTimerThatCould.setCycleCount(Timeline.INDEFINITE);
-        theLittleTimerThatCould.play();
+        theLittleTimerThatCould.playFrom(Duration.seconds(4.5));
     }
 
     /**
@@ -261,11 +261,9 @@ public class mainWindowController implements Initializable
             this.portNumber = portNumber;
             this.user = user;
             messagesToSend = new LinkedList<>();
-            //userViewer = new Users();
-            //userViewer.setUserName(user.getUserName()+"Viewer");
         }
 
-        public synchronized void addNextMessage(String msg)
+        synchronized void addNextMessage(String msg)
         {
             hasMessages = true;
             messagesToSend.push(msg);
@@ -297,7 +295,14 @@ public class mainWindowController implements Initializable
                         {
                             socket.close();
                         }
-                        Platform.runLater(() -> controller.txt_Messages.appendText(input));
+                        else if (input.contains("Request"))
+                        {
+                            //TODO
+                        }
+                        else
+                        {
+                            Platform.runLater(() -> controller.txt_Messages.appendText(input));
+                        }
                     }
 
                     if (hasMessages)

@@ -77,7 +77,7 @@ public class serverHandlerThread implements Runnable
             assert findUser != null;
             System.out.println(findUser.socket.getRemoteSocketAddress());
             ObjectOutputStream toFindUser = findUser.getWriter();
-            toFindUser.writeUTF("A request has been sent!" + "\r\n");
+            toFindUser.writeUTF("Request." + user.getUserName() +"\r\n");
             toFindUser.flush();
         }
         catch (IOException e)
