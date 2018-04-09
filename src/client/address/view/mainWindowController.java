@@ -47,6 +47,8 @@ public class mainWindowController implements Initializable
     private static final String host = "localhost";
     private static final int portNumber = 4444;
     private Timeline theLittleTimerThatCould;
+    private backgroundThread bgThread;
+    private Task<Void> task;
 
 
     /**
@@ -68,7 +70,8 @@ public class mainWindowController implements Initializable
         lst_Friends.setItems(user.friendsListProperty().get());
 
         //Connect to the server to receive messages
-        Task<Void> task = new backgroundThread(this,host,portNumber, user);
+        bgThread = new backgroundThread(this, host, portNumber, this.user);
+        task = bgThread;
         Thread thread = new Thread(task);
         thread.setDaemon(true);
         thread.start();
@@ -85,27 +88,23 @@ public class mainWindowController implements Initializable
     @FXML private void open_LoginScreen(ActionEvent actionEvent)
     {
         //TODO Convert this so it uses the existing background task
-        //Starts a new task and connects to the server and logs the user out
-        //Not proud of this implementation but it works
-        javaFXWorker task = new javaFXWorker(user, ".logout","localhost",4444);
+        bgThread.addNextMessage(".logout");
         task.setOnSucceeded(event ->
-        Platform.runLater(() ->
-        {
-            theLittleTimerThatCould.stop();
+                Platform.runLater(() ->
+                {
+                    theLittleTimerThatCould.stop();
 
-            alertInfo.setTitle("");
-            alertInfo.setHeaderText(null);
-            alertInfo.setContentText("Successfully logged out");
-            alertInfo.showAndWait();
+                    alertInfo.setTitle("");
+                    alertInfo.setHeaderText(null);
+                    alertInfo.setContentText("Successfully logged out");
+                    alertInfo.showAndWait();
 
 
-            String loginWindow = "view/loginWindow.fxml";
-            SceneSwitcher sceneSwitcher = new SceneSwitcher(loginWindow,actionEvent);
-            sceneSwitcher.switchScene();
-        }));
-        Thread thread = new Thread(task);
-        thread.setDaemon(true);
-        thread.start();
+                    String loginWindow = "view/loginWindow.fxml";
+                    SceneSwitcher sceneSwitcher = new SceneSwitcher(loginWindow,actionEvent);
+                    sceneSwitcher.switchScene();
+                }));
+
 
     }
 
@@ -115,14 +114,18 @@ public class mainWindowController implements Initializable
      */
     @FXML private void send_message(ActionEvent actionEvent)
     {
-        //TODO convert this so it uses the existing background task
-        //Starts a new task and connects to the server and sends the message
-        //Not proud of this implementation but it works
-        Task<Users> task = new javaFXWorker(user, txt_SendMessage.getText(),"localhost",4444);
-        txt_SendMessage.setText("");
-        Thread thread = new Thread(task);
-        thread.setDaemon(true);
-        thread.start();
+        if (!txt_SendMessage.getText().equals(""))
+        {
+            bgThread.addNextMessage(txt_SendMessage.getText());
+            txt_SendMessage.setText("");
+        }
+        else
+        {
+            alertInfo.setTitle("");
+            alertInfo.setHeaderText(null);
+            alertInfo.setContentText("your message can't be empty");
+            alertInfo.showAndWait();
+        }
     }
 
     /**
@@ -131,11 +134,13 @@ public class mainWindowController implements Initializable
      */
     @FXML private void send_FriendRequest(ActionEvent actionEvent)
     {
+        /*
         Task<Users> task = new javaFXWorker(user, ".Request."+ lst_OnlineUsers.getSelectionModel().getSelectedItem(),"localhost",4444);
         txt_SendMessage.setText("");
         Thread thread = new Thread(task);
         thread.setDaemon(true);
-        thread.start();
+        thread.start();*/
+        bgThread.addNextMessage(".Request."+lst_OnlineUsers.getSelectionModel().getSelectedItem());
     }
 
     /**
@@ -249,7 +254,8 @@ public class mainWindowController implements Initializable
         private String host;
         private int portNumber;
         private mainWindowController controller;
-        private Users userViewer;
+        //private Users userViewer;
+        private Users user;
         private final LinkedList<String> messagesToSend;
         private boolean hasMessages = false;
 
@@ -259,18 +265,16 @@ public class mainWindowController implements Initializable
             this.controller = controller;
             this.host = host;
             this.portNumber = portNumber;
+            this.user = user;
             messagesToSend = new LinkedList<>();
-            userViewer = new Users();
-            userViewer.setUserName(user.getUserName()+"Viewer");
+            //userViewer = new Users();
+            //userViewer.setUserName(user.getUserName()+"Viewer");
         }
 
-        public void addNextMessage(String msg)
+        public synchronized void addNextMessage(String msg)
         {
-            synchronized (messagesToSend)
-            {
-                hasMessages = true;
-                messagesToSend.push(msg);
-            }
+            hasMessages = true;
+            messagesToSend.push(msg);
         }
 
         @Override
@@ -280,12 +284,12 @@ public class mainWindowController implements Initializable
                 ObjectInputStream fromServer = new ObjectInputStream(socket.getInputStream());
                 ObjectOutputStream toServer = new ObjectOutputStream(socket.getOutputStream()))
             {
-                /*
+
                 toServer.writeUTF(".Viewer");
                 toServer.flush();
 
-                toServer.writeObject(userViewer);
-                toServer.flush(); */
+                toServer.writeObject(user);
+                toServer.flush();
 
                 while (!socket.isClosed())
                 {
@@ -295,11 +299,16 @@ public class mainWindowController implements Initializable
                     {
                         //Print out messages from the server and appends the text area
                         String input = fromServer.readUTF();
+                        if (input.equals("Done"))
+                        {
+                            socket.close();
+                        }
                         Platform.runLater(() -> controller.txt_Messages.appendText(input));
                     }
 
                     if (hasMessages)
                     {
+                        //System.out.println("I have a message to send!");
                         String nextSend = "";
                         synchronized (messagesToSend)
                         {

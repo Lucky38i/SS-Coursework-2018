@@ -59,44 +59,39 @@ public class serverHandlerThread implements Runnable
                 {
                     //Reads message and objects from client
                     String input = fromClient.readUTF();
-                    Object obj = fromClient.readObject();
 
-                    //attach the username to the list of clients
-                    user = (Users) obj;
-                    int testint = clientManagerTemp.clientlist().indexOf(this);
-                    clientManagerTemp.clientlist().get(testint).user.setUserName(user.getUserName());
 
                     //Send a request to the user
-                    if (input.contains(".Request"))
+                    if (input.contains(".Viewer"))
+                    {
+                        user = (Users) fromClient.readObject();
+                        int testint = clientManagerTemp.clientlist().indexOf(this);
+                        clientManagerTemp.clientlist().get(testint).user = user;
+
+                    }
+                    //TODO
+                    else if (input.contains(".Request"))
                     {
                         String[] names = input.split("[.]");
                         System.out.println(names.length + ": " + names[2]);
-                        Users findUser = new Users();
-                        findUser.setUserName(names[2]+"Viewer");
-                        Socket findSocket = new Socket();
+
+                        serverHandlerThread findUser = null;
                         for (int i = 0; i < clientManagerTemp.clientlist().size(); i++)
                         {
-                            if (clientManagerTemp.clientlist().get(i).user.getUserName().equals(findUser.getUserName() + "Viewer"))
+                            if (clientManagerTemp.clientlist().get(i).user.getUserName().equals(names[2]))
                             {
-                                findSocket = clientManagerTemp.clientlist().get(i).socket;
+                                findUser = clientManagerTemp.clientlist().get(i);
                             }
                         }
-                        System.out.println(findSocket.getRemoteSocketAddress());
-                        ObjectOutputStream sendRequest = new ObjectOutputStream(findSocket.getOutputStream());
-                        sendRequest.writeUTF(".Request");
 
-                        logoff();
+                        //TODO Send the message to the below socket
+                        System.out.println(findUser.socket.getRemoteSocketAddress());
+
+
                     }
                     //Logout the user
                     else if (".logout".equals(input))
-                    {//Find the the user board viewer and remove it
-                        for (int i = 0; i < clientManagerTemp.clientlist().size(); i++)
-                        {
-                            if (clientManagerTemp.clientlist().get(i).user.getUserName().equals(user.getUserName() + "Viewer"))
-                            {
-                                clientManagerTemp.removeClient(clientManagerTemp.clientlist().get(i));
-                            }
-                        }
+                    {
                         logoff();
 
                         //Set the user's log in state to false
@@ -114,21 +109,22 @@ public class serverHandlerThread implements Runnable
 
                         socket.close();
 
-
-                        //If clients sets .register command then register new user
                     }
 
+                    //If clients sets .register command then register new user
                     else if (".register".equals(input))
                     {
                         logoff();
 
-                        //user = (Users) obj;
+                        user = (Users) fromClient.readObject();
+
                         clientManagerTemp.registerUsers(user);
 
 
-                        //Sends out all the current online users
+
                     }
 
+                    //Sends out all the current online users
                     else if (".online".equals(input))
                     {
                         logoff();
@@ -154,6 +150,9 @@ public class serverHandlerThread implements Runnable
 
                     else if (".findUser".equals(input))
                     {//Create a pair and find the user
+
+                        user = (Users) fromClient.readObject();
+
                         Pair<Boolean, Users> findUsers;
 
                         findUsers = clientManagerTemp.findUsers(user);
@@ -207,26 +206,18 @@ public class serverHandlerThread implements Runnable
 
                         //Push message received to other clients
                     }
-
                     else
                     {
-                        if (!input.equals(".Viewer"))
+                        //Write the client input to all clients
+                        for (serverHandlerThread thatClient : clientManagerTemp.clientlist())
                         {
-
-                            logoff();
-
-                            //Write the client input to all clients
-                            for (serverHandlerThread thatClient : clientManagerTemp.clientlist())
+                            ObjectOutputStream thatClientOut = thatClient.getWriter();
+                            if (thatClientOut != null)
                             {
-                                ObjectOutputStream thatClientOut = thatClient.getWriter();
-                                if (thatClientOut != null)
-                                {
-                                    thatClientOut.writeUTF(user.getUserName() + ": " + input + "\r\n");
-                                    thatClientOut.flush();
-                                }
+                                thatClientOut.writeUTF(user.getUserName() + ": " + input + "\r\n");
+                                thatClientOut.flush();
                             }
                         }
-
                     }
                 }
             }
