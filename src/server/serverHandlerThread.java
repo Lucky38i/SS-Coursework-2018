@@ -49,20 +49,18 @@ public class serverHandlerThread implements Runnable
     }
 
     /**
-     * This acknowledges a friend request and
-     * finds the user it is being sent to then sends
-     * the request code to the client with the requestor's username
-     * @param input This is the request code with the accompanying user who's going to receive a request delimited by
-     *              a <code>[.]</code>
-     *              for example <code>input = "Request.userName"</code>
+     * This accepts an input from a client with the specific code
+     * whether it be friend request, acceptance of friend request or denial and sends
+     * the appropriate message to the receiving client
+     * @param input This is the code with the accompanying user who's going to receive a request delimited by
      */
-    private void friendRequest(String input)
+    private void writeMessageToUser(String input)
     {
         try
         {
             String[] names = input.split("[.]");
-            System.out.println(names.length + ": " + names[2]);
 
+            //Find the receiving user's socket
             serverHandlerThread findUser = null;
             for (int i = 0; i < clientManagerTemp.clientlist().size(); i++)
             {
@@ -72,17 +70,29 @@ public class serverHandlerThread implements Runnable
                 }
             }
 
-            //TODO create a code for the client to interpret
-            //This sends the request to the appropriate user
+            //This sends the message to the appropriate user
             assert findUser != null;
             System.out.println(findUser.socket.getRemoteSocketAddress());
             ObjectOutputStream toFindUser = findUser.getWriter();
-            toFindUser.writeUTF("Request." + user.getUserName() +"\r\n");
+            toFindUser.writeUTF("." +names[1] + "." + user.getUserName() +"\r\n");
             toFindUser.flush();
         }
         catch (IOException e)
         {
             e.printStackTrace();
+        }
+    }
+
+    private void handleRequest(String input)
+    {
+        if (input.contains(".Accept"))
+        {
+            //TODO
+            System.out.println(input);
+        }
+        else if (input.contains(".Decline"))
+        {
+            System.out.println(input);
         }
     }
 
@@ -194,7 +204,7 @@ public class serverHandlerThread implements Runnable
      * Writes the received message to all clients' viewers
      * @param input The received message
      */
-    private void writeMessage(String input)
+    private void writeMessageToAll(String input)
     {
         try
         {
@@ -281,9 +291,14 @@ public class serverHandlerThread implements Runnable
                         setViewer((Users) fromClient.readObject());
                     }
 
+                    else if (input.contains(".Accept") || input.contains(".Decline"))
+                    {
+                        handleRequest(input);
+                    }
+
                     else if (input.contains(".Request"))
                     {
-                        friendRequest(input);
+                        writeMessageToUser(input);
                     }
                     //Logout the user
                     else if (".logout".equals(input))
@@ -310,7 +325,7 @@ public class serverHandlerThread implements Runnable
                     }
                     else
                     {
-                       writeMessage(input);
+                       writeMessageToAll(input);
                     }
                 }
             }

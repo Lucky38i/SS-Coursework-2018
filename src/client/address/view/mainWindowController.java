@@ -49,6 +49,7 @@ public class mainWindowController implements Initializable
     private Timeline theLittleTimerThatCould;
     private backgroundThread bgThread;
     private Task<Void> task;
+    private Timeline theLIttleTimerThatCouldBrother;
 
 
     /**
@@ -78,34 +79,28 @@ public class mainWindowController implements Initializable
 
     }
 
-
-
-
     /**
      * Method that changes the scene back to the login screen and logs the user out
      * @param actionEvent Takes the local action event to find the source and switch scene
      */
     @FXML private void open_LoginScreen(ActionEvent actionEvent)
     {
-        //TODO Convert this so it uses the existing background task
         bgThread.addNextMessage(".logout");
         task.setOnSucceeded(event ->
                 Platform.runLater(() ->
                 {
                     theLittleTimerThatCould.stop();
+                    theLIttleTimerThatCouldBrother.stop();
 
                     alertInfo.setTitle("");
                     alertInfo.setHeaderText(null);
                     alertInfo.setContentText("Successfully logged out");
                     alertInfo.showAndWait();
 
-
                     String loginWindow = "view/loginWindow.fxml";
                     SceneSwitcher sceneSwitcher = new SceneSwitcher(loginWindow,actionEvent);
                     sceneSwitcher.switchScene();
                 }));
-
-
     }
 
     /**
@@ -130,7 +125,7 @@ public class mainWindowController implements Initializable
 
     /**
      * This sends a friend request to the user specified
-     * @param actionEvent
+     * @param actionEvent Not currently being used
      */
     @FXML private void send_FriendRequest(ActionEvent actionEvent)
     {
@@ -142,7 +137,7 @@ public class mainWindowController implements Initializable
      * social tab
      * @param event currently not being used
      */
-    @FXML private void getOnlineUsers(Event event)
+    @FXML private void getOnlineUsers_and_Requests(Event event)
     {
         //A periodic timer that finds new users every 5 seconds
         theLittleTimerThatCould = new Timeline(new KeyFrame(Duration.seconds(5), new EventHandler<ActionEvent>()
@@ -191,18 +186,20 @@ public class mainWindowController implements Initializable
             }
         }));
 
+        //Time that grabs the set of friend requests
+        theLIttleTimerThatCouldBrother = new Timeline(new KeyFrame(Duration.seconds(5), new EventHandler<ActionEvent>()
+        {
+            @Override
+            public void handle(ActionEvent event)
+            {
+                Platform.runLater(()-> lst_Requests.setItems(bgThread.getFriendRequests()));
+            }
+        }));
+
         theLittleTimerThatCould.setCycleCount(Timeline.INDEFINITE);
         theLittleTimerThatCould.playFrom(Duration.seconds(4.5));
-    }
-
-    /**
-     * This method retrieves all the friend request that has been sent to the user and updates
-     * the list
-     * @param event
-     */
-    @FXML private void getFriendRequests(Event event)
-    {
-        //TODO
+        theLIttleTimerThatCouldBrother.setCycleCount(Timeline.INDEFINITE);
+        theLIttleTimerThatCouldBrother.playFrom(Duration.seconds(4.5));
     }
 
     /**
@@ -251,6 +248,7 @@ public class mainWindowController implements Initializable
         //private Users userViewer;
         private Users user;
         private final LinkedList<String> messagesToSend;
+        private ObservableList<String> friendRequest = FXCollections.observableArrayList();
         private boolean hasMessages = false;
 
 
@@ -267,6 +265,18 @@ public class mainWindowController implements Initializable
         {
             hasMessages = true;
             messagesToSend.push(msg);
+        }
+
+        synchronized ObservableList<String> getFriendRequests()
+        {
+            return friendRequest;
+        }
+
+        void handleFriendRequest(String input)
+        {
+            String[] names = input.split("[.]");
+            System.out.println(names.length + ": " + names[2]);
+            friendRequest.add(names[2]);
         }
 
         @Override
@@ -295,9 +305,9 @@ public class mainWindowController implements Initializable
                         {
                             socket.close();
                         }
-                        else if (input.contains("Request"))
+                        else if (input.contains(".Request"))
                         {
-                            //TODO
+                            handleFriendRequest(input);
                         }
                         else
                         {
@@ -308,7 +318,7 @@ public class mainWindowController implements Initializable
                     if (hasMessages)
                     {
                         //System.out.println("I have a message to send!");
-                        String nextSend = "";
+                        String nextSend;
                         synchronized (messagesToSend)
                         {
                             nextSend = messagesToSend.pop();

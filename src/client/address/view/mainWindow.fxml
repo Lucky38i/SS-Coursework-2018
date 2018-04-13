@@ -12,7 +12,7 @@
             <TabPane prefHeight="386.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
               <tabs>
                 <Tab text="Music" />
-                <Tab fx:id="tab_Social" onSelectionChanged="#getOnlineUsers" text="Social">
+                <Tab fx:id="tab_Social" onSelectionChanged="#getOnlineUsers_and_Requests" text="Social">
                   <content>
                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                            <children>
@@ -62,8 +62,8 @@
                                                          <contextMenu>
                                                             <ContextMenu fx:id="requests_Menu">
                                                               <items>
-                                                                <MenuItem fx:id="menuItem_Accept" mnemonicParsing="false" text="Unspecified Action" />
-                                                                  <MenuItem fx:id="menuItem_Decline" mnemonicParsing="false" text="Unspecified Action" />
+                                                                <MenuItem fx:id="menuItem_Accept" mnemonicParsing="false" text="Accept" />
+                                                                  <MenuItem fx:id="menuItem_Decline" mnemonicParsing="false" text="Decline" />
                                                               </items>
                                                             </ContextMenu>
                                                          </contextMenu>
