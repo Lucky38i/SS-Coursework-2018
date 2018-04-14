@@ -38,7 +38,7 @@ public class loginWindowHandler implements Initializable
     private Users user = new Users();
     private Alert alertInfo = new Alert(Alert.AlertType.INFORMATION);
     private Alert alertError = new Alert(Alert.AlertType.ERROR);
-    private static final String version = "V0.3";
+    private static final String version = "V0.45";
     private static final String host = "localhost";
     private static final int portNumber = 4444;
 

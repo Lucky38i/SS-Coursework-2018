@@ -22,6 +22,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.URL;
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.ResourceBundle;
@@ -39,17 +40,16 @@ public class mainWindowController implements Initializable
     @FXML private ListView<String> lst_Genres, lst_Friends, lst_OnlineUsers, lst_Requests;
     @FXML private TextArea txt_Messages;
     @FXML private ContextMenu friends_Menu, users_Menu, requests_Menu;
-    @FXML private MenuItem menuItem_Decline, menuItem_Accept, menuItem_SendRequest;
 
     //Variables
     private Alert alertInfo = new Alert(Alert.AlertType.INFORMATION);
-    private Users user;
+    private static Users user;
     private static final String host = "localhost";
     private static final int portNumber = 4444;
     private Timeline theLittleTimerThatCould;
     private backgroundThread bgThread;
     private Task<Void> task;
-    private Timeline theLIttleTimerThatCouldBrother;
+    private Timeline theLittleTimerThatCouldBrother;
 
 
     /**
@@ -79,6 +79,11 @@ public class mainWindowController implements Initializable
 
     }
 
+    private void setUser(Users user)
+    {
+        this.user = user;
+    }
+
     /**
      * Method that changes the scene back to the login screen and logs the user out
      * @param actionEvent Takes the local action event to find the source and switch scene
@@ -90,7 +95,7 @@ public class mainWindowController implements Initializable
                 Platform.runLater(() ->
                 {
                     theLittleTimerThatCould.stop();
-                    theLIttleTimerThatCouldBrother.stop();
+                    theLittleTimerThatCouldBrother.stop();
 
                     alertInfo.setTitle("");
                     alertInfo.setHeaderText(null);
@@ -134,7 +139,21 @@ public class mainWindowController implements Initializable
 
     @FXML private void accept_FriendRequest(ActionEvent actionEvent)
     {
-        bgThread.addNextMessage(".Accept." + lst_Requests.getSelectionModel().getSelectedItem());
+        String selectedName = lst_Requests.getSelectionModel().getSelectedItem();
+        bgThread.addNextMessage(".Accept." + selectedName);
+        for (int i = 0; i < bgThread.getFriendRequests().size(); ++i)
+            if (bgThread.getFriendRequests().get(i).contains(selectedName))
+                bgThread.getFriendRequests().remove(i);
+
+    }
+
+    @FXML private void decline_FriendRequest(ActionEvent actionEvent)
+    {
+        String selectedName = lst_Requests.getSelectionModel().getSelectedItem();
+        bgThread.addNextMessage(".Decline."+ selectedName);
+        for (int i = 0; i < bgThread.getFriendRequests().size(); ++i)
+            if (bgThread.getFriendRequests().get(i).contains(selectedName))
+                bgThread.getFriendRequests().remove(i);
     }
 
     /**
@@ -177,8 +196,17 @@ public class mainWindowController implements Initializable
 
                             Object obj = fromServer.readObject();
                             ArrayList<String> templist = (ArrayList<String>) obj;
-                            //TODO marks users friends as (friend)
                             onlineUserList.addAll(templist);
+
+                            //Checks if any of the online users are friends
+                            for (int i = 0; i < onlineUserList.size(); ++i)
+                            {
+                                for (int x = 0; x < user.getFriendsList().size(); ++x)
+                                {
+                                    if (onlineUserList.get(i).equals(user.getFriendsList().get(x)))
+                                        onlineUserList.set(i,onlineUserList.get(i) + "(Friend)");
+                                }
+                            }
                             Platform.runLater(()-> lst_OnlineUsers.setItems(onlineUserList));
                         }
                         return null;
@@ -192,7 +220,7 @@ public class mainWindowController implements Initializable
         }));
 
         //Time that grabs the set of friend requests
-        theLIttleTimerThatCouldBrother = new Timeline(new KeyFrame(Duration.seconds(5), new EventHandler<ActionEvent>()
+        theLittleTimerThatCouldBrother = new Timeline(new KeyFrame(Duration.seconds(5), new EventHandler<ActionEvent>()
         {
             @Override
             public void handle(ActionEvent event)
@@ -201,11 +229,14 @@ public class mainWindowController implements Initializable
             }
         }));
 
+
         theLittleTimerThatCould.setCycleCount(Timeline.INDEFINITE);
         theLittleTimerThatCould.playFrom(Duration.seconds(4.5));
-        theLIttleTimerThatCouldBrother.setCycleCount(Timeline.INDEFINITE);
-        theLIttleTimerThatCouldBrother.playFrom(Duration.seconds(4.5));
+        theLittleTimerThatCouldBrother.setCycleCount(Timeline.INDEFINITE);
+        theLittleTimerThatCouldBrother.playFrom(Duration.seconds(4.5));
+
     }
+
 
     /**
      * Opens the context menu for friends list view
@@ -238,6 +269,7 @@ public class mainWindowController implements Initializable
     public void initialize(URL location, ResourceBundle resources)
     {
         //TODO
+
     }
 
 
@@ -319,16 +351,30 @@ public class mainWindowController implements Initializable
                         {
                             handleFriendRequest(input);
                         }
+                        else if (input.contains(".Get"))
+                        {
+                            Users updateUser = (Users) fromServer.readObject();
+                            Platform.runLater(()->
+                            {
+                                mainWindowController.user = updateUser;
+                                lst_Friends.setItems(updateUser.friendsListProperty().get());
+                            });
+                        }
                         else if (input.contains(".Accept"))
                         {
                             String[] names = input.split("[.]");
                             writeToUI("[ADMIN]: " + names[2] + " has accepted your friend request"+"\n");
+                            //Gets the updated user
+                            addNextMessage(".Get."+user.getUserName());
                         }
                         else if (input.contains(".Decline"))
                         {
                             String[] names = input.split("[.]");
                             writeToUI("[ADMIN]: " + names[2] + " has declined your friend request"+"\n");
-                            friendRequest.remove(names[2]);
+
+                            for (int i = 0; i < friendRequest.size(); ++i)
+                                if (friendRequest.get(i).contains(names[2]))
+                                    friendRequest.remove(i);
                         }
                         else
                         {

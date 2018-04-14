@@ -46,6 +46,10 @@ public class serverHandlerThread implements Runnable
         int testInt = clientManagerTemp.clientlist().indexOf(this);
         clientManagerTemp.clientlist().get(testInt).user = user;
         clientManagerTemp.clientlist().get(testInt).user.setLoggedIn(true);
+
+        for (int i = 0; i < clientManagerTemp.usersList().size(); ++i)
+            if (clientManagerTemp.usersList().get(i).getUserName().contains(user.getUserName()))
+                clientManagerTemp.usersList().get(i).setLoggedIn(true);
     }
 
     /**
@@ -54,8 +58,9 @@ public class serverHandlerThread implements Runnable
      * the appropriate message to the receiving client
      * @param input This is the code with the accompanying user who's going to receive a request delimited by
      */
-    private void writeMessageToUser(String input)
+    private void writeMessageToUser(String input, boolean UpdateUser)
     {
+        boolean updateUser = UpdateUser;
         try
         {
             String[] names = input.split("[.]");
@@ -87,13 +92,13 @@ public class serverHandlerThread implements Runnable
     {
         if (input.contains(".Accept"))
         {
-            clientManagerTemp.addNewFriend(input, user);
-            writeMessageToUser(input);
+            Pair<Users, Users> recevingUsers = clientManagerTemp.addNewFriend(input, user);
+            writeMessageToUser(input, true);
         }
         else if (input.contains(".Decline"))
         {
             System.out.println(input);
-            writeMessageToUser(input);
+            writeMessageToUser(input, false);
         }
     }
 
@@ -133,6 +138,29 @@ public class serverHandlerThread implements Runnable
             toClient.flush();
 
             socket.close();
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    private void getUpdatedUser(ObjectOutputStream toClient, String input)
+    {
+        try
+        {
+            String[] names = input.split("[.]");
+            for (int i=0;i< clientManagerTemp.usersList().size(); ++i)
+            {
+                if (clientManagerTemp.usersList().get(i).getUserName().contains(names[2]))
+                {
+                    toClient.writeUTF(input);
+                    toClient.flush();
+
+                    toClient.writeObject(clientManagerTemp.usersList().get(i));
+                    toClient.flush();
+                }
+            }
         }
         catch (IOException e)
         {
@@ -297,9 +325,14 @@ public class serverHandlerThread implements Runnable
                         handleRequest(input);
                     }
 
+                    else if (input.contains(".Get"))
+                    {
+                       getUpdatedUser(toClient, input);
+                    }
+
                     else if (input.contains(".Request"))
                     {
-                        writeMessageToUser(input);
+                        writeMessageToUser(input, false);
                     }
                     //Logout the user
                     else if (".logout".equals(input))

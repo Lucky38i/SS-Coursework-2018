@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
+
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.address.view.mainWindowController">
    <children>
       <BorderPane prefHeight="600.0" prefWidth="800.0">
@@ -61,7 +63,7 @@
                                                             <ContextMenu fx:id="requests_Menu">
                                                               <items>
                                                                 <MenuItem fx:id="menuItem_Accept" mnemonicParsing="false" onAction="#accept_FriendRequest" text="Accept" />
-                                                                  <MenuItem fx:id="menuItem_Decline" mnemonicParsing="false" text="Decline" />
+                                                                  <MenuItem fx:id="menuItem_Decline" mnemonicParsing="false" onAction="#decline_FriendRequest" text="Decline" />
                                                               </items>
                                                             </ContextMenu>
                                                          </contextMenu>

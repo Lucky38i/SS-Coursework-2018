@@ -65,23 +65,24 @@ class ClientManager
      * @param input The string input containing the accept code and the username
      * @param user The current thread's user object
      */
-    synchronized void addNewFriend(String input, Users user)
+    synchronized Pair<Users,Users> addNewFriend(String input, Users user)
     {
         String[] names = input.split("[.]");
         String findUser = "SELECT userID, userName FROM Users WHERE username = "+"'"+names[2]+"';";
-        Pair<Integer,String> tempUser = new Pair<>();
+        Integer tempUser = 0;
+        Pair<Users, Users> usersToUpdate = new Pair<>();
+        usersToUpdate.setFirst(new Users());
+        usersToUpdate.setSecond(new Users());
 
         try
         {
             Connection conn = this.connect();
-
-            //Find the userID of the new friend
             Statement statement = conn.createStatement();
             ResultSet resultSet = statement.executeQuery(findUser);
+            //Find the userID of the new friend
             while(resultSet.next())
             {
-                tempUser.setFirst(resultSet.getInt("userID"));
-                tempUser.setSecond(resultSet.getString("userName"));
+                tempUser = resultSet.getInt("userID");
             }
 
             //Add the new friend to the user's friend list
@@ -90,14 +91,17 @@ class ClientManager
                 if (usersList().get(i).getUserName().contains(user.getUserName()))
                 {
                     usersList().get(i).getFriendsList().add(names[2]);
+                    usersToUpdate.setFirst(usersList().get(i));
                 }
 
                 else if(usersList().get(i).getUserName().contains(names[2]))
                 {
                     usersList().get(i).getFriendsList().add(user.getUserName());
+                    usersToUpdate.setSecond(usersList().get(i));
                 }
             }
-            /*
+
+
             String addUser = "INSERT INTO Friends(userID, friendID) VALUES(" + user.getUserID() + "," + tempUser +");";
             String addUser1 = "INSERT INTO Friends(userID, friendID) VALUES(" + tempUser + "," + user.getUserID() +");";
 
@@ -106,12 +110,16 @@ class ClientManager
             preparedStatement.executeUpdate();
 
             PreparedStatement preparedStatement1 = conn.prepareStatement(addUser1);
-            preparedStatement1.executeUpdate(); */
+            preparedStatement1.executeUpdate();
+
+
+
         }
         catch (SQLException e)
         {
             e.printStackTrace();
         }
+        return usersToUpdate;
     }
 
     /**
