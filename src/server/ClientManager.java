@@ -48,6 +48,7 @@ class ClientManager
         this.users.add(user);
     }
 
+    //TODO find out if this really isn't of any use
     synchronized void removeUser(Users user)
     {
         this.users.remove(user);
@@ -56,6 +57,61 @@ class ClientManager
     synchronized List<Users> usersList()
     {
         return new ArrayList<>(this.users);
+    }
+
+    /**
+     * This method adds a new friend if the user accepts a friend request
+     * by updating the database as-well as the userlist
+     * @param input The string input containing the accept code and the username
+     * @param user The current thread's user object
+     */
+    synchronized void addNewFriend(String input, Users user)
+    {
+        String[] names = input.split("[.]");
+        String findUser = "SELECT userID, userName FROM Users WHERE username = "+"'"+names[2]+"';";
+        Pair<Integer,String> tempUser = new Pair<>();
+
+        try
+        {
+            Connection conn = this.connect();
+
+            //Find the userID of the new friend
+            Statement statement = conn.createStatement();
+            ResultSet resultSet = statement.executeQuery(findUser);
+            while(resultSet.next())
+            {
+                tempUser.setFirst(resultSet.getInt("userID"));
+                tempUser.setSecond(resultSet.getString("userName"));
+            }
+
+            //Add the new friend to the user's friend list
+            for (int i = 0; i < usersList().size(); i++)
+            {
+                if (usersList().get(i).getUserName().contains(user.getUserName()))
+                {
+                    usersList().get(i).getFriendsList().add(names[2]);
+                }
+
+                else if(usersList().get(i).getUserName().contains(names[2]))
+                {
+                    usersList().get(i).getFriendsList().add(user.getUserName());
+                }
+            }
+            /*
+            String addUser = "INSERT INTO Friends(userID, friendID) VALUES(" + user.getUserID() + "," + tempUser +");";
+            String addUser1 = "INSERT INTO Friends(userID, friendID) VALUES(" + tempUser + "," + user.getUserID() +");";
+
+            //Execute the queries
+            PreparedStatement preparedStatement = conn.prepareStatement(addUser);
+            preparedStatement.executeUpdate();
+
+            PreparedStatement preparedStatement1 = conn.prepareStatement(addUser1);
+            preparedStatement1.executeUpdate(); */
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
     }
 
     /**

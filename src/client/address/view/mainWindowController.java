@@ -132,6 +132,11 @@ public class mainWindowController implements Initializable
         bgThread.addNextMessage(".Request."+lst_OnlineUsers.getSelectionModel().getSelectedItem());
     }
 
+    @FXML private void accept_FriendRequest(ActionEvent actionEvent)
+    {
+        bgThread.addNextMessage(".Accept." + lst_Requests.getSelectionModel().getSelectedItem());
+    }
+
     /**
      * This method retrieves the online users every 5 seconds and outputs it to the list in the
      * social tab
@@ -278,6 +283,11 @@ public class mainWindowController implements Initializable
             System.out.println(names.length + ": " + names[2]);
             friendRequest.add(names[2]);
         }
+        //Writes to the UI's text area
+        private void writeToUI(String input)
+        {
+            Platform.runLater(()-> controller.txt_Messages.appendText(input+"\r"));
+        }
 
         @Override
         protected Void call() throws Exception
@@ -309,9 +319,20 @@ public class mainWindowController implements Initializable
                         {
                             handleFriendRequest(input);
                         }
+                        else if (input.contains(".Accept"))
+                        {
+                            String[] names = input.split("[.]");
+                            writeToUI("[ADMIN]: " + names[2] + " has accepted your friend request"+"\n");
+                        }
+                        else if (input.contains(".Decline"))
+                        {
+                            String[] names = input.split("[.]");
+                            writeToUI("[ADMIN]: " + names[2] + " has declined your friend request"+"\n");
+                            friendRequest.remove(names[2]);
+                        }
                         else
                         {
-                            Platform.runLater(() -> controller.txt_Messages.appendText(input));
+                            writeToUI(input);
                         }
                     }
 

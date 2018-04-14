@@ -74,7 +74,7 @@ public class serverHandlerThread implements Runnable
             assert findUser != null;
             System.out.println(findUser.socket.getRemoteSocketAddress());
             ObjectOutputStream toFindUser = findUser.getWriter();
-            toFindUser.writeUTF("." +names[1] + "." + user.getUserName() +"\r\n");
+            toFindUser.writeUTF("." +names[1] + "." + user.getUserName());
             toFindUser.flush();
         }
         catch (IOException e)
@@ -87,12 +87,13 @@ public class serverHandlerThread implements Runnable
     {
         if (input.contains(".Accept"))
         {
-            //TODO
-            System.out.println(input);
+            clientManagerTemp.addNewFriend(input, user);
+            writeMessageToUser(input);
         }
         else if (input.contains(".Decline"))
         {
             System.out.println(input);
+            writeMessageToUser(input);
         }
     }
 
