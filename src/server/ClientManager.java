@@ -65,20 +65,16 @@ class ClientManager
      * @param input The string input containing the accept code and the username
      * @param user The current thread's user object
      */
-    synchronized Pair<Users,Users> addNewFriend(String input, Users user)
+    synchronized void addNewFriend(String input, Users user)
     {
         String[] names = input.split("[.]");
         String findUser = "SELECT userID, userName FROM Users WHERE username = "+"'"+names[2]+"';";
         Integer tempUser = 0;
-        Pair<Users, Users> usersToUpdate = new Pair<>();
-        usersToUpdate.setFirst(new Users());
-        usersToUpdate.setSecond(new Users());
 
-        try
+        try(Connection conn = this.connect();
+            Statement statement= conn.createStatement();
+            ResultSet resultSet = statement.executeQuery(findUser))
         {
-            Connection conn = this.connect();
-            Statement statement = conn.createStatement();
-            ResultSet resultSet = statement.executeQuery(findUser);
             //Find the userID of the new friend
             while(resultSet.next())
             {
@@ -91,35 +87,29 @@ class ClientManager
                 if (usersList().get(i).getUserName().contains(user.getUserName()))
                 {
                     usersList().get(i).getFriendsList().add(names[2]);
-                    usersToUpdate.setFirst(usersList().get(i));
                 }
 
                 else if(usersList().get(i).getUserName().contains(names[2]))
                 {
                     usersList().get(i).getFriendsList().add(user.getUserName());
-                    usersToUpdate.setSecond(usersList().get(i));
                 }
             }
-
 
             String addUser = "INSERT INTO Friends(userID, friendID) VALUES(" + user.getUserID() + "," + tempUser +");";
             String addUser1 = "INSERT INTO Friends(userID, friendID) VALUES(" + tempUser + "," + user.getUserID() +");";
 
-            //Execute the queries
-            PreparedStatement preparedStatement = conn.prepareStatement(addUser);
-            preparedStatement.executeUpdate();
-
-            PreparedStatement preparedStatement1 = conn.prepareStatement(addUser1);
-            preparedStatement1.executeUpdate();
-
-
-
+            try(PreparedStatement preparedStatement = conn.prepareStatement(addUser);
+                PreparedStatement preparedStatement1 = conn.prepareStatement(addUser1))
+            {
+                //Execute the queries
+                preparedStatement.executeUpdate();
+                preparedStatement1.executeUpdate();
+            }
         }
         catch (SQLException e)
         {
             e.printStackTrace();
         }
-        return usersToUpdate;
     }
 
     /**
@@ -161,17 +151,13 @@ class ClientManager
     synchronized void populateUsers()
     {
         String sqlQuery = "SELECT userName, firstName, lastName, birthday, City, userID, loggedIn FROM Users";
-        try
-        {
-            Connection conn = this.connect();
 
-            //Create statements to be executed
+        try(Connection conn = this.connect();
             Statement userStatement = conn.createStatement();
             Statement genresStatement = conn.createStatement();
             Statement friendsStatement = conn.createStatement();
-
-            ResultSet resultSet = userStatement.executeQuery(sqlQuery);
-
+            ResultSet resultSet = userStatement.executeQuery(sqlQuery))
+        {
             while (resultSet.next())
             {
                 //Create a new user and set its properties from SQL results
@@ -187,24 +173,28 @@ class ClientManager
                 String findMusicGenres = "SELECT musicGenre FROM musicGenres a, Users b\n" +
                         "WHERE a.userID = " + resultSet.getInt("userID") + " AND  a.userID = b.userID";
 
-                ResultSet musicResult = genresStatement.executeQuery(findMusicGenres);
-                while (musicResult.next())
+                //Add the music genre interests
+                try(ResultSet musicResult = genresStatement.executeQuery(findMusicGenres))
                 {
-                    //Set the User's music genres based of SQL results
-                    user.musicGenreProperty().get().add(musicResult.getString("musicGenre"));
+                    while (musicResult.next())
+                    {
+                        //Set the User's music genres based of SQL results
+                        user.musicGenreProperty().get().add(musicResult.getString("musicGenre"));
+                    }
+
+                    String findFriendList = "SELECT userName FROM Users a, Friends b\n" +
+                            "WHERE b.userID = " + user.getUserID() + " AND a.userID = b.friendID";
+
+                    //Add the friends list
+                    try(ResultSet friendResult = friendsStatement.executeQuery(findFriendList);)
+                    {
+                        while (friendResult.next())
+                        {
+                            //Set the user's friend list based of SQL results
+                            user.friendsListProperty().get().add(friendResult.getString("userName"));
+                        }
+                    }
                 }
-
-                String findFriendList = "SELECT userName FROM Users a, Friends b\n" +
-                        "WHERE b.userID = " + user.getUserID() + " AND a.userID = b.friendID";
-
-                ResultSet friendResult = friendsStatement.executeQuery(findFriendList);
-                while (friendResult.next())
-                {
-                    //Set the user's friend list based of SQL results
-                    user.friendsListProperty().get().add(friendResult.getString("userName"));
-                }
-
-                //usersList.add(user);
                 addUser(user);
             }
             logger("Database built successfully ");
@@ -228,14 +218,13 @@ class ClientManager
         String addUser = "INSERT INTO Users(userName, firstName, lastName, birthday, City) VALUES(?,?,?,?,?)";
         String findUserID = "SELECT userID FROM Users WHERE userName = '" + user.getUserName() + "'";
         String addMusicGenres = "INSERT INTO musicGenres(userID, musicGenre) VALUES(?,?)";
-        try
-        {
-            //Creates a connection
-            Connection conn = this.connect();
 
-            //A statement to update the database
+        try(Connection conn = this.connect();
             PreparedStatement preparedStatement = conn.prepareStatement(addUser);
-
+            Statement statement = conn.createStatement();
+            ResultSet resultSet = statement.executeQuery(findUserID);
+            PreparedStatement preparedStatement1 = conn.prepareStatement(addMusicGenres);)
+        {
             //Sets each value and executes the update
             preparedStatement.setString(1,user.getUserName());
             preparedStatement.setString(2,user.getFirstName());
@@ -244,12 +233,6 @@ class ClientManager
             preparedStatement.setString(5, user.getCity());
             preparedStatement.executeUpdate();
 
-            //A result set finding the userID
-            Statement statement = conn.createStatement();
-            ResultSet resultSet = statement.executeQuery(findUserID);
-
-            //A new statement to addClient musicGenres using the newly created user
-            PreparedStatement preparedStatement1 = conn.prepareStatement(addMusicGenres);
             while(resultSet.next())
             {
                 for (int i=0; i < user.getMusicGenre().size(); i++)
@@ -281,13 +264,11 @@ class ClientManager
         Pair<Boolean, Users> foundUser = new Pair<>();
         foundUser.setFirst(false);
         String findUser = "SELECT * FROM Users WHERE userName = '" + user.getUserName() + "'";
-        try
-        {
-            Connection conn = this.connect();
 
+        try(Connection conn = this.connect();
             Statement statement = conn.createStatement();
-            ResultSet resultSet = statement.executeQuery(findUser);
-
+            ResultSet resultSet = statement.executeQuery(findUser))
+        {
             //If column result is empty return empty and set to false or true
             foundUser.setFirst(resultSet.isBeforeFirst());
             foundUser.setSecond(new Users());

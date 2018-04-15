@@ -58,7 +58,7 @@ public class mainWindowController implements Initializable
      */
     void initData(Users user)
     {
-        this.user = user;
+        mainWindowController.user = user;
 
         txt_UserName.setText(txt_UserName.getText() + " " + user.getFirstName() + "!");
         txt_FirstName.setText(user.getFirstName());
@@ -71,7 +71,7 @@ public class mainWindowController implements Initializable
         lst_Friends.setItems(user.friendsListProperty().get());
 
         //Connect to the server to receive messages
-        bgThread = new backgroundThread(this, host, portNumber, this.user);
+        bgThread = new backgroundThread(this, host, portNumber, mainWindowController.user);
         task = bgThread;
         Thread thread = new Thread(task);
         thread.setDaemon(true);
@@ -130,13 +130,28 @@ public class mainWindowController implements Initializable
 
     /**
      * This sends a friend request to the user specified
+     * as-well as checking if an inappropriate user is not selected
      * @param actionEvent Not currently being used
      */
     @FXML private void send_FriendRequest(ActionEvent actionEvent)
     {
-        bgThread.addNextMessage(".Request."+lst_OnlineUsers.getSelectionModel().getSelectedItem());
+        String selectedName = lst_OnlineUsers.getSelectionModel().getSelectedItem();
+        //TODO change the message
+        if (selectedName.contains(("(Friend)")) || selectedName.equals(user.getUserName()))
+        {
+            alertInfo.setTitle("");
+            alertInfo.setHeaderText(null);
+            //TODO change the message
+            alertInfo.setContentText("Why would you do that?");
+            alertInfo.showAndWait();
+        }
+        else bgThread.addNextMessage(".Request." + lst_OnlineUsers.getSelectionModel().getSelectedItem());
     }
 
+    /**
+     * accept the selected friend request
+     * @param actionEvent
+     */
     @FXML private void accept_FriendRequest(ActionEvent actionEvent)
     {
         String selectedName = lst_Requests.getSelectionModel().getSelectedItem();
@@ -147,8 +162,13 @@ public class mainWindowController implements Initializable
 
     }
 
+    /**
+     * declines a friend request
+     * @param actionEvent not currently being used
+     */
     @FXML private void decline_FriendRequest(ActionEvent actionEvent)
     {
+        //Retrieve the selected name and send it to the server then delete it from the list
         String selectedName = lst_Requests.getSelectionModel().getSelectedItem();
         bgThread.addNextMessage(".Decline."+ selectedName);
         for (int i = 0; i < bgThread.getFriendRequests().size(); ++i)

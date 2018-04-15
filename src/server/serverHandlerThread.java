@@ -58,9 +58,8 @@ public class serverHandlerThread implements Runnable
      * the appropriate message to the receiving client
      * @param input This is the code with the accompanying user who's going to receive a request delimited by
      */
-    private void writeMessageToUser(String input, boolean UpdateUser)
+    private void writeMessageToUser(String input)
     {
-        boolean updateUser = UpdateUser;
         try
         {
             String[] names = input.split("[.]");
@@ -77,7 +76,6 @@ public class serverHandlerThread implements Runnable
 
             //This sends the message to the appropriate user
             assert findUser != null;
-            System.out.println(findUser.socket.getRemoteSocketAddress());
             ObjectOutputStream toFindUser = findUser.getWriter();
             toFindUser.writeUTF("." +names[1] + "." + user.getUserName());
             toFindUser.flush();
@@ -92,13 +90,12 @@ public class serverHandlerThread implements Runnable
     {
         if (input.contains(".Accept"))
         {
-            Pair<Users, Users> recevingUsers = clientManagerTemp.addNewFriend(input, user);
-            writeMessageToUser(input, true);
+            clientManagerTemp.addNewFriend(input,user);
+            writeMessageToUser(input);
         }
         else if (input.contains(".Decline"))
         {
-            System.out.println(input);
-            writeMessageToUser(input, false);
+            writeMessageToUser(input);
         }
     }
 
@@ -332,7 +329,7 @@ public class serverHandlerThread implements Runnable
 
                     else if (input.contains(".Request"))
                     {
-                        writeMessageToUser(input, false);
+                        writeMessageToUser(input);
                     }
                     //Logout the user
                     else if (".logout".equals(input))
