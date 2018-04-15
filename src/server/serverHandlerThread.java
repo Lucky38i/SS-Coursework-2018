@@ -10,6 +10,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Task that handles all connections received from the client
@@ -237,7 +239,8 @@ public class serverHandlerThread implements Runnable
     private void searchMusicInterests(ObjectOutputStream toClient, String input)
     {
         String[] names = input.split("[.]");
-        ArrayList<String> templist = new ArrayList<>();
+        ArrayList<Users> searchedUsers = new ArrayList();
+        Set<Users> hashSet = new HashSet<>();
         try
         {
             for (int i = 0; i < clientManagerTemp.usersList().size(); ++i)
@@ -246,14 +249,19 @@ public class serverHandlerThread implements Runnable
                 {
                     if (clientManagerTemp.usersList().get(i).getMusicGenre().get(x).contains(names[2]))
                     {
-                        templist.add(clientManagerTemp.usersList().get(i).getUserName());
+                        searchedUsers.add(clientManagerTemp.usersList().get(i));
                     }
                 }
             }
+            //Removes duplicates
+            hashSet.addAll(searchedUsers);
+            searchedUsers.clear();
+            searchedUsers.addAll(hashSet);
+
             toClient.writeUTF(input);
             toClient.flush();
 
-            toClient.writeObject(templist);
+            toClient.writeObject(searchedUsers);
             toClient.flush();
         }
         catch (IOException e)
