@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.address.view.mainWindowController">
+   <children>
+      <BorderPane prefHeight="600.0" prefWidth="800.0">
+         <center>
+            <TabPane prefHeight="386.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
+              <tabs>
+                <Tab text="Music" />
+                <Tab fx:id="tab_Social" onSelectionChanged="#getOnlineUsers_and_Requests" text="Social">
+                  <content>
+                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                           <children>
+                              <BorderPane layoutX="300.0" layoutY="133.0" prefHeight="497.0" prefWidth="800.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                 <top>
+                                    <AnchorPane prefHeight="60.0" prefWidth="800.0" BorderPane.alignment="CENTER">
+                                       <children>
+                                          <Label layoutX="23.0" layoutY="30.0" prefHeight="17.0" prefWidth="80.0" text="Posts" />
+                                       </children>
+                                    </AnchorPane>
+                                 </top>
+                                 <left>
+                                    <AnchorPane prefHeight="377.0" prefWidth="20.0" BorderPane.alignment="CENTER" />
+                                 </left>
+                                 <bottom>
+                                    <AnchorPane prefHeight="60.0" prefWidth="800.0" BorderPane.alignment="CENTER">
+                                       <children>
+                                          <TextField fx:id="txt_SendMessage" layoutX="62.0" layoutY="17.0" onAction="#send_message" prefHeight="27.0" prefWidth="449.0" />
+                                          <Label layoutX="21.0" layoutY="22.0" text="Post:" />
+                                          <Button fx:id="btn_SendMessage" layoutX="526.0" layoutY="17.0" mnemonicParsing="false" onAction="#send_message" prefHeight="27.0" prefWidth="60.0" text="Send" />
+                                       </children>
+                                    </AnchorPane>
+                                 </bottom>
+                                 <right>
+                                    <AnchorPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+                                       <children>
+                                          <HBox prefHeight="377.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                             <children>
+                                                <AnchorPane prefHeight="377.0" prefWidth="49.0" />
+                                                <VBox prefHeight="377.0" prefWidth="200.0">
+                                                   <children>
+                                                      <ListView fx:id="lst_OnlineUsers" onInputMethodTextChanged="#open_ContextMenuUsers" prefHeight="167.0" prefWidth="176.0">
+                                                         <contextMenu>
+                                                            <ContextMenu fx:id="users_Menu">
+                                                              <items>
+                                                                <MenuItem fx:id="menuItem_SendRequest" mnemonicParsing="false" onAction="#send_FriendRequest" text="Send user request" />
+                                                              </items>
+                                                            </ContextMenu>
+                                                         </contextMenu>
+                                                      </ListView>
+                                                      <AnchorPane prefHeight="46.0" prefWidth="176.0">
+                                                         <children>
+                                                            <Label layoutX="3.0" layoutY="29.0" text="Friend requests" />
+                                                         </children>
+                                                      </AnchorPane>
+                                                      <ListView fx:id="lst_Requests" onContextMenuRequested="#open_ContextMenuRequests" prefHeight="164.0" prefWidth="176.0">
+                                                         <contextMenu>
+                                                            <ContextMenu fx:id="requests_Menu">
+                                                              <items>
+                                                                <MenuItem fx:id="menuItem_Accept" mnemonicParsing="false" onAction="#accept_FriendRequest" text="Accept" />
+                                                                  <MenuItem fx:id="menuItem_Decline" mnemonicParsing="false" onAction="#decline_FriendRequest" text="Decline" />
+                                                              </items>
+                                                            </ContextMenu>
+                                                         </contextMenu>
+                                                      </ListView>
+                                                   </children>
+                                                </VBox>
+                                             </children>
+                                          </HBox>
+                                       </children></AnchorPane>
+                                 </right>
+                                 <center>
+                                    <TextArea fx:id="txt_Messages" editable="false" prefHeight="155.0" prefWidth="400.0" BorderPane.alignment="CENTER" />
+                                 </center>
+                              </BorderPane>
+                           </children></AnchorPane>
+                  </content>
+                </Tab>
+                  <Tab text="Profile">
+                    <content>
+                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                           <children>
+                              <BorderPane layoutX="174.0" layoutY="42.0" prefHeight="497.0" prefWidth="800.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                 <center>
+                                    <HBox prefHeight="208.0" prefWidth="559.0" BorderPane.alignment="CENTER">
+                                       <children>
+                                          <GridPane prefHeight="443.0" prefWidth="372.0">
+                                            <columnConstraints>
+                                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="182.0" minWidth="10.0" prefWidth="77.0" />
+                                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="296.0" minWidth="10.0" prefWidth="130.0" />
+                                            </columnConstraints>
+                                            <rowConstraints>
+                                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                            </rowConstraints>
+                                             <children>
+                                                <Text strokeType="OUTSIDE" strokeWidth="0.0" text="First Name" />
+                                                <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Last Name" GridPane.rowIndex="1" />
+                                                <Text strokeType="OUTSIDE" strokeWidth="0.0" text="City of Birth" GridPane.rowIndex="2" />
+                                                <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Birthday" GridPane.rowIndex="3" />
+                                                 <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Age" GridPane.rowIndex="4" />
+                                                <TextField fx:id="txt_FirstName" editable="false" GridPane.columnIndex="1" />
+                                                <TextField fx:id="txt_LastName" editable="false" prefHeight="27.0" prefWidth="215.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                                <TextField fx:id="txt_City" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                                <TextField fx:id="txt_Birthday" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                                                <TextField fx:id="txt_Age" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                                             </children>
+                                          </GridPane>
+                                          <AnchorPane prefHeight="457.0" prefWidth="115.0" />
+                                          <VBox prefHeight="457.0" prefWidth="477.0">
+                                             <children>
+                                                <VBox prefHeight="62.0" prefWidth="396.0">
+                                                   <children>
+                                                      <HBox alignment="BOTTOM_CENTER" prefHeight="100.0" prefWidth="200.0">
+                                                         <children>
+                                                            <Label prefHeight="17.0" prefWidth="111.0" text="Genre interests" />
+                                                            <AnchorPane prefHeight="62.0" prefWidth="157.0" />
+                                                            <Label prefHeight="17.0" prefWidth="64.0" text="Friends" textAlignment="CENTER" />
+                                                         </children>
+                                                      </HBox>
+                                                   </children>
+                                                </VBox>
+                                                <HBox prefHeight="157.0" prefWidth="396.0">
+                                                   <children>
+                                                      <ListView fx:id="lst_Genres" disable="true" prefHeight="100.0" prefWidth="200.0" />
+                                                      <AnchorPane prefHeight="100.0" prefWidth="117.0" />
+                                                      <ListView fx:id="lst_Friends" onContextMenuRequested="#open_contextMenuFriends" prefHeight="100.0" prefWidth="200.0">
+                                                         <contextMenu>
+                                                            <ContextMenu fx:id="friends_Menu">
+                                                              <items>
+                                                                  <MenuItem mnemonicParsing="false" text="Private message" />
+                                                                <MenuItem mnemonicParsing="false" text="Delete Friend" />
+                                                              </items>
+                                                            </ContextMenu>
+                                                         </contextMenu>
+                                                      </ListView>
+                                                   </children>
+                                                </HBox>
+                                             </children>
+                                          </VBox>
+                                       </children>
+                                    </HBox>
+                                 </center>
+                                 <left>
+                                    <AnchorPane prefHeight="497.0" prefWidth="40.0" BorderPane.alignment="CENTER" />
+                                 </left>
+                                 <right>
+                                    <AnchorPane prefHeight="497.0" prefWidth="40.0" BorderPane.alignment="CENTER" />
+                                 </right>
+                                 <top>
+                                    <AnchorPane prefHeight="40.0" prefWidth="800.0" BorderPane.alignment="CENTER" />
+                                 </top>
+                              </BorderPane>
+                           </children>
+                        </AnchorPane>
+                    </content>
+                  </Tab>
+              </tabs>
+            </TabPane>
+         </center>
+         <bottom>
+            <AnchorPane prefHeight="45.0" prefWidth="800.0" BorderPane.alignment="CENTER">
+               <children>
+                  <Button layoutX="725.0" layoutY="9.0" mnemonicParsing="false" onAction="#open_LoginScreen" text="Logout" />
+               </children>
+            </AnchorPane>
+         </bottom>
+         <top>
+            <AnchorPane prefHeight="25.0" prefWidth="800.0" BorderPane.alignment="CENTER">
+               <children>
+                  <Text fx:id="txt_UserName" layoutX="10.0" layoutY="17.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Welcome">
+                     <font>
+                        <Font name="Arial Italic" size="13.0" />
+                     </font>
+                  </Text>
+               </children>
+            </AnchorPane>
+         </top>
+      </BorderPane>
+   </children>
+</AnchorPane>
