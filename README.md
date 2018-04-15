@@ -1,4 +1,6 @@
 # SS-Coursework-2018
+[![Build Status](https://travis-ci.com/Lucky38i/SS-Coursework-2018.svg?token=bqyyqGbK2qGAr9uo5heB&branch=master)](https://travis-ci.com/Lucky38i/SS-Coursework-2018)
+
 
 The assignment is about delivering a graphical social network system with a centralised server implementing a
 Spotify-like service. The clients connect to the “Music Social Network” server to register new members to the social
