@@ -31,6 +31,7 @@ public class registerWindowController implements Initializable
     private Users user = new Users();
     private static final String host = "localhost";
     private static final int portNumber = 4444;
+    private final String loginWindow = "view/loginWindow.fxml";
 
 
     private void addChoice_Genres(String genre)
@@ -57,7 +58,7 @@ public class registerWindowController implements Initializable
     /**
      * Registers the user then if successful opens back the login window
      */
-    public void btn_registerUser()
+    public void btn_registerUser(ActionEvent actionEvent)
     {
         //Check that no fields are blank
         if (txt_FirstName.getText().equals("") || txt_Username.getText().equals("") || txt_LastName.getText().equals("") || txt_City.getText().equals(""))
@@ -106,11 +107,13 @@ public class registerWindowController implements Initializable
                             {
                                 alert.setTitle("");
                                 alert.setHeaderText(null);
-                                alert.setContentText("Registration Successful\nPlease re-open the client");
+                                alert.setContentText("Registration Successful");
                                 alert.showAndWait();
 
                                 //TODO fix this so that it doesn't close
-                                System.exit(0);
+                                //System.exit(0);
+                                SceneSwitcher sceneSwitcher = new SceneSwitcher(loginWindow,actionEvent);
+                                sceneSwitcher.switchScene();
                                 break;
                             }
                         }
