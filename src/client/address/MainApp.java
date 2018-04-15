@@ -5,6 +5,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
@@ -42,6 +43,7 @@ public class MainApp extends Application
             primaryStage.getIcons().add(new Image("Resources/Music-icon.png"));
 
             Parent root = FXMLLoader.load(MainApp.class.getResource(loginScreenFXML));
+
 
             Scene scene = new Scene(root);
             primaryStage.setScene(scene);
