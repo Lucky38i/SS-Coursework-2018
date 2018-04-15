@@ -1,5 +1,6 @@
 package client.address.view;
 
+import Resources.Pair;
 import Resources.Users;
 import client.address.SceneSwitcher;
 import javafx.animation.KeyFrame;
@@ -15,14 +16,15 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.input.ContextMenuEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.URL;
-import java.sql.Time;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.ResourceBundle;
@@ -37,9 +39,11 @@ public class mainWindowController implements Initializable
     //FXML Controller Variables
     @FXML private Text txt_UserName;
     @FXML private TextField txt_FirstName, txt_LastName, txt_City, txt_Birthday, txt_Age, txt_SendMessage, txt_Search;
-    @FXML private ListView<String> lst_Genres, lst_Friends, lst_OnlineUsers, lst_Requests, lst_SimiliarMusicInterests;
+    @FXML private ListView<String> lst_Genres, lst_Friends, lst_OnlineUsers, lst_Requests, lst_SearchedUsers, lst_SearchedMusic;
     @FXML private TextArea txt_Messages;
     @FXML private ContextMenu friends_Menu, users_Menu, requests_Menu;
+    //@FXML private TableColumn column_UserName, column_Genres;
+    //@FXML private TableView tbl_SearchedUsers;
 
     //Variables
     private Alert alertInfo = new Alert(Alert.AlertType.INFORMATION);
@@ -50,8 +54,24 @@ public class mainWindowController implements Initializable
     private backgroundThread bgThread;
     private Task<Void> task;
     private Timeline theLittleTimerThatCouldBrother;
+    private ObservableList<Users> searchedUsers = FXCollections.observableArrayList();
+    private ObservableList<Pair<String,ObservableList<String>>> newList = FXCollections.observableArrayList();
 
 
+    private synchronized void setNewList(ObservableList<Pair<String,ObservableList<String>>> newlist)
+    {
+        newList = newlist;
+    }
+
+    private synchronized void addToNewList(Pair<String, ObservableList<String>> pair)
+    {
+        newList.add(pair);
+    }
+
+    private synchronized ObservableList<Pair<String, ObservableList<String>>> getNewList()
+    {
+        return newList;
+    }
     /**
      * This sets the received user to <code>this.user</code> to be used by this controller
      * @param user receives a user object from the registerWindowController
@@ -70,13 +90,17 @@ public class mainWindowController implements Initializable
         lst_Genres.setItems(user.musicGenreProperty().get());
         lst_Friends.setItems(user.friendsListProperty().get());
 
+        //tbl_SearchedUsers.setItems(searchedUsers);
+
+        //column_UserName.setCellValueFactory(new PropertyValueFactory<Users,String>("userName"));
+        //column_Genres.setCellFactory(new PropertyValueFactory<Users, List<String>>("musicGenre"));
+
         //Connect to the server to receive messages
         bgThread = new backgroundThread(this, host, portNumber, mainWindowController.user);
         task = bgThread;
         Thread thread = new Thread(task);
         thread.setDaemon(true);
         thread.start();
-
     }
 
     private void setUser(Users user)
@@ -176,6 +200,10 @@ public class mainWindowController implements Initializable
                 bgThread.getFriendRequests().remove(i);
     }
 
+    /**
+     * This searches for the users who have a specific music interest
+     * @param actionEvent not currently being used
+     */
     public void searchMusicInterests(ActionEvent actionEvent)
     {
         if (txt_Search.getText().equals(""))
@@ -190,6 +218,25 @@ public class mainWindowController implements Initializable
             bgThread.addNextMessage(".Search."+txt_Search.getText());
     }
 
+    /**
+     * This get the music genres for the selected user and
+     * places it in the list
+     * @param mouseEvent not currently being used
+     */
+    @FXML private void getMusicInterests(MouseEvent mouseEvent)
+    {
+        Boolean done = false;
+        for (int i = 0; i < newList.size() && !done; ++i)
+        {
+            if (newList.get(i).getFirst().equals(lst_SearchedUsers.getSelectionModel().getSelectedItem()))
+            {
+                lst_SearchedMusic.setItems(null);
+                lst_SearchedMusic.setItems(newList.get(i).getSecond());
+                done = true;
+            }
+        }
+
+    }
     /**
      * This method retrieves the online users every 5 seconds and outputs it to the list in the
      * social tab
@@ -271,7 +318,6 @@ public class mainWindowController implements Initializable
 
     }
 
-
     /**
      * Opens the context menu for friends list view
      * @param contextMenuEvent needed to get menu's X Y coordinate
@@ -319,6 +365,7 @@ public class mainWindowController implements Initializable
         private Users user;
         private final LinkedList<String> messagesToSend;
         private ObservableList<String> friendRequest = FXCollections.observableArrayList();
+        private ObservableList<String> searchedUsers = FXCollections.observableArrayList();
         private boolean hasMessages = false;
 
 
@@ -331,6 +378,11 @@ public class mainWindowController implements Initializable
             messagesToSend = new LinkedList<>();
         }
 
+        /**
+         * Add a new message to the messages to be
+         * sent to the server
+         * @param msg
+         */
         synchronized void addNextMessage(String msg)
         {
             hasMessages = true;
@@ -355,7 +407,7 @@ public class mainWindowController implements Initializable
         }
 
         @Override
-        protected Void call() throws Exception
+        protected Void call()
         {
             try(Socket socket = new Socket(host,portNumber);
                 ObjectInputStream fromServer = new ObjectInputStream(socket.getInputStream());
@@ -382,9 +434,24 @@ public class mainWindowController implements Initializable
                         }
                         else if (input.contains(".Search"))
                         {
-                            ObservableList<String> templist = FXCollections.observableArrayList();
-                            templist.setAll((ArrayList<String>) fromServer.readObject());
-                            Platform.runLater(()-> lst_SimiliarMusicInterests.setItems(templist));
+                            searchedUsers.clear();
+                            newList.clear();
+                            ObservableList<Users> tempList = FXCollections.observableArrayList();
+                            Object obj = fromServer.readObject();
+                            tempList.setAll((ArrayList<Users>)obj);
+                            for (Users i : tempList)
+                            {
+                                Pair<String, ObservableList<String>> newPair = new Pair<>();
+                                newPair.setFirst(i.getUserName());
+                                newPair.setSecond(i.musicGenreProperty().get());
+                                addToNewList(newPair);
+                            }
+                            for (int i = 0; i < getNewList().size(); ++i)
+                            {
+                                //TODO this is fucked, fix it
+                                searchedUsers.add(getNewList().get(i).getFirst());
+                            }
+                            Platform.runLater(()->lst_SearchedUsers.setItems(searchedUsers));
 
                         }
                         else if (input.contains(".Request"))
@@ -436,6 +503,10 @@ public class mainWindowController implements Initializable
                         toServer.flush();
                     }
                 }
+            }
+            catch (IOException | InterruptedException | ClassNotFoundException e)
+            {
+                e.printStackTrace();
             }
             return null;
         }

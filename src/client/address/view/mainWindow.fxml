@@ -30,9 +30,16 @@
                               <AnchorPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
                                  <children>
                                     <TextField fx:id="txt_Search" layoutX="17.0" layoutY="56.0" promptText="Music Genre" />
-                                    <ListView fx:id="lst_SimiliarMusicInterests" layoutX="23.0" layoutY="129.0" prefHeight="200.0" prefWidth="200.0" />
+                                    <ListView fx:id="lst_SearchedUsers" layoutX="23.0" layoutY="129.0" onMouseClicked="#getMusicInterests" prefHeight="200.0" prefWidth="200.0" />
                                     <Button layoutX="207.0" layoutY="56.0" mnemonicParsing="false" onAction="#searchMusicInterests" text="Search" />
                                     <Label layoutX="38.0" layoutY="28.0" text="Search for people through music interests" />
+                                    <TableView fx:id="tbl_SearchedUsers" layoutX="457.0" layoutY="129.0" prefHeight="200.0" prefWidth="270.0">
+                                      <columns>
+                                        <TableColumn fx:id="column_UserName" editable="false" prefWidth="105.0" text="Username" />
+                                        <TableColumn fx:id="column_Genres" prefWidth="164.0" text="Music Interests" />
+                                      </columns>
+                                    </TableView>
+                                    <ListView fx:id="lst_SearchedMusic" disable="true" layoutX="238.0" layoutY="129.0" prefHeight="200.0" prefWidth="200.0" />
                                  </children>
                               </AnchorPane>
                            </center>
