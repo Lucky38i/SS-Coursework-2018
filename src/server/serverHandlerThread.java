@@ -2,6 +2,8 @@ package server;
 
 import Resources.Pair;
 import Resources.Users;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -227,6 +229,40 @@ public class serverHandlerThread implements Runnable
     }
 
     /**
+     * This method searches for users who have the searched music interests
+     * then compiles a list of all these users and sends it back to the client
+     * @param toClient The object output stream for which to write to
+     * @param input the received message from the server
+     */
+    private void searchMusicInterests(ObjectOutputStream toClient, String input)
+    {
+        String[] names = input.split("[.]");
+        ArrayList<String> templist = new ArrayList<>();
+        try
+        {
+            for (int i = 0; i < clientManagerTemp.usersList().size(); ++i)
+            {
+                for (int x = 0; x < clientManagerTemp.usersList().get(i).getMusicGenre().size(); ++x)
+                {
+                    if (clientManagerTemp.usersList().get(i).getMusicGenre().get(x).contains(names[2]))
+                    {
+                        templist.add(clientManagerTemp.usersList().get(i).getUserName());
+                    }
+                }
+            }
+            toClient.writeUTF(input);
+            toClient.flush();
+
+            toClient.writeObject(templist);
+            toClient.flush();
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    /**
      * Writes the received message to all clients' viewers
      * @param input The received message
      */
@@ -315,6 +351,10 @@ public class serverHandlerThread implements Runnable
                     if (input.contains(".Viewer"))
                     {
                         setViewer((Users) fromClient.readObject());
+                    }
+                    else if (input.contains(".Search"))
+                    {
+                        searchMusicInterests(toClient, input);
                     }
 
                     else if (input.contains(".Accept") || input.contains(".Decline"))

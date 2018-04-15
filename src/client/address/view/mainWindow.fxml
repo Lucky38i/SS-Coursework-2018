@@ -11,7 +11,34 @@
          <center>
             <TabPane prefHeight="386.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
               <tabs>
-                <Tab text="Music" />
+                <Tab text="Music">
+                     <content>
+                        <BorderPane prefHeight="200.0" prefWidth="200.0">
+                           <top>
+                              <AnchorPane prefHeight="20.0" prefWidth="800.0" BorderPane.alignment="CENTER" />
+                           </top>
+                           <left>
+                              <AnchorPane prefHeight="457.0" prefWidth="20.0" BorderPane.alignment="CENTER" />
+                           </left>
+                           <right>
+                              <AnchorPane prefHeight="457.0" prefWidth="20.0" BorderPane.alignment="CENTER" />
+                           </right>
+                           <bottom>
+                              <AnchorPane prefHeight="20.0" prefWidth="800.0" BorderPane.alignment="CENTER" />
+                           </bottom>
+                           <center>
+                              <AnchorPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+                                 <children>
+                                    <TextField fx:id="txt_Search" layoutX="17.0" layoutY="56.0" promptText="Music Genre" />
+                                    <ListView fx:id="lst_SimiliarMusicInterests" layoutX="23.0" layoutY="129.0" prefHeight="200.0" prefWidth="200.0" />
+                                    <Button layoutX="207.0" layoutY="56.0" mnemonicParsing="false" onAction="#searchMusicInterests" text="Search" />
+                                    <Label layoutX="38.0" layoutY="28.0" text="Search for people through music interests" />
+                                 </children>
+                              </AnchorPane>
+                           </center>
+                        </BorderPane>
+                     </content>
+                  </Tab>
                 <Tab fx:id="tab_Social" onSelectionChanged="#getOnlineUsers_and_Requests" text="Social">
                   <content>
                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
@@ -41,10 +68,15 @@
                                        <children>
                                           <HBox prefHeight="377.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                              <children>
-                                                <AnchorPane prefHeight="377.0" prefWidth="49.0" />
-                                                <VBox prefHeight="377.0" prefWidth="200.0">
+                                                <AnchorPane prefHeight="377.0" prefWidth="35.0" />
+                                                <VBox prefHeight="377.0" prefWidth="155.0">
                                                    <children>
-                                                      <ListView fx:id="lst_OnlineUsers" onInputMethodTextChanged="#open_ContextMenuUsers" prefHeight="167.0" prefWidth="176.0">
+                                                      <AnchorPane prefHeight="10.0" prefWidth="145.0">
+                                                         <children>
+                                                            <Label layoutY="2.0" text="Online Users" />
+                                                         </children>
+                                                      </AnchorPane>
+                                                      <ListView fx:id="lst_OnlineUsers" onInputMethodTextChanged="#open_ContextMenuUsers" prefHeight="167.0" prefWidth="145.0">
                                                          <contextMenu>
                                                             <ContextMenu fx:id="users_Menu">
                                                               <items>
@@ -58,7 +90,7 @@
                                                             <Label layoutX="3.0" layoutY="29.0" text="Friend requests" />
                                                          </children>
                                                       </AnchorPane>
-                                                      <ListView fx:id="lst_Requests" onContextMenuRequested="#open_ContextMenuRequests" prefHeight="164.0" prefWidth="176.0">
+                                                      <ListView fx:id="lst_Requests" onContextMenuRequested="#open_ContextMenuRequests" prefHeight="164.0" prefWidth="145.0">
                                                          <contextMenu>
                                                             <ContextMenu fx:id="requests_Menu">
                                                               <items>
@@ -70,15 +102,18 @@
                                                       </ListView>
                                                    </children>
                                                 </VBox>
+                                                <AnchorPane prefHeight="377.0" prefWidth="10.0" />
                                              </children>
                                           </HBox>
-                                       </children></AnchorPane>
+                                       </children>
+                                    </AnchorPane>
                                  </right>
                                  <center>
                                     <TextArea fx:id="txt_Messages" editable="false" prefHeight="155.0" prefWidth="400.0" BorderPane.alignment="CENTER" />
                                  </center>
                               </BorderPane>
-                           </children></AnchorPane>
+                           </children>
+                        </AnchorPane>
                   </content>
                 </Tab>
                   <Tab text="Profile">

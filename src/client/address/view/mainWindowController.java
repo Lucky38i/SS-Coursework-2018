@@ -36,8 +36,8 @@ public class mainWindowController implements Initializable
 {
     //FXML Controller Variables
     @FXML private Text txt_UserName;
-    @FXML private TextField txt_FirstName, txt_LastName, txt_City, txt_Birthday, txt_Age, txt_SendMessage;
-    @FXML private ListView<String> lst_Genres, lst_Friends, lst_OnlineUsers, lst_Requests;
+    @FXML private TextField txt_FirstName, txt_LastName, txt_City, txt_Birthday, txt_Age, txt_SendMessage, txt_Search;
+    @FXML private ListView<String> lst_Genres, lst_Friends, lst_OnlineUsers, lst_Requests, lst_SimiliarMusicInterests;
     @FXML private TextArea txt_Messages;
     @FXML private ContextMenu friends_Menu, users_Menu, requests_Menu;
 
@@ -176,6 +176,20 @@ public class mainWindowController implements Initializable
                 bgThread.getFriendRequests().remove(i);
     }
 
+    public void searchMusicInterests(ActionEvent actionEvent)
+    {
+        if (txt_Search.getText().equals(""))
+        {
+            alertInfo.setTitle("");
+            alertInfo.setHeaderText(null);
+            //TODO change the message
+            alertInfo.setContentText("This box can't be empty");
+            alertInfo.showAndWait();
+        }
+        else
+            bgThread.addNextMessage(".Search."+txt_Search.getText());
+    }
+
     /**
      * This method retrieves the online users every 5 seconds and outputs it to the list in the
      * social tab
@@ -292,9 +306,8 @@ public class mainWindowController implements Initializable
 
     }
 
-
     /**
-     * This is a Task that connects to the s1erver and receives messages to
+     * This is a Task that connects to the server and receives messages to
      * be appended to the text area
      */
     private class backgroundThread extends Task<Void>
@@ -366,6 +379,13 @@ public class mainWindowController implements Initializable
                         if (input.equals("Done"))
                         {
                             socket.close();
+                        }
+                        else if (input.contains(".Search"))
+                        {
+                            ObservableList<String> templist = FXCollections.observableArrayList();
+                            templist.setAll((ArrayList<String>) fromServer.readObject());
+                            Platform.runLater(()-> lst_SimiliarMusicInterests.setItems(templist));
+
                         }
                         else if (input.contains(".Request"))
                         {
