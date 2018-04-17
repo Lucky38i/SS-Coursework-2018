@@ -42,8 +42,6 @@ public class mainWindowController implements Initializable
     @FXML private ListView<String> lst_Genres, lst_Friends, lst_OnlineUsers, lst_Requests, lst_SearchedUsers, lst_SearchedMusic;
     @FXML private TextArea txt_Messages;
     @FXML private ContextMenu friends_Menu, users_Menu, requests_Menu;
-    //@FXML private TableColumn column_UserName, column_Genres;
-    //@FXML private TableView tbl_SearchedUsers;
 
     //Variables
     private Alert alertInfo = new Alert(Alert.AlertType.INFORMATION);
@@ -54,24 +52,9 @@ public class mainWindowController implements Initializable
     private backgroundThread bgThread;
     private Task<Void> task;
     private Timeline theLittleTimerThatCouldBrother;
-    private ObservableList<Users> searchedUsers = FXCollections.observableArrayList();
     private ObservableList<Pair<String,ObservableList<String>>> newList = FXCollections.observableArrayList();
 
 
-    private synchronized void setNewList(ObservableList<Pair<String,ObservableList<String>>> newlist)
-    {
-        newList = newlist;
-    }
-
-    private synchronized void addToNewList(Pair<String, ObservableList<String>> pair)
-    {
-        newList.add(pair);
-    }
-
-    private synchronized ObservableList<Pair<String, ObservableList<String>>> getNewList()
-    {
-        return newList;
-    }
     /**
      * This sets the received user to <code>this.user</code> to be used by this controller
      * @param user receives a user object from the registerWindowController
@@ -90,10 +73,6 @@ public class mainWindowController implements Initializable
         lst_Genres.setItems(user.musicGenreProperty().get());
         lst_Friends.setItems(user.friendsListProperty().get());
 
-        //tbl_SearchedUsers.setItems(searchedUsers);
-
-        //column_UserName.setCellValueFactory(new PropertyValueFactory<Users,String>("userName"));
-        //column_Genres.setCellFactory(new PropertyValueFactory<Users, List<String>>("musicGenre"));
 
         //Connect to the server to receive messages
         bgThread = new backgroundThread(this, host, portNumber, mainWindowController.user);
@@ -103,10 +82,16 @@ public class mainWindowController implements Initializable
         thread.start();
     }
 
-    private void setUser(Users user)
+    private synchronized void addToNewList(Pair<String, ObservableList<String>> pair)
     {
-        this.user = user;
+        newList.add(pair);
     }
+
+    private synchronized ObservableList<Pair<String, ObservableList<String>>> getNewList()
+    {
+        return newList;
+    }
+
 
     /**
      * Method that changes the scene back to the login screen and logs the user out
@@ -160,7 +145,6 @@ public class mainWindowController implements Initializable
     @FXML private void send_FriendRequest(ActionEvent actionEvent)
     {
         String selectedName = lst_OnlineUsers.getSelectionModel().getSelectedItem();
-        //TODO change the message
         if (selectedName.contains(("(Friend)")) || selectedName.equals(user.getUserName()))
         {
             alertInfo.setTitle("");
@@ -215,6 +199,7 @@ public class mainWindowController implements Initializable
             alertInfo.showAndWait();
         }
         else
+            newList.clear();
             bgThread.addNextMessage(".Search."+txt_Search.getText());
     }
 
@@ -225,6 +210,7 @@ public class mainWindowController implements Initializable
      */
     @FXML private void getMusicInterests(MouseEvent mouseEvent)
     {
+        System.out.println(newList.size());
         Boolean done = false;
         for (int i = 0; i < newList.size() && !done; ++i)
         {
@@ -235,7 +221,6 @@ public class mainWindowController implements Initializable
                 done = true;
             }
         }
-
     }
     /**
      * This method retrieves the online users every 5 seconds and outputs it to the list in the
@@ -244,6 +229,8 @@ public class mainWindowController implements Initializable
      */
     @FXML private void getOnlineUsers_and_Requests(Event event)
     {
+        //TODO make this use the background thread
+        //TODO make this start on initData
         //A periodic timer that finds new users every 5 seconds
         theLittleTimerThatCould = new Timeline(new KeyFrame(Duration.seconds(5), new EventHandler<ActionEvent>()
         {
@@ -349,7 +336,6 @@ public class mainWindowController implements Initializable
     public void initialize(URL location, ResourceBundle resources)
     {
         //TODO
-
     }
 
     /**
@@ -361,7 +347,6 @@ public class mainWindowController implements Initializable
         private String host;
         private int portNumber;
         private mainWindowController controller;
-        //private Users userViewer;
         private Users user;
         private final LinkedList<String> messagesToSend;
         private ObservableList<String> friendRequest = FXCollections.observableArrayList();
@@ -381,7 +366,7 @@ public class mainWindowController implements Initializable
         /**
          * Add a new message to the messages to be
          * sent to the server
-         * @param msg
+         * @param msg The message to the sent to the server
          */
         synchronized void addNextMessage(String msg)
         {
@@ -428,17 +413,19 @@ public class mainWindowController implements Initializable
                     {
                         //Print out messages from the server and appends the text area
                         String input = fromServer.readUTF();
+
+                        //TODO create comments for the purpose for all of these if statements
                         if (input.equals("Done"))
                         {
                             socket.close();
                         }
                         else if (input.contains(".Search"))
                         {
-                            searchedUsers.clear();
-                            newList.clear();
+                            //Read the received list and set it as a temporary list
                             ObservableList<Users> tempList = FXCollections.observableArrayList();
-                            Object obj = fromServer.readObject();
-                            tempList.setAll((ArrayList<Users>)obj);
+                            tempList.setAll((ArrayList<Users>) fromServer.readObject());
+                            ArrayList<String> tempListForUsers = new ArrayList<>();
+
                             for (Users i : tempList)
                             {
                                 Pair<String, ObservableList<String>> newPair = new Pair<>();
@@ -446,12 +433,18 @@ public class mainWindowController implements Initializable
                                 newPair.setSecond(i.musicGenreProperty().get());
                                 addToNewList(newPair);
                             }
+
                             for (int i = 0; i < getNewList().size(); ++i)
                             {
-                                //TODO this is fucked, fix it
-                                searchedUsers.add(getNewList().get(i).getFirst());
+                                tempListForUsers.add(getNewList().get(i).getFirst());
                             }
-                            Platform.runLater(()->lst_SearchedUsers.setItems(searchedUsers));
+
+                            Platform.runLater(()->
+                            {
+                                lst_SearchedUsers.refresh();
+                                searchedUsers.setAll(tempListForUsers);
+                                lst_SearchedUsers.setItems(searchedUsers);
+                            });
 
                         }
                         else if (input.contains(".Request"))
