@@ -10,16 +10,19 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
-import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.input.ContextMenuEvent;
+import javafx.scene.input.InputMethodEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -53,6 +56,7 @@ public class mainWindowController implements Initializable
     private Task<Void> task;
     private Timeline theLittleTimerThatCouldBrother;
     private ObservableList<Pair<String,ObservableList<String>>> newList = FXCollections.observableArrayList();
+    private MediaPlayer mediaPlayer;
 
 
     /**
@@ -80,6 +84,32 @@ public class mainWindowController implements Initializable
         Thread thread = new Thread(task);
         thread.setDaemon(true);
         thread.start();
+
+        //A periodic timer that checks the list of online users
+        theLittleTimerThatCould = new Timeline(new KeyFrame(Duration.seconds(5), new EventHandler<ActionEvent>()
+        {
+            @Override
+            public void handle(ActionEvent event)
+            {
+                Platform.runLater(()-> lst_OnlineUsers.setItems(bgThread.getOnlineUserList()));
+            }
+        }));
+
+        //Time that grabs the set of friend requests
+        theLittleTimerThatCouldBrother = new Timeline(new KeyFrame(Duration.seconds(5), new EventHandler<ActionEvent>()
+        {
+            @Override
+            public void handle(ActionEvent event)
+            {
+                Platform.runLater(()-> lst_Requests.setItems(bgThread.getFriendRequests()));
+            }
+        }));
+
+
+        theLittleTimerThatCould.setCycleCount(Timeline.INDEFINITE);
+        theLittleTimerThatCould.playFrom(Duration.seconds(4.5));
+        theLittleTimerThatCouldBrother.setCycleCount(Timeline.INDEFINITE);
+        theLittleTimerThatCouldBrother.playFrom(Duration.seconds(4.5));
     }
 
     private synchronized void addToNewList(Pair<String, ObservableList<String>> pair)
@@ -92,6 +122,19 @@ public class mainWindowController implements Initializable
         return newList;
     }
 
+
+    @FXML private void play_Music()
+    {
+        String location = "src/Resources/bensound-betterdays.mp3";
+        Media hit = new Media(new File(location).toURI().toString());
+        mediaPlayer = new MediaPlayer(hit);
+        Platform.runLater(() -> mediaPlayer.play());
+    }
+
+    @FXML private void stop_Music()
+    {
+        mediaPlayer.stop();
+    }
 
     /**
      * Method that changes the scene back to the login screen and logs the user out
@@ -158,7 +201,7 @@ public class mainWindowController implements Initializable
 
     /**
      * accept the selected friend request
-     * @param actionEvent
+     * @param actionEvent not currently being used
      */
     @FXML private void accept_FriendRequest(ActionEvent actionEvent)
     {
@@ -210,7 +253,6 @@ public class mainWindowController implements Initializable
      */
     @FXML private void getMusicInterests(MouseEvent mouseEvent)
     {
-        System.out.println(newList.size());
         Boolean done = false;
         for (int i = 0; i < newList.size() && !done; ++i)
         {
@@ -222,88 +264,7 @@ public class mainWindowController implements Initializable
             }
         }
     }
-    /**
-     * This method retrieves the online users every 5 seconds and outputs it to the list in the
-     * social tab
-     * @param event currently not being used
-     */
-    @FXML private void getOnlineUsers_and_Requests(Event event)
-    {
-        //TODO make this use the background thread
-        //TODO make this start on initData
-        //A periodic timer that finds new users every 5 seconds
-        theLittleTimerThatCould = new Timeline(new KeyFrame(Duration.seconds(5), new EventHandler<ActionEvent>()
-        {
-            @Override
-            public void handle(ActionEvent event)
-            {
-                //Task to find all the current online users
-                //Kind of sloppy but it works
-                Task<Void> task = new Task<Void>()
-                {
-                    private static final String host = "localhost";
-                    private static final int portNumber = 4444;
-                    private static final String code = ".online";
-                    private ObservableList<String> onlineUserList = FXCollections.observableArrayList();
-                    private Users dummyUser = new Users();
 
-                    @Override protected Void call() throws Exception
-                    {
-                        try(Socket socket = new Socket(host,portNumber))
-                        {
-                            Thread.sleep(100);
-
-                            ObjectInputStream fromServer = new ObjectInputStream(socket.getInputStream());
-                            ObjectOutputStream toServer = new ObjectOutputStream(socket.getOutputStream());
-
-                            toServer.writeUTF(code);
-                            toServer.flush();
-
-                            toServer.writeObject(dummyUser);
-                            toServer.flush();
-
-                            Object obj = fromServer.readObject();
-                            ArrayList<String> templist = (ArrayList<String>) obj;
-                            onlineUserList.addAll(templist);
-
-                            //Checks if any of the online users are friends
-                            for (int i = 0; i < onlineUserList.size(); ++i)
-                            {
-                                for (int x = 0; x < user.getFriendsList().size(); ++x)
-                                {
-                                    if (onlineUserList.get(i).equals(user.getFriendsList().get(x)))
-                                        onlineUserList.set(i,onlineUserList.get(i) + "(Friend)");
-                                }
-                            }
-                            Platform.runLater(()-> lst_OnlineUsers.setItems(onlineUserList));
-                        }
-                        return null;
-                    }
-                };
-
-                Thread thread = new Thread(task);
-                thread.setDaemon(true);
-                thread.start();
-            }
-        }));
-
-        //Time that grabs the set of friend requests
-        theLittleTimerThatCouldBrother = new Timeline(new KeyFrame(Duration.seconds(5), new EventHandler<ActionEvent>()
-        {
-            @Override
-            public void handle(ActionEvent event)
-            {
-                Platform.runLater(()-> lst_Requests.setItems(bgThread.getFriendRequests()));
-            }
-        }));
-
-
-        theLittleTimerThatCould.setCycleCount(Timeline.INDEFINITE);
-        theLittleTimerThatCould.playFrom(Duration.seconds(4.5));
-        theLittleTimerThatCouldBrother.setCycleCount(Timeline.INDEFINITE);
-        theLittleTimerThatCouldBrother.playFrom(Duration.seconds(4.5));
-
-    }
 
     /**
      * Opens the context menu for friends list view
@@ -327,7 +288,7 @@ public class mainWindowController implements Initializable
      * opens the context menu for the requests list view
      * @param contextMenuEvent needed to get the menu's X & y coordinates
      */
-    public void open_ContextMenuRequests(ContextMenuEvent contextMenuEvent)
+    @FXML private void open_ContextMenuRequests(ContextMenuEvent contextMenuEvent)
     {
         requests_Menu.show(lst_Requests,contextMenuEvent.getScreenX(),contextMenuEvent.getScreenY());
     }
@@ -351,6 +312,7 @@ public class mainWindowController implements Initializable
         private final LinkedList<String> messagesToSend;
         private ObservableList<String> friendRequest = FXCollections.observableArrayList();
         private ObservableList<String> searchedUsers = FXCollections.observableArrayList();
+        private ObservableList<String> onlineUserList = FXCollections.observableArrayList();
         private boolean hasMessages = false;
 
 
@@ -377,6 +339,16 @@ public class mainWindowController implements Initializable
         synchronized ObservableList<String> getFriendRequests()
         {
             return friendRequest;
+        }
+
+        synchronized  ObservableList<String> getOnlineUserList()
+        {
+            return onlineUserList;
+        }
+
+        private void setOnlineUserList(ArrayList<String> list)
+        {
+            Platform.runLater(()->this.onlineUserList.setAll(list));
         }
 
         void handleFriendRequest(String input)
@@ -418,6 +390,24 @@ public class mainWindowController implements Initializable
                         if (input.equals("Done"))
                         {
                             socket.close();
+                        }
+                        else if (input.contains(".online"))
+                        {
+                            Object obj = fromServer.readObject();
+                            ArrayList<String> templist = (ArrayList<String>) obj;
+
+                            //Checks if any of the online users are friends
+                            for (int i = 0; i < templist.size(); ++i)
+                            {
+                                for (int x = 0; x < user.getFriendsList().size(); ++x)
+                                {
+                                    if (templist.get(i).equals(user.getFriendsList().get(x)))
+                                    {
+                                        templist.set(i, templist.get(i) + "(Friend)");
+                                    }
+                                }
+                            }
+                            setOnlineUserList(templist);
                         }
                         else if (input.contains(".Search"))
                         {

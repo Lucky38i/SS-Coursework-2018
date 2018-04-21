@@ -2,16 +2,17 @@ package server;
 
 import Resources.Pair;
 import Resources.Users;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.util.Duration;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Task that handles all connections received from the client
@@ -23,6 +24,7 @@ public class serverHandlerThread implements Runnable
     private ObjectOutputStream toClient;
     private ClientManager clientManagerTemp;
     private Users user;
+    private Timer t;
 
     /**
      * The main constructor
@@ -122,9 +124,6 @@ public class serverHandlerThread implements Runnable
     {
         try
         {
-
-            logoff();
-
             //Gathers a list of all the users that are online
             ArrayList<String> tempList = new ArrayList<>();
             for (Users i : clientManagerTemp.usersList())
@@ -134,11 +133,12 @@ public class serverHandlerThread implements Runnable
                     tempList.add(i.getUserName());
                 }
             }
+            toClient.writeUTF(".online");
+            toClient.flush();
 
             toClient.writeObject(tempList);
             toClient.flush();
 
-            socket.close();
         }
         catch (IOException e)
         {
@@ -239,8 +239,7 @@ public class serverHandlerThread implements Runnable
     private void searchMusicInterests(ObjectOutputStream toClient, String input)
     {
         String[] names = input.split("[.]");
-        ArrayList<Users> searchedUsers = new ArrayList();
-        Set<Users> hashSet = new HashSet<>();
+        ArrayList<Users> searchedUsers = new ArrayList<>();
         try
         {
             for (int i = 0; i < clientManagerTemp.usersList().size(); ++i)
@@ -254,7 +253,7 @@ public class serverHandlerThread implements Runnable
                 }
             }
             //Removes duplicates
-            hashSet.addAll(searchedUsers);
+            Set<Users> hashSet = new HashSet<>(searchedUsers);
             searchedUsers.clear();
             searchedUsers.addAll(hashSet);
 
@@ -276,6 +275,7 @@ public class serverHandlerThread implements Runnable
      */
     private void writeMessageToAll(String input)
     {
+        clientManagerTemp.logger(user.getUserName() + " Said: " + input );
         try
         {
             //Write the client input to all clients
@@ -306,6 +306,7 @@ public class serverHandlerThread implements Runnable
     {
         try
         {
+            t.cancel();
             logoff();
 
             //Set the user's log in state to false
@@ -348,6 +349,7 @@ public class serverHandlerThread implements Runnable
 
             while(!socket.isClosed())
             {
+
                 //If server has received a message
                 if(fromClient.available() > 0)
                 {
@@ -359,6 +361,15 @@ public class serverHandlerThread implements Runnable
                     if (input.contains(".Viewer"))
                     {
                         setViewer((Users) fromClient.readObject());
+
+                        //Intermittently send a list of online users
+                        t = new Timer();
+                        t.schedule(new TimerTask() {
+                            @Override
+                            public void run() {
+                                getOnlineUsers(toClient);
+                            }
+                        }, 0, 5000);
                     }
                     else if (input.contains(".Search"))
                     {
@@ -391,11 +402,12 @@ public class serverHandlerThread implements Runnable
                         registerUser((Users) fromClient.readObject());
                     }
 
+                    /*
                     //Sends out all the current online users
                     else if (".online".equals(input))
                     {
                         getOnlineUsers(toClient);
-                    }
+                    }*/
 
                     //If clients sends .findUser command then see if user exists in DB
                     else if (".findUser".equals(input))

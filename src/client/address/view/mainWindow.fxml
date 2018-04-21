@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
-
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.address.view.mainWindowController">
    <children>
       <BorderPane prefHeight="600.0" prefWidth="800.0">
@@ -29,24 +27,21 @@
                            <center>
                               <AnchorPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
                                  <children>
-                                    <TextField fx:id="txt_Search" layoutX="17.0" layoutY="56.0" promptText="Music Genre" />
+                                    <TextField fx:id="txt_Search" layoutX="23.0" layoutY="56.0" onAction="#searchMusicInterests" promptText="Music Genre" />
                                     <ListView fx:id="lst_SearchedUsers" layoutX="23.0" layoutY="129.0" onMouseClicked="#getMusicInterests" prefHeight="200.0" prefWidth="200.0" />
-                                    <Button layoutX="207.0" layoutY="56.0" mnemonicParsing="false" onAction="#searchMusicInterests" text="Search" />
-                                    <Label layoutX="38.0" layoutY="28.0" text="Search for people through music interests" />
-                                    <TableView fx:id="tbl_SearchedUsers" layoutX="457.0" layoutY="129.0" prefHeight="200.0" prefWidth="270.0">
-                                      <columns>
-                                        <TableColumn fx:id="column_UserName" editable="false" prefWidth="105.0" text="Username" />
-                                        <TableColumn fx:id="column_Genres" prefWidth="164.0" text="Music Interests" />
-                                      </columns>
-                                    </TableView>
-                                    <ListView fx:id="lst_SearchedMusic" disable="true" layoutX="238.0" layoutY="129.0" prefHeight="200.0" prefWidth="200.0" />
+                                    <Button layoutX="188.0" layoutY="56.0" mnemonicParsing="false" onAction="#searchMusicInterests" text="Search" />
+                                    <Label layoutX="23.0" layoutY="28.0" text="Search for people through music interests" />
+                                    <ListView fx:id="lst_SearchedMusic" disable="true" layoutX="223.0" layoutY="129.0" prefHeight="200.0" prefWidth="200.0" />
+                                    <Label layoutX="38.0" layoutY="104.0" text="Select a user to see interests" />
+                                    <Button layoutX="567.0" layoutY="206.0" mnemonicParsing="false" onAction="#play_Music" text="Play" />
+                                    <Button layoutX="560.0" layoutY="259.0" mnemonicParsing="false" onAction="#stop_Music" text="Button" />
                                  </children>
                               </AnchorPane>
                            </center>
                         </BorderPane>
                      </content>
                   </Tab>
-                <Tab fx:id="tab_Social" onSelectionChanged="#getOnlineUsers_and_Requests" text="Social">
+                <Tab text="Social">
                   <content>
                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                            <children>
@@ -66,7 +61,7 @@
                                        <children>
                                           <TextField fx:id="txt_SendMessage" layoutX="62.0" layoutY="17.0" onAction="#send_message" prefHeight="27.0" prefWidth="449.0" />
                                           <Label layoutX="21.0" layoutY="22.0" text="Post:" />
-                                          <Button fx:id="btn_SendMessage" layoutX="526.0" layoutY="17.0" mnemonicParsing="false" onAction="#send_message" prefHeight="27.0" prefWidth="60.0" text="Send" />
+                                          <Button layoutX="526.0" layoutY="17.0" mnemonicParsing="false" onAction="#send_message" prefHeight="27.0" prefWidth="60.0" text="Send" />
                                        </children>
                                     </AnchorPane>
                                  </bottom>
@@ -87,7 +82,7 @@
                                                          <contextMenu>
                                                             <ContextMenu fx:id="users_Menu">
                                                               <items>
-                                                                <MenuItem fx:id="menuItem_SendRequest" mnemonicParsing="false" onAction="#send_FriendRequest" text="Send user request" />
+                                                                <MenuItem mnemonicParsing="false" onAction="#send_FriendRequest" text="Send user request" />
                                                               </items>
                                                             </ContextMenu>
                                                          </contextMenu>
@@ -101,8 +96,8 @@
                                                          <contextMenu>
                                                             <ContextMenu fx:id="requests_Menu">
                                                               <items>
-                                                                <MenuItem fx:id="menuItem_Accept" mnemonicParsing="false" onAction="#accept_FriendRequest" text="Accept" />
-                                                                  <MenuItem fx:id="menuItem_Decline" mnemonicParsing="false" onAction="#decline_FriendRequest" text="Decline" />
+                                                                <MenuItem mnemonicParsing="false" onAction="#accept_FriendRequest" text="Accept" />
+                                                                  <MenuItem mnemonicParsing="false" onAction="#decline_FriendRequest" text="Decline" />
                                                               </items>
                                                             </ContextMenu>
                                                          </contextMenu>

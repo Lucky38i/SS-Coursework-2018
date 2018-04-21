@@ -3,6 +3,10 @@ package server;
 
 import Resources.Pair;
 import Resources.Users;
+import javafx.application.Platform;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.control.TextArea;
+import server.view.MainWindowController;
 
 import java.sql.*;
 import java.time.LocalDate;
@@ -18,14 +22,16 @@ class ClientManager
 {
     private final List<serverHandlerThread> clients;
     private final List<Users> users;
+    private TextArea textArea;
 
     /**
      * Constructor
      */
-    ClientManager()
+    ClientManager(TextArea textArea)
     {
         this.clients = new ArrayList<>();
         this.users = new ArrayList<>();
+        this.textArea = textArea;
     }
 
     synchronized void addClient(serverHandlerThread client)
@@ -119,7 +125,10 @@ class ClientManager
      */
     synchronized void logger(String msg)
     {
-        System.out.println(LocalDate.now()+ " " +LocalTime.now() + " - " +msg);
+        String logMessage = LocalDate.now()+ " " +LocalTime.now() + " - " +msg +"\n";
+        //System.out.println(logMessage);
+        Platform.runLater(() -> textArea.appendText(logMessage));
+
     }
 
     /**
@@ -186,7 +195,7 @@ class ClientManager
                             "WHERE b.userID = " + user.getUserID() + " AND a.userID = b.friendID";
 
                     //Add the friends list
-                    try(ResultSet friendResult = friendsStatement.executeQuery(findFriendList);)
+                    try(ResultSet friendResult = friendsStatement.executeQuery(findFriendList))
                     {
                         while (friendResult.next())
                         {
@@ -223,7 +232,7 @@ class ClientManager
             PreparedStatement preparedStatement = conn.prepareStatement(addUser);
             Statement statement = conn.createStatement();
             ResultSet resultSet = statement.executeQuery(findUserID);
-            PreparedStatement preparedStatement1 = conn.prepareStatement(addMusicGenres);)
+            PreparedStatement preparedStatement1 = conn.prepareStatement(addMusicGenres))
         {
             //Sets each value and executes the update
             preparedStatement.setString(1,user.getUserName());
