@@ -22,14 +22,6 @@ public class MainApp extends Application
     private static final String loginScreenFXML = "view/loginWindow.fxml";
 
     /**
-     * Constructor
-     */
-    public MainApp()
-    {
-        //Sample data
-    }
-
-    /**
      * The main entry point for JavaFX applications
      * @param primaryStage used as the.. primary stage
      *

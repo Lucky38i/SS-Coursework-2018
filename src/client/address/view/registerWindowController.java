@@ -29,8 +29,8 @@ public class registerWindowController implements Initializable
     private Alert alertError = new Alert(Alert.AlertType.ERROR);
     private Alert alert = new Alert(Alert.AlertType.INFORMATION);
     private Users user = new Users();
-    private static final String host = "localhost";
-    private static final int portNumber = 4444;
+    private static String host = "localhost";
+    private static int portNumber = 4444;
     private final String loginWindow = "view/loginWindow.fxml";
 
 

@@ -27,9 +27,8 @@ import java.util.ResourceBundle;
 public class loginWindowController implements Initializable
 {
 
-
     //FXML Variables
-    @FXML private TextField textField_Username;
+    @FXML private TextField textField_Username, txt_Port, txt_IPAddress;
     @FXML private Label txt_Version;
 
     //Variables
@@ -39,8 +38,8 @@ public class loginWindowController implements Initializable
     private Alert alertInfo = new Alert(Alert.AlertType.INFORMATION);
     private Alert alertError = new Alert(Alert.AlertType.ERROR);
     private static final String version = "V0.45";
-    private static final String host = "localhost";
-    private static final int portNumber = 4444;
+    private static String host = "localhost";
+    private static int portNumber = 4444;
 
 
     /**
@@ -61,8 +60,15 @@ public class loginWindowController implements Initializable
             alertError.showAndWait();
 
 
-        } else
+        }
+        else
         {
+            if (!txt_IPAddress.getText().equals("") || !txt_Port.getText().equals(""))
+            {
+                portNumber = Integer.parseInt(txt_Port.getText());
+                host = txt_IPAddress.getText();
+            }
+
             user.setUserName(textField_Username.getText());
 
             Task<Users> task = new javaFXWorker(user, ".findUser",host,portNumber);

@@ -9,6 +9,10 @@ package server;
  *
  * @author alexmcbean
  */
+import javafx.concurrent.Task;
+import javafx.scene.control.TextArea;
+
+import java.awt.*;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -21,15 +25,17 @@ import java.util.concurrent.FutureTask;
  * such as registration, log in, friends, music streaming etc.
  * @author alexmcbean
  */
-public class MainServer
+public class MainServer extends Task<Void>
 {
+    //JavaFX variables
+    private TextArea textArea;
 
     //Static variables
     private static final int portNumber = 4444;
     
     //Variables
     private int serverPort;
-    private final ClientManager clientManagerTemp = new ClientManager();
+    private ClientManager clientManagerTemp;
 
     /**
      * Starts the server and begins accepting clients
@@ -88,21 +94,19 @@ public class MainServer
      * Main constructor that takes in a port Number
      * @param portNumber the port number by which to start the server
      */
-    public MainServer(int portNumber)
+    public MainServer(int portNumber, TextArea textArea)
     {
         this.serverPort = portNumber;
+        this.textArea = textArea;
     }
 
-    /**
-     * The main method, could be seperated into a main program
-     * @param args not being currently used
-     */
-    public static void main(String[] args) 
+    @Override
+    protected Void call()
     {
-        MainServer server  = new MainServer(portNumber);
-        server.clientManagerTemp.populateUsers();
-        server.startServer();
-
+        clientManagerTemp = new ClientManager(textArea);
+        clientManagerTemp.populateUsers();
+        startServer();
+        return null;
     }
 }
 

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<AnchorPane prefHeight="400.0" prefWidth="280.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="server.view.startWindowController">
+   <children>
+      <BorderPane prefHeight="400.0" prefWidth="280.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <center>
+            <AnchorPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+               <children>
+                  <TextField fx:id="txt_ChatPort" disable="true" editable="false" layoutX="26.0" layoutY="176.0" promptText="//TODO" />
+                  <Label layoutX="57.0" layoutY="159.0" text="Chat Server Port" />
+                  <Label layoutX="55.0" layoutY="57.0" text="Main Server Port" />
+                  <Button layoutX="57.0" layoutY="281.0" mnemonicParsing="false" onAction="#openMainWindow" text="Start Servers!" />
+                  <TextField fx:id="txt_MainPort" layoutX="25.0" layoutY="74.0" />
+               </children>
+            </AnchorPane>
+         </center>
+         <left>
+            <AnchorPane prefHeight="320.0" prefWidth="40.0" BorderPane.alignment="CENTER" />
+         </left>
+         <top>
+            <AnchorPane prefHeight="40.0" prefWidth="549.0" BorderPane.alignment="CENTER" />
+         </top>
+         <right>
+            <AnchorPane prefHeight="320.0" prefWidth="40.0" BorderPane.alignment="CENTER" />
+         </right>
+         <bottom>
+            <AnchorPane prefHeight="40.0" prefWidth="549.0" BorderPane.alignment="CENTER" />
+         </bottom>
+      </BorderPane>
+   </children>
+</AnchorPane>
