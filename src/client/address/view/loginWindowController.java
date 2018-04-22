@@ -11,9 +11,10 @@ import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -26,10 +27,11 @@ import java.util.ResourceBundle;
  */
 public class loginWindowController implements Initializable
 {
-
     //FXML Variables
     @FXML private TextField textField_Username, txt_Port, txt_IPAddress;
     @FXML private Label txt_Version;
+    @FXML private ToggleButton btn_Config;
+    @FXML private AnchorPane pane_Config, pane_Login;
 
     //Variables
     private static final String mainWindow = "mainWindow.fxml";
@@ -40,6 +42,20 @@ public class loginWindowController implements Initializable
     private static final String version = "V0.45";
     private static String host = "localhost";
     private static int portNumber = 4444;
+
+    @FXML private void open_Config(ActionEvent actionEvent)
+    {
+        if (btn_Config.selectedProperty().get())
+        {
+            pane_Login.setVisible(false);
+            pane_Config.setVisible(true);
+        }
+        else
+        {
+            pane_Login.setVisible(true);
+            pane_Config.setVisible(false);
+        }
+    }
 
 
     /**
@@ -162,9 +178,12 @@ public class loginWindowController implements Initializable
     @Override
     public void initialize(URL url, ResourceBundle rb)
     {
+        Image configImage = new Image(getClass().getResourceAsStream("../../../Resources/Cogwheel-512.png"),btn_Config.getPrefWidth(),btn_Config.getPrefHeight(),true,false);
+        btn_Config.setGraphic(new ImageView(configImage));
+        txt_Port.setText(String.valueOf(portNumber));
+        txt_IPAddress.setText(host);
+        pane_Config.setVisible(false);
         txt_Version.setText(version);
     }
-
-
 }
 
