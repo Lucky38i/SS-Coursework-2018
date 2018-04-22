@@ -15,17 +15,13 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.input.ContextMenuEvent;
-import javafx.scene.input.InputMethodEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.net.Socket;
 import java.net.URL;
 import java.util.ArrayList;
@@ -125,7 +121,7 @@ public class mainWindowController implements Initializable
 
     @FXML private void play_Music()
     {
-        String location = "src/Resources/bensound-betterdays.mp3";
+        String location = "src/Resources/Songs/test.mp3";
         Media hit = new Media(new File(location).toURI().toString());
         mediaPlayer = new MediaPlayer(hit);
         Platform.runLater(() -> mediaPlayer.play());
@@ -134,6 +130,68 @@ public class mainWindowController implements Initializable
     @FXML private void stop_Music()
     {
         mediaPlayer.stop();
+    }
+
+    /**
+     * This handles music (incomplete javaDoc)
+     * @param actionEvent incomplete
+     */
+    @FXML private void handleMusic(ActionEvent actionEvent)
+    {
+
+        Task<Void> task = new Task<Void>()
+        {
+            String song = "test";
+            String tempSong = "test.mp3";
+            int byteRead;
+            int current =0;
+
+            @Override
+            //TODO close the socket
+            protected Void call()
+            {
+                try(Socket socket = new Socket(host,portNumber);
+                    ObjectOutputStream toServer = new ObjectOutputStream(socket.getOutputStream());
+                    ObjectInputStream fromServer = new ObjectInputStream(socket.getInputStream()))
+                {
+                    toServer.writeUTF(".Music."+song);
+                    toServer.flush();
+
+                    byte[] buffer = new byte[16384];
+
+                    File test = new File(tempSong);
+                    test.createNewFile();
+                    BufferedOutputStream bOS = new BufferedOutputStream(new FileOutputStream(test));
+                    byteRead = fromServer.read(buffer, 0, buffer.length);
+                    current = byteRead;
+
+                    while ((byteRead = fromServer.read(buffer, 0, buffer.length)) != -1)
+                    {
+                        bOS.write(buffer,0, byteRead);
+                    }
+                    System.out.println("Finished writing");
+
+                    bOS.close();
+                }
+                catch (IOException e)
+                {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+        };
+        task.setOnSucceeded(event ->
+        Platform.runLater(()->
+        {
+            String location = "test.mp3";
+            Media hit = new Media(new File(location).toURI().toString());
+            mediaPlayer = new MediaPlayer(hit);
+            System.out.println("Playing");
+            Platform.runLater(() -> mediaPlayer.play());
+        }));
+        Thread thread = new Thread(task);
+        thread.setDaemon(true);
+        thread.start();
     }
 
     /**

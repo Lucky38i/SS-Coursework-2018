@@ -55,7 +55,7 @@ class ClientManager
     }
 
     //TODO find out if this really isn't of any use
-    synchronized void removeUser(Users user)
+   synchronized void removeUser(Users user)
     {
         this.users.remove(user);
     }

@@ -40,6 +40,7 @@ public class MainWindowController implements Initializable
     @FXML private void shutdownServers()
     {
         Platform.exit();
+        System.exit(0);
     }
 
     @Override

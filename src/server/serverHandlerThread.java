@@ -1,30 +1,31 @@
 package server;
 
+import Resources.AudioUtil;
 import Resources.Pair;
 import Resources.Users;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.util.Duration;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.net.Socket;
 import java.util.*;
 
 /**
  * Task that handles all connections received from the client
  */
-public class serverHandlerThread implements Runnable
+public class serverHandlerThread extends Task<Void>
 {
     //Variables
     private Socket socket;
     private ObjectOutputStream toClient;
     private ClientManager clientManagerTemp;
     private Users user;
-    private Timer t;
+    private Timeline timer;
 
     /**
      * The main constructor
@@ -230,6 +231,34 @@ public class serverHandlerThread implements Runnable
         }
     }
 
+    private void findMusic(String input, ObjectOutputStream toClient)
+    {
+        logoff();
+        String[] names = input.split("[.]");
+        clientManagerTemp.logger("Someone request song: " + names[2] + ".mp3");
+
+        File musicFile = AudioUtil.getSoundFile("src/Resources/Songs/" + names[2]+ ".mp3");
+        byte[] buffer = new byte[(int) musicFile.length()];
+
+        try(BufferedInputStream bis = new BufferedInputStream(new FileInputStream(musicFile)))
+        {
+            bis.read(buffer, 0, buffer.length);
+
+            clientManagerTemp.logger("Sending " + "src/Resources/Songs/" + names[2]+ ".mp3" + "(" + buffer.length + " bytes)");
+
+            toClient.write(buffer,0, buffer.length);
+            toClient.flush();
+
+            clientManagerTemp.logger("Finished sending");
+
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+
+    }
+
     /**
      * This method searches for users who have the searched music interests
      * then compiles a list of all these users and sends it back to the client
@@ -306,7 +335,7 @@ public class serverHandlerThread implements Runnable
     {
         try
         {
-            t.cancel();
+            timer.stop();
             logoff();
 
             //Set the user's log in state to false
@@ -339,7 +368,7 @@ public class serverHandlerThread implements Runnable
     }
 
     @Override
-    public void run ()
+    public Void call ()
     {
         try
         {
@@ -349,27 +378,33 @@ public class serverHandlerThread implements Runnable
 
             while(!socket.isClosed())
             {
-
                 //If server has received a message
                 if(fromClient.available() > 0)
                 {
                     //Reads message and objects from client
                     String input = fromClient.readUTF();
 
-
                     //Send a request to the user
                     if (input.contains(".Viewer"))
                     {
                         setViewer((Users) fromClient.readObject());
 
-                        //Intermittently send a list of online users
-                        t = new Timer();
-                        t.schedule(new TimerTask() {
+                        //A periodic timer that sends online users periodically
+                        timer = new Timeline(new KeyFrame(Duration.seconds(5), new EventHandler<ActionEvent>()
+                        {
                             @Override
-                            public void run() {
+                            public void handle(ActionEvent event)
+                            {
                                 getOnlineUsers(toClient);
                             }
-                        }, 0, 5000);
+                        }));
+
+                        timer.setCycleCount(Timeline.INDEFINITE);
+                        timer.playFrom(Duration.seconds(4.5));
+                    }
+                    else if (input.contains(".Music"))
+                    {
+                        findMusic(input, toClient);
                     }
                     else if (input.contains(".Search"))
                     {
@@ -402,13 +437,6 @@ public class serverHandlerThread implements Runnable
                         registerUser((Users) fromClient.readObject());
                     }
 
-                    /*
-                    //Sends out all the current online users
-                    else if (".online".equals(input))
-                    {
-                        getOnlineUsers(toClient);
-                    }*/
-
                     //If clients sends .findUser command then see if user exists in DB
                     else if (".findUser".equals(input))
                     {
@@ -425,5 +453,6 @@ public class serverHandlerThread implements Runnable
         {
             e.printStackTrace();
         }
+        return null;
     }
 }

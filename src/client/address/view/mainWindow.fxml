@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
+
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.address.view.mainWindowController">
    <children>
       <BorderPane prefHeight="600.0" prefWidth="800.0">
@@ -35,6 +37,7 @@
                                     <Label layoutX="38.0" layoutY="104.0" text="Select a user to see interests" />
                                     <Button layoutX="567.0" layoutY="206.0" mnemonicParsing="false" onAction="#play_Music" text="Play" />
                                     <Button layoutX="560.0" layoutY="259.0" mnemonicParsing="false" onAction="#stop_Music" text="Button" />
+                                    <Button layoutX="541.0" layoutY="69.0" mnemonicParsing="false" onAction="#handleMusic" text="Test Stream" />
                                  </children>
                               </AnchorPane>
                            </center>
