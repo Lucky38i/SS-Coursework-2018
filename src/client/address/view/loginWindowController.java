@@ -115,7 +115,7 @@ public class loginWindowController implements Initializable
 
                                 //Receive the object returned by the task and switch the scene
                                 Users taskUser = task.getValue();
-                                switchToMainMenu(actionEvent, taskUser);
+                                switchToMainMenu(actionEvent, taskUser, host, portNumber);
                                 break;
                         }
                     }));
@@ -147,7 +147,7 @@ public class loginWindowController implements Initializable
      * @param actionEvent used to switch the scene
      * @param user used to send to the main window controller
      */
-    private void switchToMainMenu(ActionEvent actionEvent, Users user)
+    private void switchToMainMenu(ActionEvent actionEvent, Users user, String host, Integer portNumber)
     {
         try
         {
@@ -161,7 +161,7 @@ public class loginWindowController implements Initializable
 
             //Access the controller and init data
             mainWindowController controller = loader.getController();
-            controller.initData(user);
+            controller.initData(user, host, portNumber);
 
             //Find the stage information
             Stage window = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();

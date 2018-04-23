@@ -21,6 +21,7 @@ import javafx.scene.media.MediaPlayer;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 
+import javax.sound.sampled.AudioInputStream;
 import java.io.*;
 import java.net.Socket;
 import java.net.URL;
@@ -45,8 +46,8 @@ public class mainWindowController implements Initializable
     //Variables
     private Alert alertInfo = new Alert(Alert.AlertType.INFORMATION);
     private static Users user;
-    private static final String host = "localhost";
-    private static final int portNumber = 4444;
+    private String host = "localhost";
+    private int portNumber = 4444;
     private Timeline theLittleTimerThatCould;
     private backgroundThread bgThread;
     private Task<Void> task;
@@ -59,9 +60,11 @@ public class mainWindowController implements Initializable
      * This sets the received user to <code>this.user</code> to be used by this controller
      * @param user receives a user object from the registerWindowController
      */
-    void initData(Users user)
+    void initData(Users user, String host, Integer portNumber)
     {
         mainWindowController.user = user;
+        this.host = host;
+        this.portNumber = portNumber;
 
         txt_UserName.setText(txt_UserName.getText() + " " + user.getFirstName() + "!");
         txt_FirstName.setText(user.getFirstName());
@@ -143,8 +146,7 @@ public class mainWindowController implements Initializable
         {
             String song = "test";
             String tempSong = "test.mp3";
-            int byteRead;
-            int current =0;
+            int current;
 
             @Override
             //TODO close the socket
@@ -157,18 +159,18 @@ public class mainWindowController implements Initializable
                     toServer.writeUTF(".Music."+song);
                     toServer.flush();
 
-                    byte[] buffer = new byte[16384];
 
                     File test = new File(tempSong);
                     test.createNewFile();
                     BufferedOutputStream bOS = new BufferedOutputStream(new FileOutputStream(test));
-                    byteRead = fromServer.read(buffer, 0, buffer.length);
-                    current = byteRead;
 
-                    while ((byteRead = fromServer.read(buffer, 0, buffer.length)) != -1)
+                    byte[] buffer = new byte[4096];
+
+                    while ((current = fromServer.read(buffer)) > 0)
                     {
-                        bOS.write(buffer,0, byteRead);
+                        bOS.write(buffer, 0 , current);
                     }
+
                     System.out.println("Finished writing");
 
                     bOS.close();

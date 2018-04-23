@@ -23,7 +23,7 @@ public class mainApp extends Application
         try
         {
             primaryStage.setTitle("SpotLike Server!");
-            primaryStage.getIcons().add(new Image("Resources/Music-icon.png"));
+            primaryStage.getIcons().add(new Image("resources/Music-icon.png"));
 
             Parent root = FXMLLoader.load(mainApp.class.getResource(startScreenFXML));
 
