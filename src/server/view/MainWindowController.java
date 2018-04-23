@@ -6,6 +6,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.TextArea;
 import javafx.scene.text.Text;
+import server.ChatServer;
 import server.MainServer;
 
 import java.net.URL;
@@ -19,6 +20,7 @@ public class MainWindowController implements Initializable
     private int mainPort;
     private int chatPort;
     private Thread mainThread;
+    private Thread chatThread;
 
     /**
      * Initializes the data for the servers to start on
@@ -31,10 +33,17 @@ public class MainWindowController implements Initializable
         lbl_Welcome.setText("Main Server started on port: " + this.mainPort + "\nChat Server started on port: ");
 
         //Start Main server
-        Task<Void> task = new MainServer(this.mainPort, txt_MainServerLogs);
-        mainThread = new Thread(task);
+        Task<Void> mainTask = new MainServer(this.mainPort, txt_MainServerLogs);
+        Task<Void> chatTask = new ChatServer(this.chatPort);
+
+        mainThread = new Thread(mainTask);
+        chatThread = new Thread(chatTask);
+
         mainThread.setDaemon(true);
+        chatThread.setDaemon(true);
+
         mainThread.start();
+        chatThread.start();
     }
 
     @FXML private void shutdownServers()
