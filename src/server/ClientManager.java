@@ -4,9 +4,7 @@ package server;
 import Resources.Pair;
 import Resources.Users;
 import javafx.application.Platform;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.control.TextArea;
-import server.view.MainWindowController;
 
 import java.sql.*;
 import java.time.LocalDate;
@@ -18,20 +16,21 @@ import java.util.List;
  * A client manager that synchronizes all data between threads
  * @author alexmcbean
  */
-class ClientManager
+public class ClientManager
 {
     private final List<serverHandlerThread> clients;
     private final List<Users> users;
-    private TextArea textArea;
+    private TextArea maintextArea, chatTextArea;
 
     /**
      * Constructor
      */
-    ClientManager(TextArea textArea)
+    public ClientManager(TextArea maintextArea, TextArea chatTextArea)
     {
         this.clients = new ArrayList<>();
         this.users = new ArrayList<>();
-        this.textArea = textArea;
+        this.maintextArea = maintextArea;
+        this.chatTextArea = chatTextArea;
     }
 
     synchronized void addClient(serverHandlerThread client)
@@ -123,11 +122,26 @@ class ClientManager
      * the current time and date
      * @param msg used when printing the log
      */
-    synchronized void logger(String msg)
+    synchronized void logger(String msg, String type)
     {
         String logMessage = LocalDate.now()+ " " +LocalTime.now() + " - " +msg +"\n";
         //System.out.println(logMessage);
-        Platform.runLater(() -> textArea.appendText(logMessage));
+        if (type.contains("Main"))
+        {
+            Platform.runLater(() -> maintextArea.appendText(logMessage));
+        }
+        else if (type.contains("Chat"))
+        {
+            Platform.runLater(()-> chatTextArea.appendText(logMessage));
+        }
+        else
+        {
+            Platform.runLater(()->
+            {
+                maintextArea.appendText(logMessage);
+                chatTextArea.appendText(logMessage);
+            });
+        }
 
     }
 
@@ -142,7 +156,7 @@ class ClientManager
         try
         {
             conn = DriverManager.getConnection(url);
-            logger("Connection to database made");
+            logger("Connection to database made", "Both");
         }
         catch (SQLException e)
         {
@@ -157,7 +171,7 @@ class ClientManager
      * and adds the results to a user which then gets added
      * to a list of users
      */
-    synchronized void populateUsers()
+    public synchronized void populateUsers()
     {
         String sqlQuery = "SELECT userName, firstName, lastName, birthday, City, userID, loggedIn FROM Users";
 
@@ -206,7 +220,7 @@ class ClientManager
                 }
                 addUser(user);
             }
-            logger("Database built successfully ");
+            logger("Database built successfully ","Both");
 
 
         }
@@ -253,7 +267,7 @@ class ClientManager
             }
 
             addUser(user);
-            logger("User: " + user.getUserName() + " added to database");
+            logger("User: " + user.getUserName() + " added to database", "Both");
         }
 
         catch (SQLException e)
@@ -293,10 +307,10 @@ class ClientManager
                     }
                 }
                 foundUser.setSecond(temp);
-                logger("Found user: " + foundUser.getSecond().getFirstName());
+                logger("Found user: " + foundUser.getSecond().getFirstName(),"Main");
             }
             else
-                logger("User not found");
+                logger("User not found","Main");
         }
 
         catch (SQLException e)

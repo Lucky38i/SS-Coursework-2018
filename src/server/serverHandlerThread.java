@@ -192,7 +192,7 @@ public class serverHandlerThread extends Task<Void>
                 toClient.writeObject(findUsers.getSecond());
                 toClient.flush();
 
-                clientManagerTemp.logger("IP: " + socket.getRemoteSocketAddress() + " tried to access an already logged in account");
+                clientManagerTemp.logger("IP: " + socket.getRemoteSocketAddress() + " tried to access an already logged in account","Main");
             } else
             {
                 //If user is found then send the user object to the client
@@ -210,7 +210,7 @@ public class serverHandlerThread extends Task<Void>
                         if (findUsers.getSecond().getUserName().equals(clientManagerTemp.usersList().get(i).getUserName()))
                         {
                             clientManagerTemp.usersList().get(i).setLoggedIn(true);
-                            clientManagerTemp.logger(findUsers.getSecond().getUserName() + " has logged in");
+                            clientManagerTemp.logger(findUsers.getSecond().getUserName() + " has logged in","Main");
                         }
                     }
                 } else if (!findUsers.getFirst())
@@ -240,7 +240,7 @@ public class serverHandlerThread extends Task<Void>
     {
         logoff();
         String[] names = input.split("[.]");
-        clientManagerTemp.logger("Someone request song: " + names[2] + ".mp3");
+        clientManagerTemp.logger("Someone request song: " + names[2] + ".mp3","Main");
 
         File musicFile = AudioUtil.getSoundFile("src/Resources/Songs/" + names[2]+ ".mp3");
         byte[] buffer = new byte[(int) musicFile.length()];
@@ -249,12 +249,12 @@ public class serverHandlerThread extends Task<Void>
         {
             bis.read(buffer, 0, buffer.length);
 
-            clientManagerTemp.logger("Sending " + "src/Resources/Songs/" + names[2]+ ".mp3" + "(" + buffer.length + " bytes)");
+            clientManagerTemp.logger("Sending " + "src/Resources/Songs/" + names[2]+ ".mp3" + "(" + buffer.length + " bytes)","Main");
 
             toClient.write(buffer,0, buffer.length);
             toClient.flush();
 
-            clientManagerTemp.logger("Finished sending");
+            clientManagerTemp.logger("Finished sending","Main");
 
         }
         catch (IOException e)
@@ -309,7 +309,7 @@ public class serverHandlerThread extends Task<Void>
      */
     private void writeMessageToAll(String input)
     {
-        clientManagerTemp.logger(user.getUserName() + " Said: " + input );
+        clientManagerTemp.logger(user.getUserName() + " Said: " + input,"Main" );
         try
         {
             //Write the client input to all clients
@@ -350,7 +350,7 @@ public class serverHandlerThread extends Task<Void>
                 if (user.getUserName().equals(clientManagerTemp.usersList().get(i).getUserName()))
                 {
                     clientManagerTemp.usersList().get(i).setLoggedIn(false);
-                    clientManagerTemp.logger(user.getUserName() + " has logged out");
+                    clientManagerTemp.logger(user.getUserName() + " has logged out","Main");
                 }
             }
 

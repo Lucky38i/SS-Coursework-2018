@@ -2,6 +2,7 @@ package client.address.view;
 
 import Resources.Users;
 import client.address.SceneSwitcher;
+import client.address.javaFXWorker;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;

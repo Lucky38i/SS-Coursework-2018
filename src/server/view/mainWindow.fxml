@@ -42,7 +42,23 @@
                       </Tab>
                       <Tab text="Chat Server">
                         <content>
-                          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                 <children>
+                                    <BorderPane prefHeight="327.0" prefWidth="600.0">
+                                       <center>
+                                          <TextArea fx:id="txt_ChatServerLogs" prefHeight="327.0" prefWidth="471.0" BorderPane.alignment="CENTER" />
+                                       </center>
+                                       <left>
+                                          <AnchorPane prefHeight="327.0" prefWidth="20.0" BorderPane.alignment="CENTER" />
+                                       </left>
+                                       <right>
+                                          <AnchorPane prefHeight="327.0" prefWidth="100.0" BorderPane.alignment="CENTER" />
+                                       </right>
+                                       <top>
+                                          <AnchorPane prefHeight="20.0" prefWidth="600.0" BorderPane.alignment="CENTER" />
+                                       </top>
+                                    </BorderPane>
+                                 </children></AnchorPane>
                         </content>
                       </Tab>
                     </tabs>

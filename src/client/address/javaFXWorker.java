@@ -1,4 +1,4 @@
-package client.address.view;
+package client.address;
 
 import Resources.Users;
 import javafx.concurrent.Task;
@@ -24,7 +24,7 @@ public class javaFXWorker extends Task<Users>
 
 
 
-    javaFXWorker(Users user, String code, String host, int portNumber)
+    public javaFXWorker(Users user, String code, String host, int portNumber)
     {
         this.user = user;
         javaFXWorker.code = code;

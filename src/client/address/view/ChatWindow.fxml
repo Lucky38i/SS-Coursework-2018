@@ -6,7 +6,7 @@
 <?import javafx.scene.control.TitledPane?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane prefHeight="283.0" prefWidth="224.0" xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.address.view.ChatWindowController">
+<AnchorPane prefHeight="283.0" prefWidth="224.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.address.view.ChatWindowController">
    <children>
       <TitledPane prefHeight="253.0" prefWidth="263.0" text="Chat">
          <content>

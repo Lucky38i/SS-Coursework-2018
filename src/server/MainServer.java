@@ -50,7 +50,7 @@ public class MainServer extends Task<Void>
         }
         catch (IOException e)
         {
-            clientManagerTemp.logger("Could not listen on port: " + serverPort);
+            clientManagerTemp.logger("Could not listen on port: " + serverPort, "Main");
             System.exit(1);
         }
     }
@@ -73,7 +73,7 @@ public class MainServer extends Task<Void>
      */
     private void acceptClients(ServerSocket serverSocket)
     {
-        clientManagerTemp.logger("Server starts port = " + serverSocket.getLocalSocketAddress());
+        clientManagerTemp.logger("Server starts port = " + serverSocket.getLocalSocketAddress(), "Main");
         ExecutorService executorService = Executors.newCachedThreadPool();
         while (true)
         {
@@ -94,17 +94,15 @@ public class MainServer extends Task<Void>
      * Main constructor that takes in a port Number
      * @param portNumber the port number by which to start the server
      */
-    public MainServer(int portNumber, TextArea textArea)
+    public MainServer(int portNumber, ClientManager clientManager)
     {
         this.serverPort = portNumber;
-        this.textArea = textArea;
+        clientManagerTemp = clientManager;
     }
 
     @Override
     protected Void call()
     {
-        clientManagerTemp = new ClientManager(textArea);
-        clientManagerTemp.populateUsers();
         startServer();
         return null;
     }
