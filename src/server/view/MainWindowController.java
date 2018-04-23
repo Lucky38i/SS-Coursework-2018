@@ -27,17 +27,18 @@ public class MainWindowController implements Initializable
      * Initializes the data for the servers to start on
      * @param mainPort the port for the main server
      */
-    void initData(int mainPort)
+    void initData(int mainPort, int chatPort)
     {
         this.mainPort = mainPort;
+        this.chatPort = chatPort;
         //this.chatPort = chatPort;
-        lbl_Welcome.setText("Main Server started on port: " + this.mainPort + "\nChat Server started on port: ");
+        lbl_Welcome.setText("Main Server started on port: " + this.mainPort + "\nChat Server started on port: " + this.chatPort);
         ClientManager clientManager = new ClientManager(txt_MainServerLogs, txt_ChatServerLogs);
         clientManager.populateUsers();
 
         //Start Main server
         Task<Void> mainTask = new MainServer(this.mainPort, clientManager);
-        Task<Void> chatTask = new ChatServer(this.chatPort);
+        Task<Void> chatTask = new ChatServer(this.chatPort, clientManager);
 
         mainThread = new Thread(mainTask);
         chatThread = new Thread(chatTask);

@@ -2,15 +2,16 @@ package server;
 
 import Resources.AudioUtil;
 import Resources.Pair;
+import Resources.SharedSongs;
 import Resources.Users;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
-import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.util.Duration;
 
+import javax.jws.soap.SOAPBinding;
 import java.io.*;
 import java.net.Socket;
 import java.util.*;
@@ -25,7 +26,7 @@ public class serverHandlerThread extends Task<Void>
     private ObjectOutputStream toClient;
     private ClientManager clientManagerTemp;
     private Users user;
-    private Timeline timer;
+    private Timeline updaterTimer;
 
     /**
      * The main constructor
@@ -147,6 +148,12 @@ public class serverHandlerThread extends Task<Void>
         }
     }
 
+    /**
+     * Retrieves a user and sends it to the client, basically updating it, in case of
+     * any changes such as a new friend
+     * @param toClient The output stream
+     * @param input The get message code
+     */
     private void getUpdatedUser(ObjectOutputStream toClient, String input)
     {
         try
@@ -156,9 +163,11 @@ public class serverHandlerThread extends Task<Void>
             {
                 if (clientManagerTemp.usersList().get(i).getUserName().contains(names[2]))
                 {
+                    toClient.reset();
                     toClient.writeUTF(input);
                     toClient.flush();
 
+                    toClient.reset();
                     toClient.writeObject(clientManagerTemp.usersList().get(i));
                     toClient.flush();
                 }
@@ -232,9 +241,9 @@ public class serverHandlerThread extends Task<Void>
     }
 
     /**
-     * //TODO
-     * @param input //TODO
-     * @param toClient //TODO
+     * Finds the requested music and sends the file to the user
+     * @param input  the message containing the requested song
+     * @param toClient The object output stream used to send the file
      */
     private void findMusic(String input, ObjectOutputStream toClient)
     {
@@ -246,7 +255,8 @@ public class serverHandlerThread extends Task<Void>
         Integer fileLength = (int) musicFile.length();
         byte[] buffer = new byte[fileLength];
 
-        try(BufferedInputStream bis = new BufferedInputStream(new FileInputStream(musicFile)))
+        try(FileInputStream fileReader = new FileInputStream(musicFile);
+            BufferedInputStream bis = new BufferedInputStream(fileReader))
         {
             bis.read(buffer, 0, buffer.length);
 
@@ -257,8 +267,8 @@ public class serverHandlerThread extends Task<Void>
             toClient.flush();
 
             clientManagerTemp.logger("Finished sending","Main");
-
         }
+
         catch (IOException e)
         {
             e.printStackTrace();
@@ -343,7 +353,7 @@ public class serverHandlerThread extends Task<Void>
     {
         try
         {
-            timer.stop();
+            updaterTimer.stop();
             logoff();
 
             //Set the user's log in state to false
@@ -397,18 +407,21 @@ public class serverHandlerThread extends Task<Void>
                     {
                         setViewer((Users) fromClient.readObject());
 
-                        //A periodic timer that sends online users periodically
-                        timer = new Timeline(new KeyFrame(Duration.seconds(5), new EventHandler<ActionEvent>()
+                        //A periodic updaterTimer that sends online users periodically
+                        updaterTimer = new Timeline(new KeyFrame(Duration.seconds(5), new EventHandler<ActionEvent>()
                         {
                             @Override
                             public void handle(ActionEvent event)
                             {
                                 getOnlineUsers(toClient);
+
+                                getUpdatedUser(toClient,".Get."+user.getUserName());
+
                             }
                         }));
 
-                        timer.setCycleCount(Timeline.INDEFINITE);
-                        timer.playFrom(Duration.seconds(4.5));
+                        updaterTimer.setCycleCount(Timeline.INDEFINITE);
+                        updaterTimer.playFrom(Duration.seconds(4));
                     }
                     else if (input.contains(".Music"))
                     {
@@ -422,11 +435,6 @@ public class serverHandlerThread extends Task<Void>
                     else if (input.contains(".Accept") || input.contains(".Decline"))
                     {
                         handleRequest(input);
-                    }
-
-                    else if (input.contains(".Get"))
-                    {
-                       getUpdatedUser(toClient, input);
                     }
 
                     else if (input.contains(".Request"))
@@ -448,7 +456,8 @@ public class serverHandlerThread extends Task<Void>
                     //If clients sends .findUser command then see if user exists in DB
                     else if (".findUser".equals(input))
                     {
-                        findUser(toClient, (Users) fromClient.readObject());
+                        Users tempUser = (Users) fromClient.readObject();
+                        findUser(toClient, tempUser);
                     }
                     else
                     {

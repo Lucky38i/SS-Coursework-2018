@@ -1,4 +1,4 @@
-package client.address;
+package Resources;
 
 import javafx.beans.property.*;
 

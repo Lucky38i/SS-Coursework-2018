@@ -2,6 +2,7 @@ package server;
 
 
 import Resources.Pair;
+import Resources.SharedSongs;
 import Resources.Users;
 import javafx.application.Platform;
 import javafx.scene.control.TextArea;
@@ -100,6 +101,7 @@ public class ClientManager
                 }
             }
 
+
             String addUser = "INSERT INTO Friends(userID, friendID) VALUES(" + user.getUserID() + "," + tempUser +");";
             String addUser1 = "INSERT INTO Friends(userID, friendID) VALUES(" + tempUser + "," + user.getUserID() +");";
 
@@ -179,6 +181,8 @@ public class ClientManager
             Statement userStatement = conn.createStatement();
             Statement genresStatement = conn.createStatement();
             Statement friendsStatement = conn.createStatement();
+            Statement friendShareStatement = conn.createStatement();
+            Statement songShareStatement = conn.createStatement();
             ResultSet resultSet = userStatement.executeQuery(sqlQuery))
         {
             while (resultSet.next())
@@ -215,6 +219,31 @@ public class ClientManager
                         {
                             //Set the user's friend list based of SQL results
                             user.friendsListProperty().get().add(friendResult.getString("userName"));
+                        }
+
+                        /**
+                         * The following two try statement populates the sharedSongs list
+                         */
+                        String findFriendShare = "SELECT userName FROM Users a, Shared_Songs b WHERE b.userID =" + user.getUserID() + " AND a.userID = b.friendID";
+                        try (ResultSet friendShareResult = friendShareStatement.executeQuery(findFriendShare))
+                        {
+                            SharedSongs temp = new SharedSongs();
+                            while (friendShareResult.next())
+                            {
+                                temp.setFriend(friendShareResult.getString("userName"));
+                            }
+
+                            String findSharedSongs = "SELECT FriendID, Song FROM Shared_Songs a WHERE a.UserID=" + user.getUserID();
+                            try(ResultSet sharedSongsResult = songShareStatement.executeQuery(findSharedSongs))
+                            {
+                                while (sharedSongsResult.next())
+                                {
+                                    temp.sharedSongsProperty().get().add(sharedSongsResult.getString("Song"));
+                                }
+                            }
+
+                            user.sharedSongsListProperty().get().add(temp);
+
                         }
                     }
                 }

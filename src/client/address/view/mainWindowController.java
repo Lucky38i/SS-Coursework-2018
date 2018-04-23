@@ -2,7 +2,6 @@ package client.address.view;
 
 import Resources.Pair;
 import Resources.Users;
-import client.address.MainApp;
 import client.address.SceneSwitcher;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -20,17 +19,18 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
-import javax.sound.sampled.AudioInputStream;
 import java.io.*;
 import java.net.Socket;
 import java.net.URL;
+import java.nio.file.DirectoryNotEmptyException;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.ResourceBundle;
@@ -45,14 +45,14 @@ public class mainWindowController implements Initializable
     //FXML Controller Variables
     @FXML private Text txt_UserName;
     @FXML private TextField txt_FirstName, txt_LastName, txt_City, txt_Birthday, txt_Age, txt_SendMessage, txt_Search;
-    @FXML private ListView<String> lst_Genres, lst_Friends, lst_OnlineUsers, lst_Requests, lst_SearchedUsers, lst_SearchedMusic;
+    @FXML private ListView<String> lst_Genres, lst_Friends, lst_OnlineUsers, lst_Requests, lst_SearchedUsers, lst_SearchedMusic, lst_SharedSongs;
     @FXML private TextArea txt_Messages;
     @FXML private ContextMenu friends_Menu, users_Menu, requests_Menu;
 
     //Variables
     private Alert alertInfo = new Alert(Alert.AlertType.INFORMATION);
     private static Users user;
-    private String host = "localhost";
+    private String host = "localhost", song;
     private int portNumber = 4444;
     private Timeline theLittleTimerThatCould;
     private backgroundThread bgThread;
@@ -60,7 +60,6 @@ public class mainWindowController implements Initializable
     private Timeline theLittleTimerThatCouldBrother;
     private ObservableList<Pair<String,ObservableList<String>>> newList = FXCollections.observableArrayList();
     private MediaPlayer mediaPlayer;
-
 
     /**
      * This sets the received user to <code>this.user</code> to be used by this controller
@@ -130,15 +129,40 @@ public class mainWindowController implements Initializable
 
     @FXML private void play_Music()
     {
-        String location = "src/Resources/Songs/test.mp3";
+        //TODO
+        String location = "test.mp3";
         Media hit = new Media(new File(location).toURI().toString());
         mediaPlayer = new MediaPlayer(hit);
-        Platform.runLater(() -> mediaPlayer.play());
+        System.out.println("Playing");
+        mediaPlayer.play();
     }
 
     @FXML private void stop_Music()
     {
         mediaPlayer.stop();
+        String location = "test.mp3";
+        File tempFile = new File(location);
+        //Currently not working
+        /*
+        try
+        {
+            Files.deleteIfExists(tempFile.toPath());
+        }
+        catch(NoSuchFileException e)
+        {
+            System.out.println("No such file/directory exists");
+        }
+        catch(DirectoryNotEmptyException e)
+        {
+            e.printStackTrace();
+        }
+        catch(IOException e)
+        {
+            e.printStackTrace();
+            System.out.println("Invalid permission");
+        }
+
+        System.out.println("Deletion successful.");*/
     }
 
     /**
@@ -148,9 +172,9 @@ public class mainWindowController implements Initializable
     @FXML private void handleMusic(ActionEvent actionEvent)
     {
 
+        //TODO move this to the bgThread
         Task<Void> task = new Task<Void>()
         {
-            String song = "test";
             String tempSong = "test.mp3";
             int current;
 
@@ -158,47 +182,53 @@ public class mainWindowController implements Initializable
             //TODO close the socket
             protected Void call()
             {
-                try(Socket socket = new Socket(host,portNumber);
-                    ObjectOutputStream toServer = new ObjectOutputStream(socket.getOutputStream());
-                    ObjectInputStream fromServer = new ObjectInputStream(socket.getInputStream()))
+                if (lst_SharedSongs.getSelectionModel().getSelectedItems().equals(""))
                 {
-                    toServer.writeUTF(".Music."+song);
-                    toServer.flush();
-
-
-                    File test = new File(tempSong);
-                    test.createNewFile();
-                    BufferedOutputStream bOS = new BufferedOutputStream(new FileOutputStream(test));
-
-                    byte[] buffer = new byte[4096];
-                    int fileLength = fromServer.readInt();
-
-                    while (fileLength > 0 && (current = fromServer.read(buffer,0,Math.min(4096,fileLength))) > 0)
-                    {
-                        bOS.write(buffer, 0 , current);
-                        fileLength -= current;
-                    }
-
-                    System.out.println("Finished writing");
-
-                    bOS.close();
+                    alertInfo.setTitle("");
+                    alertInfo.setHeaderText(null);
+                    //TODO change the message
+                    alertInfo.setContentText("You need to pick a song");
+                    alertInfo.showAndWait();
                 }
-                catch (IOException e)
+                else
                 {
-                    e.printStackTrace();
+                    song = lst_SharedSongs.getSelectionModel().getSelectedItem();
+                    try (Socket socket = new Socket(host, portNumber);
+                         ObjectOutputStream toServer = new ObjectOutputStream(socket.getOutputStream());
+                         ObjectInputStream fromServer = new ObjectInputStream(socket.getInputStream()))
+                    {
+                        toServer.writeUTF(".Music." + song);
+                        toServer.flush();
+
+
+                        File file = new File(tempSong);
+                        file.createNewFile();
+                        FileOutputStream fileReader = new FileOutputStream(file);
+                        BufferedOutputStream bOS = new BufferedOutputStream(fileReader);
+
+                        byte[] buffer = new byte[4096];
+                        int fileLength = fromServer.readInt();
+
+                        while (fileLength > 0 && (current = fromServer.read(buffer, 0, Math.min(4096, fileLength))) > 0)
+                        {
+                            bOS.write(buffer, 0, current);
+                            fileLength -= current;
+                        }
+
+
+                        fileReader.close();
+                        bOS.close();
+                    }
+                    catch (IOException e)
+                    {
+                        e.printStackTrace();
+                    }
                 }
                 return null;
             }
         };
         task.setOnSucceeded(event ->
-        Platform.runLater(()->
-        {
-            String location = "test.mp3";
-            Media hit = new Media(new File(location).toURI().toString());
-            mediaPlayer = new MediaPlayer(hit);
-            System.out.println("Playing");
-            mediaPlayer.play();
-        }));
+        Platform.runLater(this::play_Music));
         Thread thread = new Thread(task);
         thread.setDaemon(true);
         thread.start();
@@ -358,6 +388,21 @@ public class mainWindowController implements Initializable
         }
     }
 
+    @FXML private void getSharedSongs(MouseEvent mouseEvent)
+    {
+        boolean done = false;
+        for (int i = 0; i < user.sharedSongsListProperty().get().size() && !done; ++i)
+        {
+            if (user.getSharedSongsList().get(i).getFriend().equals(lst_Friends.getSelectionModel().getSelectedItem()))
+            {
+                lst_SharedSongs.setItems(null);
+                lst_SharedSongs.setItems(user.getSharedSongsList().get(i).getSharedSongs());
+            }
+            else
+                lst_SharedSongs.setItems(null);
+        }
+    }
+
 
     /**
      * Opens the context menu for friends list view
@@ -397,7 +442,7 @@ public class mainWindowController implements Initializable
      * This is a Task that connects to the server and receives messages to
      * be appended to the text area
      */
-    private class backgroundThread extends Task<Void>
+    public class backgroundThread extends Task<Void>
     {
         private String host;
         private int portNumber;
@@ -424,7 +469,7 @@ public class mainWindowController implements Initializable
          * sent to the server
          * @param msg The message to the sent to the server
          */
-        synchronized void addNextMessage(String msg)
+        public synchronized void addNextMessage(String msg)
         {
             hasMessages = true;
             messagesToSend.push(msg);
@@ -538,6 +583,7 @@ public class mainWindowController implements Initializable
                         else if (input.contains(".Get"))
                         {
                             Users updateUser = (Users) fromServer.readObject();
+
                             Platform.runLater(()->
                             {
                                 mainWindowController.user = updateUser;
@@ -548,8 +594,7 @@ public class mainWindowController implements Initializable
                         {
                             String[] names = input.split("[.]");
                             writeToUI("[ADMIN]: " + names[2] + " has accepted your friend request"+"\n");
-                            //Gets the updated user
-                            addNextMessage(".Get."+user.getUserName());
+
                         }
                         else if (input.contains(".Decline"))
                         {

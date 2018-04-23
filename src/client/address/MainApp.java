@@ -1,5 +1,6 @@
 package client.address;
 
+import client.address.view.mainWindowController;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -8,6 +9,7 @@ import javafx.scene.image.Image;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import server.view.MainWindowController;
 
 import java.io.IOException;
 
@@ -20,20 +22,8 @@ import java.io.IOException;
 public class MainApp extends Application
 {
     private static final String loginScreenFXML = "view/loginWindow.fxml";
-
-    private static Stage primaryStage;
-
-    public static Stage getPrimaryStage()
-    {
-        return primaryStage;
-    }
-
-    public static void setPrimaryStage(Stage primaryStage)
-    {
-        MainApp.primaryStage = primaryStage;
-    }
-
-    /**
+    private static final String mainWindowFXML = "view/mainWindow.fxml";
+     /**
      * The main entry point for JavaFX applications
      * @param primaryStage used as the.. primary stage
      *
@@ -43,7 +33,6 @@ public class MainApp extends Application
     {
         try
         {
-            setPrimaryStage(primaryStage);
             primaryStage.setTitle("SpotLike!");
             primaryStage.getIcons().add(new Image("Resources/Music-icon.png"));
 
@@ -53,7 +42,6 @@ public class MainApp extends Application
             Scene scene = new Scene(root);
             primaryStage.setScene(scene);
             primaryStage.show();
-
         }
         catch (IOException e)
         {
@@ -65,4 +53,5 @@ public class MainApp extends Application
     {
         launch(args);
     }
+
 }

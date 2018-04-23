@@ -23,7 +23,7 @@ public class startWindowController implements Initializable
 
     @FXML private void openMainWindow(ActionEvent actionEvent)
     {
-        switchToMainMenu(actionEvent, Integer.parseInt(txt_MainPort.getText()));
+        switchToMainMenu(actionEvent, Integer.parseInt(txt_MainPort.getText()), Integer.parseInt(txt_ChatPort.getText()));
     }
 
     /**
@@ -33,7 +33,7 @@ public class startWindowController implements Initializable
      * @param actionEvent used to switch the scene
      * @param mainPort The main port for the main Server
      */
-    private void switchToMainMenu(ActionEvent actionEvent, int mainPort)
+    private void switchToMainMenu(ActionEvent actionEvent, int mainPort, int chatPort)
     {
         try
         {
@@ -47,7 +47,7 @@ public class startWindowController implements Initializable
 
             //Access the controller and init data
             MainWindowController controller = loader.getController();
-            controller.initData(mainPort);
+            controller.initData(mainPort, chatPort);
 
             //Find the stage information
             Stage window = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();

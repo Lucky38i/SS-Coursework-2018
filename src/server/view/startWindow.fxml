@@ -1,14 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+
 <AnchorPane prefHeight="400.0" prefWidth="280.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="server.view.startWindowController">
    <children>
       <BorderPane prefHeight="400.0" prefWidth="280.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <center>
             <AnchorPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
                <children>
-                  <TextField fx:id="txt_ChatPort" disable="true" editable="false" layoutX="26.0" layoutY="176.0" promptText="//TODO" />
+                  <TextField fx:id="txt_ChatPort" layoutX="26.0" layoutY="176.0" />
                   <Label layoutX="57.0" layoutY="159.0" text="Chat Server Port" />
                   <Label layoutX="55.0" layoutY="57.0" text="Main Server Port" />
                   <Button layoutX="57.0" layoutY="281.0" mnemonicParsing="false" onAction="#openMainWindow" text="Start Servers!" />

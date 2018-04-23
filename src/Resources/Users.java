@@ -2,8 +2,6 @@ package Resources;
 
 
 
-import client.address.ReadObjectsHelper;
-import client.address.WriteObjectsHelper;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -75,6 +73,13 @@ public class Users implements Serializable
         return loggedIn;
     }
 
+    private transient ListProperty<SharedSongs> sharedSongsList;
+    public ListProperty<SharedSongs> sharedSongsListProperty()
+    {
+        return sharedSongsList;
+    }
+
+
     /**
      * Default constructor.
      */
@@ -93,19 +98,20 @@ public class Users implements Serializable
         birthday = new SimpleObjectProperty<>();
         musicGenre = new SimpleListProperty<>(FXCollections.observableArrayList());
         friendsList = new SimpleListProperty<>(FXCollections.observableArrayList());
+        sharedSongsList = new SimpleListProperty<>(FXCollections.observableArrayList());
         loggedIn = new SimpleBooleanProperty();
         loggedIn.set(false);
     }
 
     private void writeObject(ObjectOutputStream out) throws IOException
     {
-        WriteObjectsHelper.writeAllProp(out, userID,userName,firstName,lastName,city,birthday,musicGenre, friendsList);
+        WriteObjectsHelper.writeAllProp(out, userID,userName,firstName,lastName,city,birthday,musicGenre, friendsList, sharedSongsList);
     }
 
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException
     {
         initInstance();
-        ReadObjectsHelper.readAllProp(in, userID,userName,firstName,lastName,city,birthday,musicGenre, friendsList);
+        ReadObjectsHelper.readAllProp(in, userID,userName,firstName,lastName,city,birthday,musicGenre, friendsList, sharedSongsList);
     }
 
     /* Setters and Getters */
@@ -189,6 +195,15 @@ public class Users implements Serializable
     public void setFriendsList(ObservableList friendsList)
     {
         this.friendsList.set(friendsList);
+    }
+
+    public List<SharedSongs> getSharedSongsList()
+    {
+        return sharedSongsList.get();
+    }
+    public void setSharedSongsList(ObservableList sharedSongsList)
+    {
+        this.sharedSongsList.set(sharedSongsList);
     }
 
     public Boolean getLoggedIn()

@@ -48,14 +48,12 @@
                               <AnchorPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
                                  <children>
                                     <TextField fx:id="txt_Search" layoutX="23.0" layoutY="56.0" onAction="#searchMusicInterests" promptText="Music Genre" />
-                                    <ListView fx:id="lst_SearchedUsers" layoutX="23.0" layoutY="129.0" onMouseClicked="#getMusicInterests" prefHeight="200.0" prefWidth="200.0" />
+                                    <ListView fx:id="lst_SearchedUsers" layoutX="23.0" layoutY="129.0" onMouseClicked="#getMusicInterests" prefHeight="80.0" prefWidth="200.0" />
                                     <Button layoutX="188.0" layoutY="56.0" mnemonicParsing="false" onAction="#searchMusicInterests" text="Search" />
                                     <Label layoutX="23.0" layoutY="28.0" text="Search for people through music interests" />
-                                    <ListView fx:id="lst_SearchedMusic" disable="true" layoutX="223.0" layoutY="129.0" prefHeight="200.0" prefWidth="200.0" />
+                                    <ListView fx:id="lst_SearchedMusic" disable="true" layoutX="23.0" layoutY="259.0" prefHeight="126.0" prefWidth="200.0" />
                                     <Label layoutX="38.0" layoutY="104.0" text="Select a user to see interests" />
-                                    <Button layoutX="567.0" layoutY="206.0" mnemonicParsing="false" onAction="#play_Music" text="Play" />
-                                    <Button layoutX="560.0" layoutY="259.0" mnemonicParsing="false" onAction="#stop_Music" text="Button" />
-                                    <Button layoutX="541.0" layoutY="69.0" mnemonicParsing="false" onAction="#handleMusic" text="Test Stream" />
+                                    <Label layoutX="90.0" layoutY="231.0" text="Interests" />
                                  </children>
                               </AnchorPane>
                            </center>
@@ -190,18 +188,29 @@
                                                    <children>
                                                       <ListView fx:id="lst_Genres" disable="true" prefHeight="100.0" prefWidth="200.0" />
                                                       <AnchorPane prefHeight="100.0" prefWidth="117.0" />
-                                                      <ListView fx:id="lst_Friends" onContextMenuRequested="#open_contextMenuFriends" prefHeight="100.0" prefWidth="200.0">
+                                                      <ListView fx:id="lst_Friends" onContextMenuRequested="#open_contextMenuFriends" onMouseClicked="#getSharedSongs" prefHeight="100.0" prefWidth="200.0">
                                                          <contextMenu>
                                                             <ContextMenu fx:id="friends_Menu">
                                                               <items>
                                                                   <MenuItem mnemonicParsing="false" onAction="#open_PMWindow" text="Private message" />
-                                                                <MenuItem mnemonicParsing="false" text="Delete Friend" />
                                                               </items>
                                                             </ContextMenu>
                                                          </contextMenu>
                                                       </ListView>
                                                    </children>
                                                 </HBox>
+                                                <AnchorPane prefHeight="30.0" prefWidth="396.0">
+                                                   <children>
+                                                      <Label layoutX="162.0" layoutY="6.0" text="Shared Songs" />
+                                                   </children>
+                                                </AnchorPane>
+                                                <ListView fx:id="lst_SharedSongs" prefHeight="129.0" prefWidth="396.0" />
+                                                <AnchorPane prefHeight="50.0" prefWidth="396.0">
+                                                   <children>
+                                                      <Button layoutX="97.0" layoutY="2.0" mnemonicParsing="false" onAction="#handleMusic" text="Play" />
+                                                      <Button layoutX="282.0" layoutY="2.0" mnemonicParsing="false" onAction="#stop_Music" text="Stop" />
+                                                   </children>
+                                                </AnchorPane>
                                              </children>
                                           </VBox>
                                        </children>
