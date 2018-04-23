@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane prefHeight="283.0" prefWidth="224.0" xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.address.view.ChatWindowController">
+   <children>
+      <TitledPane prefHeight="253.0" prefWidth="263.0" text="Chat">
+         <content>
+            <TextArea fx:id="txtArea_Receive" prefHeight="214.0" prefWidth="264.0" />
+         </content>
+      </TitledPane>
+      <Button layoutX="200.0" layoutY="251.0" mnemonicParsing="false" onAction="#send_Chat" prefHeight="37.0" prefWidth="63.0" text="Send" />
+      <TextField fx:id="chat_Message" layoutY="250.0" onAction="#send_Chat" prefHeight="39.0" prefWidth="200.0" />
+   </children>
+</AnchorPane>

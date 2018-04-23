@@ -329,6 +329,7 @@ public class serverHandlerThread extends Task<Void>
         }
     }
 
+
     /**
      * This removes the current thread from the client list
      * and sets the logged in state of the user to false
