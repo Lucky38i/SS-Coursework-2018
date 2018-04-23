@@ -21,6 +21,18 @@ public class MainApp extends Application
 {
     private static final String loginScreenFXML = "view/loginWindow.fxml";
 
+    private static Stage primaryStage;
+
+    public static Stage getPrimaryStage()
+    {
+        return primaryStage;
+    }
+
+    public static void setPrimaryStage(Stage primaryStage)
+    {
+        MainApp.primaryStage = primaryStage;
+    }
+
     /**
      * The main entry point for JavaFX applications
      * @param primaryStage used as the.. primary stage
@@ -31,6 +43,7 @@ public class MainApp extends Application
     {
         try
         {
+            setPrimaryStage(primaryStage);
             primaryStage.setTitle("SpotLike!");
             primaryStage.getIcons().add(new Image("Resources/Music-icon.png"));
 

@@ -2,6 +2,7 @@ package client.address.view;
 
 import Resources.Pair;
 import Resources.Users;
+import client.address.MainApp;
 import client.address.SceneSwitcher;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -19,6 +20,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.text.Text;
@@ -169,10 +171,12 @@ public class mainWindowController implements Initializable
                     BufferedOutputStream bOS = new BufferedOutputStream(new FileOutputStream(test));
 
                     byte[] buffer = new byte[4096];
+                    int fileLength = fromServer.readInt();
 
-                    while ((current = fromServer.read(buffer)) > 0)
+                    while (fileLength > 0 && (current = fromServer.read(buffer,0,Math.min(4096,fileLength))) > 0)
                     {
                         bOS.write(buffer, 0 , current);
+                        fileLength -= current;
                     }
 
                     System.out.println("Finished writing");
@@ -193,7 +197,7 @@ public class mainWindowController implements Initializable
             Media hit = new Media(new File(location).toURI().toString());
             mediaPlayer = new MediaPlayer(hit);
             System.out.println("Playing");
-            Platform.runLater(() -> mediaPlayer.play());
+            mediaPlayer.play();
         }));
         Thread thread = new Thread(task);
         thread.setDaemon(true);
@@ -385,7 +389,7 @@ public class mainWindowController implements Initializable
     @Override
     public void initialize(URL location, ResourceBundle resources)
     {
-        //TODO
+        //Logs the user out if they close the stage
     }
 
 

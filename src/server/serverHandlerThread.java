@@ -243,7 +243,8 @@ public class serverHandlerThread extends Task<Void>
         clientManagerTemp.logger("Someone request song: " + names[2] + ".mp3","Main");
 
         File musicFile = AudioUtil.getSoundFile("src/Resources/Songs/" + names[2]+ ".mp3");
-        byte[] buffer = new byte[(int) musicFile.length()];
+        Integer fileLength = (int) musicFile.length();
+        byte[] buffer = new byte[fileLength];
 
         try(BufferedInputStream bis = new BufferedInputStream(new FileInputStream(musicFile)))
         {
@@ -251,6 +252,7 @@ public class serverHandlerThread extends Task<Void>
 
             clientManagerTemp.logger("Sending " + "src/Resources/Songs/" + names[2]+ ".mp3" + "(" + buffer.length + " bytes)","Main");
 
+            toClient.writeInt(fileLength);
             toClient.write(buffer,0, buffer.length);
             toClient.flush();
 
