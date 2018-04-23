@@ -12,13 +12,17 @@ import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.text.Text;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import java.io.*;
@@ -218,6 +222,31 @@ public class mainWindowController implements Initializable
                 }));
     }
 
+    @FXML private void open_PMWindow(ActionEvent actionEvent)
+    {
+        try
+        {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("ChatWindow.fxml"));
+            Parent root = loader.load();
+            Scene scene = new Scene(root);
+
+            ChatWindowController controller = loader.getController();
+            controller.initData("shit");
+
+            //listView.getSelectionModel().getSelectedItem();
+            System.out.println(lst_Friends.getSelectionModel().getSelectedItem());
+
+            Stage primaryStage = new Stage();
+            primaryStage.setScene(scene);
+            primaryStage.show();
+
+
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
     /**
      * Sends a user message to the server board
      * @param actionEvent not being used currently
@@ -356,6 +385,7 @@ public class mainWindowController implements Initializable
     {
         //TODO
     }
+
 
     /**
      * This is a Task that connects to the server and receives messages to
