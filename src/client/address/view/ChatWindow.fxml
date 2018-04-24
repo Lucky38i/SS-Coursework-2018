@@ -15,8 +15,9 @@
          <bottom>
             <AnchorPane prefHeight="52.0" prefWidth="451.0" BorderPane.alignment="CENTER">
                <children>
-                  <TextField fx:id="chat_Message" layoutX="14.0" layoutY="13.0" onAction="#send_Chat" prefHeight="27.0" prefWidth="328.0" />
-                  <Button fx:id="send_PrivateMessage" layoutX="358.0" layoutY="13.0" mnemonicParsing="false" onAction="#send_Chat" prefHeight="25.0" prefWidth="63.0" text="Send" />
+                  <TextField fx:id="chat_Message" layoutX="14.0" layoutY="13.0" onAction="#send_Chat" prefHeight="27.0" prefWidth="304.0" />
+                  <Button fx:id="send_PrivateMessage" layoutX="330.0" layoutY="13.0" mnemonicParsing="false" onAction="#send_Chat" prefHeight="25.0" prefWidth="63.0" text="Send" />
+                  <Button fx:id="btn_FileChooser" layoutX="409.0" layoutY="13.0" mnemonicParsing="false" onAction="#Open_File" prefHeight="27.0" prefWidth="27.0" text="S" />
                </children>
             </AnchorPane>
          </bottom>

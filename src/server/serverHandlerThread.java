@@ -19,6 +19,7 @@ import java.util.*;
 
 /**
  * Task that handles all connections received from the client
+ * @author alexmcbean
  */
 public class serverHandlerThread extends Task<Void>
 {
@@ -102,6 +103,10 @@ public class serverHandlerThread extends Task<Void>
         }
     }
 
+    /**
+     * Handles friend requests
+     * @param input the request received
+     */
     private void handleRequest(String input)
     {
         if (input.contains(".Accept"))
@@ -112,6 +117,39 @@ public class serverHandlerThread extends Task<Void>
         else if (input.contains(".Decline"))
         {
             writeMessageToUser(input);
+        }
+    }
+
+    /**
+     * Handles private messages and finds out who to send it to.
+     * @param input Input contains the message and username to send the message to.
+     * @param user Used to retrieve who the message is coming from.
+     */
+    private void handlePrivateMessage(String input, Users user)
+    {
+        String[] names = input.split("[.]");
+        String message = names[2];
+        String userName = names[1];
+        String[] usernameToSend = user.getUserName().split("[.]");
+
+        try
+        {
+            serverHandlerThread findUser = null;
+            for (int i = 0; i < clientManagerTemp.clientlist().size(); ++i)
+            {
+                if (clientManagerTemp.clientlist().get(i).user.getUserName().equals(userName + ".ChatViewer"))
+                {
+                    findUser = clientManagerTemp.clientlist().get(i);
+                }
+            }
+            assert findUser != null;
+            ObjectOutputStream toFindUser = findUser.getWriter();
+            toFindUser.writeUTF(".Message." + usernameToSend[0] +"."+message);
+            toFindUser.flush();
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
         }
     }
 
@@ -285,6 +323,47 @@ public class serverHandlerThread extends Task<Void>
     }
 
     /**
+     * This creates a new song file in the Resources folder based on the song
+     * the user uploaded the notifies the receiving user that a song was shared
+     * with them.
+     * @param input The message to notify the receiving user that that a song
+     *              was shared with them
+     * @param fromClient The Object inputstream to read the received file
+     */
+    private void createNewSong(String input, ObjectInputStream fromClient)
+    {
+        try
+        {
+            String[] names = input.split("[.]");
+            String userToTell = names[1];
+            String songName = names[2];
+
+            File file = new File("src/Resources/Songs/" + songName + ".mp3");
+            file.createNewFile();
+
+            try (BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file)))
+            {
+                byte[] buffer = new byte[4096];
+                int fileLength = fromClient.readInt();
+                int current;
+
+                while (fileLength > 0 && (current = fromClient.read(buffer, 0, Math.min(4096, fileLength))) > 0)
+                {
+                    bos.write(buffer, 0, current);
+                    fileLength -= current;
+                }
+                handlePrivateMessage(".Message." + userToTell + "." + "I shared '"+ songName+"' with you!",user);
+
+            }
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+
+    }
+
+    /**
      * This method searches for users who have the searched music interests
      * then compiles a list of all these users and sends it back to the client
      * @param toClient The object output stream for which to write to
@@ -362,7 +441,7 @@ public class serverHandlerThread extends Task<Void>
         try
         {
             updaterTimer.stop();
-            chatUpdaterTimer.stop();
+            //chatUpdaterTimer.stop();
             logoff();
 
             //Set the user's log in state to false
@@ -443,12 +522,20 @@ public class serverHandlerThread extends Task<Void>
                                 getOnlineUsers(toClient);
                             }
                         }));
-                        chatUpdaterTimer.setCycleCount(Timeline.INDEFINITE);
-                        chatUpdaterTimer.playFrom(Duration.seconds(3));
+                        //chatUpdaterTimer.setCycleCount(Timeline.INDEFINITE);
+                        //chatUpdaterTimer.playFrom(Duration.seconds(3));
+                    }
+                    else if (input.contains(".Message"))
+                    {
+                        handlePrivateMessage(input, user);
                     }
                     else if (input.contains(".Music"))
                     {
                         findMusic(input, toClient);
+                    }
+                    else if (input.contains(".NewSong"))
+                    {
+                        createNewSong(input, fromClient);
                     }
                     else if (input.contains(".Search"))
                     {
@@ -495,4 +582,6 @@ public class serverHandlerThread extends Task<Void>
         }
         return null;
     }
+
+
 }
