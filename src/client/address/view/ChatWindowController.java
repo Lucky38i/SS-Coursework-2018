@@ -2,14 +2,21 @@ package client.address.view;
 
 import Resources.Pair;
 import Resources.Users;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
+import javafx.util.Duration;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -30,7 +37,7 @@ public class ChatWindowController
     @FXML private ListView<String> lst_Users;
 
     private ArrayList<Pair<String,List<String>>> privateMessages;
-    private backgroundThread bgThead;
+    private backgroundThread bgThread;
     private String host;
     private int portNumber;
     private Users user;
@@ -42,8 +49,25 @@ public class ChatWindowController
         this.host = host;
         this.portNumber = portNumber;
         this.user = user;
+        Timeline theTimer;
 
-        bgThead = new backgroundThread(host,portNumber,user);
+        bgThread = new backgroundThread(host,portNumber,user);
+        Task task = bgThread;
+        Thread thread = new Thread(task);
+        thread.setDaemon(true);
+        thread.start();
+
+        //A periodic timer that checks the list of online users
+        theTimer = new Timeline(new KeyFrame(Duration.seconds(5), new EventHandler<ActionEvent>()
+        {
+            @Override
+            public void handle(ActionEvent event)
+            {
+                Platform.runLater(()-> lst_Users.setItems(bgThread.getOnlineUserList()));
+            }
+        }));
+        theTimer.setCycleCount(Timeline.INDEFINITE);
+        theTimer.playFrom(Duration.seconds(4.5));
 
     }
 
@@ -62,7 +86,7 @@ public class ChatWindowController
             alertInfo.showAndWait();
         }
         else
-            bgThead.addNextMessage(".Message." + lst_Users.getSelectionModel().getSelectedItem()+"."+chat_Message.getText());
+            bgThread.addNextMessage(".Message." + lst_Users.getSelectionModel().getSelectedItem()+"."+chat_Message.getText());
     }
 
     /**
@@ -94,6 +118,7 @@ public class ChatWindowController
         private boolean hasMessages = false;
         private final LinkedList<String> messagesToSend;
         private final ArrayList<String> messageList;
+        private ObservableList<String> onlineUserList = FXCollections.observableArrayList();
 
         backgroundThread(String host, int portNumber, Users user)
         {
@@ -102,6 +127,16 @@ public class ChatWindowController
             this.user = user;
             messagesToSend = new LinkedList<>();
             messageList = new ArrayList<>();
+        }
+
+        synchronized ObservableList<String> getOnlineUserList()
+        {
+            return onlineUserList;
+        }
+
+        private void setOnlineUserList(ArrayList<String> list)
+        {
+            Platform.runLater(()->this.onlineUserList.setAll(list));
         }
 
         /**
@@ -181,8 +216,21 @@ public class ChatWindowController
 
                         else if (input.contains(".online"))
                         {
-                            //TODO
-                            break;
+                                Object obj = fromServer.readObject();
+                                ArrayList<String> templist = (ArrayList<String>) obj;
+
+                                //Checks if any of the online users are friends
+                                for (int i = 0; i < templist.size(); ++i)
+                                {
+                                    for (int x = 0; x < user.getFriendsList().size(); ++x)
+                                    {
+                                        if (templist.get(i).equals(user.getFriendsList().get(x)))
+                                        {
+                                            templist.set(i, templist.get(i) + "(Friend)");
+                                        }
+                                    }
+                                }
+                                setOnlineUserList(templist);
                         }
                     }
 
