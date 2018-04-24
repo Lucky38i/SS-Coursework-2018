@@ -185,7 +185,7 @@ public class loginWindowController implements Initializable
         Image configImage = new Image(getClass().getResourceAsStream("../../../Resources/Cogwheel-512.png"),btn_Config.getPrefWidth(),btn_Config.getPrefHeight(),true,false);
         btn_Config.setGraphic(new ImageView(configImage));
         txt_MainPort.setText(String.valueOf(mainPortNumber));
-        txt_ChatPort.setText(String.valueOf(mainPortNumber));
+        txt_ChatPort.setText(String.valueOf(chatPortNumber));
         txt_IPAddress.setText(host);
         pane_Config.setVisible(false);
         txt_Version.setText(version);

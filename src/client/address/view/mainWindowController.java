@@ -414,7 +414,7 @@ public class mainWindowController implements Initializable
     @Override
     public void initialize(URL location, ResourceBundle resources)
     {
-        //Logs the user out if they close the stage
+        //TODO Logs the user out if they close the stage
     }
 
 

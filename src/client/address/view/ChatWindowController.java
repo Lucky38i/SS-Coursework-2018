@@ -16,11 +16,10 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
+import javafx.stage.FileChooser;
 import javafx.util.Duration;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -109,6 +108,14 @@ public class ChatWindowController
         }
     }
 
+    @FXML private void Open_File(ActionEvent actionEvent)
+    {
+        FileChooser fileChooser = new FileChooser();
+        File file = fileChooser.showOpenDialog(txt_Messages.getScene().getWindow());
+        String fileName = file.getName();
+        bgThread.addNextSong(file, fileName);
+    }
+
     class backgroundThread extends Task<Void>
     {
 
@@ -118,6 +125,8 @@ public class ChatWindowController
         private boolean hasMessages = false;
         private final LinkedList<String> messagesToSend;
         private final ArrayList<String> messageList;
+        private boolean hasMusic = false;
+        private final LinkedList<Pair<File,String>> musicToSend;
         private ObservableList<String> onlineUserList = FXCollections.observableArrayList();
 
         backgroundThread(String host, int portNumber, Users user)
@@ -127,6 +136,7 @@ public class ChatWindowController
             this.user = user;
             messagesToSend = new LinkedList<>();
             messageList = new ArrayList<>();
+            musicToSend = new LinkedList<>();
         }
 
         synchronized ObservableList<String> getOnlineUserList()
@@ -150,6 +160,15 @@ public class ChatWindowController
             messagesToSend.push(msg);
         }
 
+        synchronized void addNextSong(File file, String fileName)
+        {
+            Pair<File, String> newSong = new Pair<>();
+            newSong.setFirst(file);
+            newSong.setSecond(fileName);
+            hasMusic = true;
+            musicToSend.push(newSong);
+        }
+
         /**
          * This receives a message and parses it between
          * code, user who it came from and the message received
@@ -159,10 +178,12 @@ public class ChatWindowController
         void handlePrivateMessages(String input)
         {
             String[] names = input.split("[.]");
+            String userName = names[1];
+            String message = names[2];
             boolean userChatExists = false;
             for (int i= 0; i < getPrivateMessages().size(); i++)
             {
-                if (getPrivateMessages().get(i).getFirst().equals(names[2]))
+                if (getPrivateMessages().get(i).getFirst().equals(userName))
                 {
                     userChatExists = true;
                 }
@@ -172,9 +193,9 @@ public class ChatWindowController
             {
                 for (int i = 0; i < getPrivateMessages().size(); i++)
                 {
-                    if (getPrivateMessages().get(i).getFirst().equals(names[2]))
+                    if (getPrivateMessages().get(i).getFirst().equals(userName))
                     {
-                        getPrivateMessages().get(i).getSecond().add(names[3]);
+                        getPrivateMessages().get(i).getSecond().add(message);
                     }
                 }
             }
@@ -200,6 +221,7 @@ public class ChatWindowController
                 toServer.flush();
 
                 toServer.writeObject(user);
+                toServer.flush();
 
                 while (!socket.isClosed())
                 {
@@ -245,6 +267,32 @@ public class ChatWindowController
 
                         toServer.writeUTF(nextSend);
                         toServer.flush();
+                    }
+
+                    if (hasMusic)
+                    {
+                        Pair<File, String> nextSong;
+                        synchronized (musicToSend)
+                        {
+                            nextSong = musicToSend.pop();
+                            hasMusic = !musicToSend.isEmpty();
+                        }
+
+                        Integer fileLength = (int) nextSong.getFirst().length();
+                        byte[] buffer = new byte[fileLength];
+
+                        addNextMessage(".NewSong."+lst_Users.getSelectionModel().getSelectedItem() +"."+nextSong.getSecond());
+
+
+                        try(BufferedInputStream bis = new BufferedInputStream(new FileInputStream(nextSong.getFirst())))
+                        {
+                            bis.read(buffer,0,buffer.length);
+
+                            toServer.writeInt(fileLength);
+                            toServer.write(buffer,0, buffer.length);
+                            toServer.flush();
+                        }
+
                     }
                 }
             }
