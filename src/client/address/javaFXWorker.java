@@ -22,8 +22,6 @@ public class javaFXWorker extends Task<Users>
     private static String host;
     private static int portNumber;
 
-
-
     public javaFXWorker(Users user, String code, String host, int portNumber)
     {
         this.user = user;

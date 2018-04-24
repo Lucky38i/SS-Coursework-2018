@@ -16,8 +16,8 @@
                   <AnchorPane fx:id="pane_Config" layoutX="85.0" layoutY="174.0" prefHeight="123.0" prefWidth="130.0">
                      <children>
                         <TextField fx:id="txt_IPAddress" layoutX="10.0" layoutY="14.0" prefHeight="25.0" prefWidth="110.0" promptText="IP Address" />
-                        <TextField fx:id="txt_Port" layoutX="10.0" layoutY="84.0" prefHeight="25.0" prefWidth="110.0" promptText="Main Server Port" />
-                        <TextField layoutX="10.0" layoutY="49.0" prefHeight="25.0" prefWidth="110.0" promptText="Chat Server Port" />
+                        <TextField fx:id="txt_MainPort" layoutX="10.0" layoutY="84.0" prefHeight="25.0" prefWidth="110.0" promptText="Main Server Port" />
+                        <TextField fx:id="txt_ChatPort" layoutX="10.0" layoutY="49.0" prefHeight="25.0" prefWidth="110.0" promptText="Chat Server Port" />
                      </children>
                   </AnchorPane>
                   <AnchorPane fx:id="pane_Login" layoutX="47.0" layoutY="62.0" prefHeight="118.0" prefWidth="200.0">

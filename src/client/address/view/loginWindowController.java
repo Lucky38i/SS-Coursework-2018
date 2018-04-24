@@ -29,7 +29,7 @@ import java.util.ResourceBundle;
 public class loginWindowController implements Initializable
 {
     //FXML Variables
-    @FXML private TextField textField_Username, txt_Port, txt_IPAddress;
+    @FXML private TextField textField_Username, txt_MainPort, txt_ChatPort, txt_IPAddress;
     @FXML private Label txt_Version;
     @FXML private ToggleButton btn_Config;
     @FXML private AnchorPane pane_Config, pane_Login;
@@ -42,7 +42,8 @@ public class loginWindowController implements Initializable
     private Alert alertError = new Alert(Alert.AlertType.ERROR);
     private static final String version = "V0.45";
     private static String host = "localhost";
-    private static int portNumber = 4444;
+    private static int mainPortNumber = 4444;
+    private static int chatPortNumber = 4445;
 
     @FXML private void open_Config(ActionEvent actionEvent)
     {
@@ -80,15 +81,21 @@ public class loginWindowController implements Initializable
         }
         else
         {
-            if (!txt_IPAddress.getText().equals("") || !txt_Port.getText().equals(""))
+            //Checks if any of the config settings have been changed
+            if (!txt_MainPort.getText().equals(""))
+                mainPortNumber = Integer.parseInt(txt_MainPort.getText());
+
+            if (!txt_ChatPort.getText().equals(""))
+                chatPortNumber = Integer.parseInt(txt_ChatPort.getText());
+
+            if (!txt_IPAddress.getText().equals(""))
             {
-                portNumber = Integer.parseInt(txt_Port.getText());
                 host = txt_IPAddress.getText();
             }
 
             user.setUserName(textField_Username.getText());
 
-            Task<Users> task = new javaFXWorker(user, ".findUser",host,portNumber);
+            Task<Users> task = new javaFXWorker(user, ".findUser",host, mainPortNumber);
 
             task.setOnSucceeded(event ->
                     Platform.runLater(() ->
@@ -116,7 +123,7 @@ public class loginWindowController implements Initializable
 
                                 //Receive the object returned by the task and switch the scene
                                 Users taskUser = task.getValue();
-                                switchToMainMenu(actionEvent, taskUser, host, portNumber);
+                                switchToMainMenu(actionEvent, taskUser, host, mainPortNumber, chatPortNumber);
                                 break;
                         }
                     }));
@@ -124,11 +131,7 @@ public class loginWindowController implements Initializable
             Thread thread = new Thread(task);
             thread.setDaemon(true);
             thread.start();
-
-
-
         }
-
     }
 
     /**
@@ -148,7 +151,7 @@ public class loginWindowController implements Initializable
      * @param actionEvent used to switch the scene
      * @param user used to send to the main window controller
      */
-    private void switchToMainMenu(ActionEvent actionEvent, Users user, String host, Integer portNumber)
+    private void switchToMainMenu(ActionEvent actionEvent, Users user, String host, int mainPortNumber, int chatPortNumber)
     {
         try
         {
@@ -162,7 +165,7 @@ public class loginWindowController implements Initializable
 
             //Access the controller and init data
             mainWindowController controller = loader.getController();
-            controller.initData(user, host, portNumber);
+            controller.initData(user, host, mainPortNumber, chatPortNumber);
 
             //Find the stage information
             Stage window = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
@@ -181,7 +184,8 @@ public class loginWindowController implements Initializable
     {
         Image configImage = new Image(getClass().getResourceAsStream("../../../Resources/Cogwheel-512.png"),btn_Config.getPrefWidth(),btn_Config.getPrefHeight(),true,false);
         btn_Config.setGraphic(new ImageView(configImage));
-        txt_Port.setText(String.valueOf(portNumber));
+        txt_MainPort.setText(String.valueOf(mainPortNumber));
+        txt_ChatPort.setText(String.valueOf(mainPortNumber));
         txt_IPAddress.setText(host);
         pane_Config.setVisible(false);
         txt_Version.setText(version);

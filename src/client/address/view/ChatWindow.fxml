@@ -1,19 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.TitledPane?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane prefHeight="283.0" prefWidth="224.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.address.view.ChatWindowController">
+<AnchorPane prefHeight="289.0" prefWidth="451.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.address.view.ChatWindowController">
    <children>
-      <TitledPane prefHeight="253.0" prefWidth="263.0" text="Chat">
-         <content>
-            <TextArea fx:id="txtArea_Receive" prefHeight="214.0" prefWidth="264.0" />
-         </content>
-      </TitledPane>
-      <Button layoutX="200.0" layoutY="251.0" mnemonicParsing="false" onAction="#send_Chat" prefHeight="37.0" prefWidth="63.0" text="Send" />
-      <TextField fx:id="chat_Message" layoutY="250.0" onAction="#send_Chat" prefHeight="39.0" prefWidth="200.0" />
+      <BorderPane prefHeight="289.0" prefWidth="451.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <bottom>
+            <AnchorPane prefHeight="52.0" prefWidth="451.0" BorderPane.alignment="CENTER">
+               <children>
+                  <TextField fx:id="chat_Message" layoutX="14.0" layoutY="13.0" onAction="#send_Chat" prefHeight="27.0" prefWidth="328.0" />
+                  <Button fx:id="send_PrivateMessage" layoutX="358.0" layoutY="13.0" mnemonicParsing="false" onAction="#send_Chat" prefHeight="25.0" prefWidth="63.0" text="Send" />
+               </children>
+            </AnchorPane>
+         </bottom>
+         <left>
+            <AnchorPane prefHeight="217.0" prefWidth="20.0" BorderPane.alignment="CENTER" />
+         </left>
+         <top>
+            <AnchorPane prefHeight="20.0" prefWidth="451.0" BorderPane.alignment="CENTER" />
+         </top>
+         <right>
+            <AnchorPane prefHeight="217.0" prefWidth="125.0" BorderPane.alignment="CENTER">
+               <children>
+                  <ListView fx:id="lst_Users" layoutX="23.0" layoutY="9.0" onMouseClicked="#get_Messages" prefHeight="200.0" prefWidth="90.0" />
+               </children>
+            </AnchorPane>
+         </right>
+         <center>
+            <AnchorPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+               <children>
+                  <TextArea fx:id="txt_Messages" editable="false" layoutX="8.0" layoutY="9.0" prefHeight="200.0" prefWidth="291.0" />
+               </children>
+            </AnchorPane>
+         </center>
+      </BorderPane>
    </children>
 </AnchorPane>

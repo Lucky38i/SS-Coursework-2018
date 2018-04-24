@@ -11,9 +11,6 @@ import java.util.concurrent.FutureTask;
 
 public class ChatServer extends Task<Void>
 {
-    //Static variables
-    private static final int portNumber = 4444;
-
     //Variables
     private int serverPort;
     private ClientManager clientManagerTemp;
@@ -80,7 +77,7 @@ public class ChatServer extends Task<Void>
 
 
     @Override
-    protected Void call() throws Exception
+    protected Void call()
     {
         startServer();
         return null;

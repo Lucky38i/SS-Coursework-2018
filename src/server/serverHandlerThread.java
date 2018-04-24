@@ -14,6 +14,7 @@ import javafx.util.Duration;
 import javax.jws.soap.SOAPBinding;
 import java.io.*;
 import java.net.Socket;
+import java.sql.Time;
 import java.util.*;
 
 /**
@@ -27,6 +28,7 @@ public class serverHandlerThread extends Task<Void>
     private ClientManager clientManagerTemp;
     private Users user;
     private Timeline updaterTimer;
+    private Timeline chatUpdaterTimer;
 
     /**
      * The main constructor
@@ -58,6 +60,12 @@ public class serverHandlerThread extends Task<Void>
         for (int i = 0; i < clientManagerTemp.usersList().size(); ++i)
             if (clientManagerTemp.usersList().get(i).getUserName().contains(user.getUserName()))
                 clientManagerTemp.usersList().get(i).setLoggedIn(true);
+    }
+
+    private void setChatViewer(Users user)
+    {
+        int testInt = clientManagerTemp.clientlist().indexOf(this);
+        clientManagerTemp.clientlist().get(testInt).user = user;
     }
 
     /**
@@ -354,6 +362,7 @@ public class serverHandlerThread extends Task<Void>
         try
         {
             updaterTimer.stop();
+            chatUpdaterTimer.stop();
             logoff();
 
             //Set the user's log in state to false
@@ -422,6 +431,20 @@ public class serverHandlerThread extends Task<Void>
 
                         updaterTimer.setCycleCount(Timeline.INDEFINITE);
                         updaterTimer.playFrom(Duration.seconds(4));
+                    }
+                    else if (input.contains(".ChatViewer"))
+                    {
+                        setChatViewer((Users) fromClient.readObject());
+                        chatUpdaterTimer = new Timeline(new KeyFrame(Duration.seconds(5), new EventHandler<ActionEvent>()
+                        {
+                            @Override
+                            public void handle(ActionEvent event)
+                            {
+                                getOnlineUsers(toClient);
+                            }
+                        }));
+                        chatUpdaterTimer.setCycleCount(Timeline.INDEFINITE);
+                        chatUpdaterTimer.playFrom(Duration.seconds(3));
                     }
                     else if (input.contains(".Music"))
                     {

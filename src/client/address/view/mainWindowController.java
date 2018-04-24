@@ -28,9 +28,6 @@ import javafx.util.Duration;
 import java.io.*;
 import java.net.Socket;
 import java.net.URL;
-import java.nio.file.DirectoryNotEmptyException;
-import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.ResourceBundle;
@@ -53,7 +50,8 @@ public class mainWindowController implements Initializable
     private Alert alertInfo = new Alert(Alert.AlertType.INFORMATION);
     private static Users user;
     private String host = "localhost", song;
-    private int portNumber = 4444;
+    private int mainPortNumber = 4444;
+    private int chatPortNumber = 4445;
     private Timeline theLittleTimerThatCould;
     private backgroundThread bgThread;
     private Task<Void> task;
@@ -65,11 +63,12 @@ public class mainWindowController implements Initializable
      * This sets the received user to <code>this.user</code> to be used by this controller
      * @param user receives a user object from the registerWindowController
      */
-    void initData(Users user, String host, Integer portNumber)
+    void initData(Users user, String host, int mainPortNumber, int chatPortNumber)
     {
         mainWindowController.user = user;
         this.host = host;
-        this.portNumber = portNumber;
+        this.mainPortNumber = mainPortNumber;
+        this.chatPortNumber = chatPortNumber;
 
         txt_UserName.setText(txt_UserName.getText() + " " + user.getFirstName() + "!");
         txt_FirstName.setText(user.getFirstName());
@@ -83,7 +82,7 @@ public class mainWindowController implements Initializable
 
 
         //Connect to the server to receive messages
-        bgThread = new backgroundThread(this, host, portNumber, mainWindowController.user);
+        bgThread = new backgroundThread(this, host, mainPortNumber, mainWindowController.user);
         task = bgThread;
         Thread thread = new Thread(task);
         thread.setDaemon(true);
@@ -142,27 +141,7 @@ public class mainWindowController implements Initializable
         mediaPlayer.stop();
         String location = "test.mp3";
         File tempFile = new File(location);
-        //Currently not working
-        /*
-        try
-        {
-            Files.deleteIfExists(tempFile.toPath());
-        }
-        catch(NoSuchFileException e)
-        {
-            System.out.println("No such file/directory exists");
-        }
-        catch(DirectoryNotEmptyException e)
-        {
-            e.printStackTrace();
-        }
-        catch(IOException e)
-        {
-            e.printStackTrace();
-            System.out.println("Invalid permission");
-        }
-
-        System.out.println("Deletion successful.");*/
+       //TODO Delete the temporary song
     }
 
     /**
@@ -193,7 +172,7 @@ public class mainWindowController implements Initializable
                 else
                 {
                     song = lst_SharedSongs.getSelectionModel().getSelectedItem();
-                    try (Socket socket = new Socket(host, portNumber);
+                    try (Socket socket = new Socket(host, mainPortNumber);
                          ObjectOutputStream toServer = new ObjectOutputStream(socket.getOutputStream());
                          ObjectInputStream fromServer = new ObjectInputStream(socket.getInputStream()))
                     {
@@ -267,7 +246,7 @@ public class mainWindowController implements Initializable
             Scene scene = new Scene(root);
 
             ChatWindowController controller = loader.getController();
-            controller.initData("shit");
+            controller.initData(host,chatPortNumber,user);
 
             //listView.getSelectionModel().getSelectedItem();
             System.out.println(lst_Friends.getSelectionModel().getSelectedItem());
@@ -397,6 +376,7 @@ public class mainWindowController implements Initializable
             {
                 lst_SharedSongs.setItems(null);
                 lst_SharedSongs.setItems(user.getSharedSongsList().get(i).getSharedSongs());
+                done = true;
             }
             else
                 lst_SharedSongs.setItems(null);
@@ -469,7 +449,7 @@ public class mainWindowController implements Initializable
          * sent to the server
          * @param msg The message to the sent to the server
          */
-        public synchronized void addNextMessage(String msg)
+        synchronized void addNextMessage(String msg)
         {
             hasMessages = true;
             messagesToSend.push(msg);
