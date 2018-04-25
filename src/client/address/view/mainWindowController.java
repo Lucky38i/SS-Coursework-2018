@@ -23,6 +23,7 @@ import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
 import javafx.util.Duration;
 
@@ -46,6 +47,7 @@ public class mainWindowController implements Initializable
     @FXML private ListView<String> lst_Genres, lst_Friends, lst_OnlineUsers, lst_Requests, lst_SearchedUsers, lst_SearchedMusic, lst_SharedSongs;
     @FXML private TextArea txt_Messages;
     @FXML private ContextMenu friends_Menu, users_Menu, requests_Menu;
+    @FXML private ToggleButton toggle_PMWindow;
     Stage PMWindowStage = new Stage();
     ChatWindowController chatWindowController;
 
@@ -117,6 +119,32 @@ public class mainWindowController implements Initializable
         theLittleTimerThatCould.playFrom(Duration.seconds(4.5));
         theLittleTimerThatCouldBrother.setCycleCount(Timeline.INDEFINITE);
         theLittleTimerThatCouldBrother.playFrom(Duration.seconds(4.5));
+
+        StartPMWindow();
+    }
+
+    /**
+     * Sets the scene up for the private message stage
+     */
+    private void StartPMWindow()
+    {
+        try
+        {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("ChatWindow.fxml"));
+            Parent root = loader.load();
+            Scene scene = new Scene(root);
+
+            chatWindowController = loader.getController();
+            chatWindowController.initData(host, chatPortNumber, user);
+
+            //PMWindowStage.initStyle(StageStyle.UNDECORATED);
+
+            PMWindowStage.setScene(scene);
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
     }
 
     private synchronized void addToNewList(Pair<String, ObservableList<String>> pair)
@@ -228,14 +256,7 @@ public class mainWindowController implements Initializable
                 {
                     theLittleTimerThatCould.stop();
                     theLittleTimerThatCouldBrother.stop();
-                    if (!pmWindowTimerClosed)
-                    {
-                        Platform.runLater(() ->
-                        {
-                            chatWindowController.getTheTimer().stop();
-                            System.out.println("Timer stopped");
-                        });
-                    }
+                    chatWindowController.getTheTimer().stop();
 
                     alertInfo.setTitle("");
                     alertInfo.setHeaderText(null);
@@ -246,28 +267,6 @@ public class mainWindowController implements Initializable
                     SceneSwitcher sceneSwitcher = new SceneSwitcher(loginWindow,actionEvent);
                     sceneSwitcher.switchScene();
                 }));
-    }
-
-    @FXML private void open_PMWindow(ActionEvent actionEvent)
-    {
-        try
-        {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("ChatWindow.fxml"));
-            Parent root = loader.load();
-            Scene scene = new Scene(root);
-
-            chatWindowController = loader.getController();
-            chatWindowController.initData(host,chatPortNumber,user);
-
-
-            PMWindowStage.setScene(scene);
-            PMWindowStage.show();
-
-
-        } catch (IOException e)
-        {
-            e.printStackTrace();
-        }
     }
 
     /**
@@ -422,20 +421,19 @@ public class mainWindowController implements Initializable
     @Override
     public void initialize(URL location, ResourceBundle resources)
     {
-        //TODO Logs the user out if they close the stage
-        PMWindowStage.setOnCloseRequest(new EventHandler<WindowEvent>()
+        //TODO
+    }
+
+    public void toggle_PMWindow(ActionEvent actionEvent)
+    {
+        if (toggle_PMWindow.selectedProperty().get())
         {
-            @Override
-            public void handle(WindowEvent event)
-            {
-                Platform.runLater(() ->
-                {
-                    chatWindowController.getTheTimer().stop();
-                    pmWindowTimerClosed = true;
-                    System.out.println("Timer stopped");
-                });
-            }
-        });
+            PMWindowStage.show();
+        }
+        else
+        {
+            PMWindowStage.hide();
+        }
 
     }
 
@@ -519,107 +517,108 @@ public class mainWindowController implements Initializable
 
                 while (!socket.isClosed())
                 {
-                    //Print messages from server
-                    String input = fromServer.readUTF();
-
-                    //TODO create comments for the purpose for all of these if statements
-                    if (input.equals("Done"))
+                    if (fromServer.available() > 0)
                     {
-                        socket.close();
-                    }
-                    else if (input.contains(".online"))
-                    {
-                        Object obj = fromServer.readObject();
-                        ArrayList<String> templist = (ArrayList<String>) obj;
+                        //Print messages from server
+                        String input = fromServer.readUTF();
 
-                        //Checks if any of the online users are friends
-                        for (int i = 0; i < templist.size(); ++i)
+                        //TODO create comments for the purpose for all of these if statements
+                        if (input.equals("Done"))
                         {
-                            for (int x = 0; x < user.getFriendsList().size(); ++x)
+                            socket.close();
+                        }
+
+                        else if (input.contains(".online"))
+                        {
+                            Object obj = fromServer.readObject();
+                            ArrayList<String> templist = (ArrayList<String>) obj;
+
+                            //Checks if any of the online users are friends
+                            for (int i = 0; i < templist.size(); ++i)
                             {
-                                if (templist.get(i).equals(user.getFriendsList().get(x)))
+                                for (int x = 0; x < user.getFriendsList().size(); ++x)
                                 {
-                                    templist.set(i, templist.get(i) + "(Friend)");
+                                    if (templist.get(i).equals(user.getFriendsList().get(x)))
+                                    {
+                                        templist.set(i, templist.get(i) + "(Friend)");
+                                    }
                                 }
                             }
+                            setOnlineUserList(templist);
+                        } else if (input.contains(".Search"))
+                        {
+                            //Read the received list and set it as a temporary list
+                            ObservableList<Users> tempList = FXCollections.observableArrayList();
+                            tempList.setAll((ArrayList<Users>) fromServer.readObject());
+                            ArrayList<String> tempListForUsers = new ArrayList<>();
+
+                            for (Users i : tempList)
+                            {
+                                Pair<String, ObservableList<String>> newPair = new Pair<>();
+                                newPair.setFirst(i.getUserName());
+                                newPair.setSecond(i.musicGenreProperty().get());
+                                addToNewList(newPair);
+                            }
+
+                            for (int i = 0; i < getNewList().size(); ++i)
+                            {
+                                tempListForUsers.add(getNewList().get(i).getFirst());
+                            }
+
+                            Platform.runLater(() ->
+                            {
+                                lst_SearchedUsers.refresh();
+                                searchedUsers.setAll(tempListForUsers);
+                                lst_SearchedUsers.setItems(searchedUsers);
+                            });
+
+                        } else if (input.contains(".Request"))
+                        {
+                            handleFriendRequest(input);
+                        } else if (input.contains(".Get"))
+                        {
+                            Users updateUser = (Users) fromServer.readObject();
+
+                            Platform.runLater(() ->
+                            {
+                                mainWindowController.user = updateUser;
+                                lst_Friends.setItems(updateUser.friendsListProperty().get());
+                            });
+                        } else if (input.contains(".Accept"))
+                        {
+                            String[] names = input.split("[.]");
+                            writeToUI("[ADMIN]: " + names[2] + " has accepted your friend request" + "\n");
+
+                        } else if (input.contains(".Decline"))
+                        {
+                            String[] names = input.split("[.]");
+                            writeToUI("[ADMIN]: " + names[2] + " has declined your friend request" + "\n");
+
+                            for (int i = 0; i < friendRequest.size(); ++i)
+                                if (friendRequest.get(i).contains(names[2]))
+                                    friendRequest.remove(i);
+                        } else
+                        {
+                            writeToUI(input);
                         }
-                        setOnlineUserList(templist);
                     }
-                    else if (input.contains(".Search"))
-                    {
-                        //Read the received list and set it as a temporary list
-                        ObservableList<Users> tempList = FXCollections.observableArrayList();
-                        tempList.setAll((ArrayList<Users>) fromServer.readObject());
-                        ArrayList<String> tempListForUsers = new ArrayList<>();
 
-                        for (Users i : tempList)
+                    if (hasMessages)
+                    {
+                        String nextSend;
+                        synchronized (messagesToSend)
                         {
-                            Pair<String, ObservableList<String>> newPair = new Pair<>();
-                            newPair.setFirst(i.getUserName());
-                            newPair.setSecond(i.musicGenreProperty().get());
-                            addToNewList(newPair);
+                            nextSend = messagesToSend.pop();
+                            hasMessages = !messagesToSend.isEmpty();
                         }
 
-                        for (int i = 0; i < getNewList().size(); ++i)
-                        {
-                            tempListForUsers.add(getNewList().get(i).getFirst());
-                        }
-
-                        Platform.runLater(()->
-                        {
-                            lst_SearchedUsers.refresh();
-                            searchedUsers.setAll(tempListForUsers);
-                            lst_SearchedUsers.setItems(searchedUsers);
-                        });
-
-                    }
-                    else if (input.contains(".Request"))
-                    {
-                        handleFriendRequest(input);
-                    }
-                    else if (input.contains(".Get"))
-                    {
-                        Users updateUser = (Users) fromServer.readObject();
-
-                        Platform.runLater(()->
-                        {
-                            mainWindowController.user = updateUser;
-                            lst_Friends.setItems(updateUser.friendsListProperty().get());
-                        });
-                    }
-                    else if (input.contains(".Accept"))
-                    {
-                        String[] names = input.split("[.]");
-                        writeToUI("[ADMIN]: " + names[2] + " has accepted your friend request"+"\n");
-
-                    }
-                    else if (input.contains(".Decline"))
-                    {
-                        String[] names = input.split("[.]");
-                        writeToUI("[ADMIN]: " + names[2] + " has declined your friend request"+"\n");
-
-                        for (int i = 0; i < friendRequest.size(); ++i)
-                            if (friendRequest.get(i).contains(names[2]))
-                                friendRequest.remove(i);
-                    }
-                    else
-                    {
-                        writeToUI(input);
+                        System.out.println(nextSend);
+                        toServer.writeUTF(nextSend);
+                        toServer.flush();
                     }
                 }
 
-                if (hasMessages)
-                {
-                    String nextSend;
-                    synchronized (messagesToSend)
-                    {
-                        nextSend = messagesToSend.pop();
-                        hasMessages = !messagesToSend.isEmpty();
-                    }
 
-                    toServer.writeUTF(nextSend);
-                    toServer.flush();
-                }
 
             }
             catch (IOException | ClassNotFoundException e)

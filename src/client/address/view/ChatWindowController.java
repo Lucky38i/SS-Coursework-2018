@@ -240,32 +240,31 @@ public class ChatWindowController
 
                 while (!socket.isClosed())
                 {
-
-                    String input = fromServer.readUTF();
-                    System.out.println(input);
-
-                    if (input.contains(".online"))
+                    if (fromServer.available() > 0)
                     {
-                        Object obj = fromServer.readObject();
-                        ArrayList<String> templist = (ArrayList<String>) obj;
+                        String input = fromServer.readUTF();
 
-                        //Checks if any of the online users are friends
-                        for (int i = 0; i < templist.size(); ++i)
+                        if (input.contains(".online"))
                         {
-                            for (int x = 0; x < user.getFriendsList().size(); ++x)
+                            Object obj = fromServer.readObject();
+                            ArrayList<String> templist = (ArrayList<String>) obj;
+
+                            //Checks if any of the online users are friends
+                            for (int i = 0; i < templist.size(); ++i)
                             {
-                                if (templist.get(i).equals(user.getFriendsList().get(x)))
+                                for (int x = 0; x < user.getFriendsList().size(); ++x)
                                 {
-                                    templist.set(i, templist.get(i) + "(Friend)");
+                                    if (templist.get(i).equals(user.getFriendsList().get(x)))
+                                    {
+                                        templist.set(i, templist.get(i) + "(Friend)");
+                                    }
                                 }
                             }
+                            setOnlineUserList(templist);
+                        } else if (input.contains(".Message"))
+                        {
+                            handlePrivateMessages(input);
                         }
-                        setOnlineUserList(templist);
-                    }
-
-                    else if (input.contains(".Message"))
-                    {
-                        handlePrivateMessages(input);
                     }
 
                     if (hasMessages)

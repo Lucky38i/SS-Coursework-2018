@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
+
 <AnchorPane fx:id="AnchorPane_Main" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.address.view.mainWindowController">
    <children>
       <BorderPane prefHeight="600.0" prefWidth="800.0">
@@ -82,6 +84,7 @@
                                                             <ContextMenu fx:id="users_Menu">
                                                               <items>
                                                                 <MenuItem mnemonicParsing="false" onAction="#send_FriendRequest" text="Send user request" />
+                                                                  <MenuItem mnemonicParsing="false" text="Private Message" />
                                                               </items>
                                                             </ContextMenu>
                                                          </contextMenu>
@@ -172,7 +175,7 @@
                                                          <contextMenu>
                                                             <ContextMenu fx:id="friends_Menu">
                                                               <items>
-                                                                  <MenuItem mnemonicParsing="false" onAction="#open_PMWindow" text="Private message" />
+                                                                  <MenuItem mnemonicParsing="false" text="Private message" />
                                                               </items>
                                                             </ContextMenu>
                                                          </contextMenu>
@@ -217,6 +220,7 @@
             <AnchorPane prefHeight="45.0" prefWidth="800.0" BorderPane.alignment="CENTER">
                <children>
                   <Button layoutX="725.0" layoutY="9.0" mnemonicParsing="false" onAction="#open_LoginScreen" text="Logout" />
+                  <ToggleButton fx:id="toggle_PMWindow" layoutX="555.0" layoutY="9.0" mnemonicParsing="false" onAction="#toggle_PMWindow" text="PM Window Toggle" />
                </children>
             </AnchorPane>
          </bottom>

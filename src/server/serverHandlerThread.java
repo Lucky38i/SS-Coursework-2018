@@ -29,7 +29,8 @@ public class serverHandlerThread extends Task<Void>
     private ClientManager clientManagerTemp;
     private Users user;
     private Timeline updaterTimer;
-    private Timeline chatUpdaterTimer;
+    //TODO fix this stupid fucking thing
+    private Timeline timer1;
 
     /**
      * The main constructor
@@ -447,6 +448,7 @@ public class serverHandlerThread extends Task<Void>
         try
         {
             updaterTimer.stop();
+            clientManagerTemp.logger("Stopping timer 1", "Main");
             logoff();
 
             //Set the user's log in state to false
@@ -489,10 +491,13 @@ public class serverHandlerThread extends Task<Void>
 
             while(!socket.isClosed())
             {
+                Thread.sleep(100);
+
                 if (fromClient.available() > 0)
                 {
                     //Reads message and objects from client
                     String input = fromClient.readUTF();
+                    clientManagerTemp.logger(input, "Main");
 
                     //Send a request to the user
                     if (input.contains(".Viewer"))
@@ -506,43 +511,58 @@ public class serverHandlerThread extends Task<Void>
                             public void handle(ActionEvent event)
                             {
                                 getOnlineUsers(toClient);
-
                                 getUpdatedUser(toClient, ".Get." + user.getUserName());
 
                             }
                         }));
-
                         updaterTimer.setCycleCount(Timeline.INDEFINITE);
                         updaterTimer.playFrom(Duration.seconds(4));
-                    } else if (input.contains(".ChatViewer"))
+                    }
+                    else if (input.contains(".ChatViewer"))
                     {
                         setChatViewer((Users) fromClient.readObject());
-                        chatUpdaterTimer = new Timeline(new KeyFrame(Duration.seconds(3), new EventHandler<ActionEvent>()
+
+                        //TODO why is this not being instantiated?!
+                        /*
+                        timer1 = new Timeline(new KeyFrame(Duration.seconds(4), new EventHandler<ActionEvent>()
                         {
                             @Override
                             public void handle(ActionEvent event)
                             {
                                 getOnlineUsers(toClient);
+                                clientManagerTemp.logger("Im running", "Main");
                             }
                         }));
-                        chatUpdaterTimer.setCycleCount(Timeline.INDEFINITE);
-                        chatUpdaterTimer.playFrom(Duration.seconds(2.5));
-                    } else if (input.contains(".Message"))
+                        timer1.setCycleCount(Timeline.INDEFINITE);
+                        timer1.play();*/
+                    }
+
+                    else if (input.contains(".Message"))
                     {
                         handlePrivateMessage(input, user);
-                    } else if (input.contains(".Music"))
+                    }
+
+                    else if (input.contains(".Music"))
                     {
                         findMusic(input, toClient);
-                    } else if (input.contains(".NewSong"))
+                    }
+
+                    else if (input.contains(".NewSong"))
                     {
                         createNewSong(input, fromClient);
-                    } else if (input.contains(".Search"))
+                    }
+
+                    else if (input.contains(".Search"))
                     {
                         searchMusicInterests(toClient, input);
-                    } else if (input.contains(".Accept") || input.contains(".Decline"))
+                    }
+
+                    else if (input.contains(".Accept") || input.contains(".Decline"))
                     {
                         handleRequest(input);
-                    } else if (input.contains(".Request"))
+                    }
+
+                    else if (input.contains(".Request"))
                     {
                         writeMessageToUser(input);
                     }
@@ -563,7 +583,9 @@ public class serverHandlerThread extends Task<Void>
                     {
                         Users tempUser = (Users) fromClient.readObject();
                         findUser(toClient, tempUser);
-                    } else
+                    }
+
+                    else
                     {
                         writeMessageToAll(input);
                     }
