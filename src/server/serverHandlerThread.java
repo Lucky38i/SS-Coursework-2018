@@ -27,7 +27,7 @@ public class serverHandlerThread extends Task<Void>
     private Users user;
     private Timeline updaterTimer;
     //TODO fix this stupid fucking thing
-    private Timeline timer1;
+    private Timeline chatTimer;
 
     /**
      * The main constructor
@@ -445,7 +445,6 @@ public class serverHandlerThread extends Task<Void>
         try
         {
             updaterTimer.stop();
-            clientManagerTemp.logger("Stopping timer 1", "Main");
             logoff();
 
             //Set the user's log in state to false
@@ -464,6 +463,21 @@ public class serverHandlerThread extends Task<Void>
             socket.close();
         }
         catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    private void logoffChat()
+    {
+        try
+        {
+            chatTimer.stop();
+            logoff();
+
+            socket.close();
+        }
+        catch (Exception e)
         {
             e.printStackTrace();
         }
@@ -494,7 +508,6 @@ public class serverHandlerThread extends Task<Void>
                 {
                     //Reads message and objects from client
                     String input = fromClient.readUTF();
-                    clientManagerTemp.logger(input, "Main");
 
                     //Send a request to the user
                     if (input.contains(".Viewer"))
@@ -517,18 +530,19 @@ public class serverHandlerThread extends Task<Void>
                         getOnlineUsers(toClient);
 
                         //TODO why is this not being instantiated?!
-                        /*
-                        timer1 = new Timeline(new KeyFrame(Duration.seconds(4), new EventHandler<ActionEvent>()
+                        chatTimer = new Timeline(new KeyFrame(Duration.seconds(4), event ->
                         {
-                            @Override
-                            public void handle(ActionEvent event)
-                            {
-                                getOnlineUsers(toClient);
-                                clientManagerTemp.logger("Im running", "Main");
-                            }
+
+                            getOnlineUsers(toClient);
+
                         }));
-                        timer1.setCycleCount(Timeline.INDEFINITE);
-                        timer1.play();*/
+                        chatTimer.setCycleCount(Timeline.INDEFINITE);
+                        chatTimer.play();
+                    }
+
+                    else if (input.contains(".LogoffChat"))
+                    {
+                        logoffChat();
                     }
 
                     else if (input.contains(".Message"))
@@ -592,6 +606,4 @@ public class serverHandlerThread extends Task<Void>
         }
         return null;
     }
-
-
 }

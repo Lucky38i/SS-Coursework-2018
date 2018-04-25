@@ -10,6 +10,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -21,6 +22,7 @@ import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import javafx.util.Duration;
 
 import java.io.*;
@@ -230,6 +232,9 @@ public class mainWindowController implements Initializable
                 {
                     theLittleTimerThatCould.stop();
                     chatWindowController.getTheTimer().stop();
+                    chatWindowController.bgThread.addNextMessage(".LogoffChat");
+                    PMWindowStage.close();
+
 
                     alertInfo.setTitle("");
                     alertInfo.setHeaderText(null);
@@ -392,6 +397,12 @@ public class mainWindowController implements Initializable
     public void initialize(URL location, ResourceBundle resources)
     {
         //TODO
+        /*
+        PMWindowStage.setOnCloseRequest(event ->
+        {
+            chatWindowController.bgThread.addNextMessage(".LogoffChat");
+            System.out.println("Closing PM Window");
+        }); */
     }
 
     /**

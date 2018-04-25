@@ -30,7 +30,7 @@
          <right>
             <AnchorPane prefHeight="217.0" prefWidth="125.0" BorderPane.alignment="CENTER">
                <children>
-                  <ListView fx:id="lst_Users" layoutX="23.0" layoutY="9.0" onMouseClicked="#get_Messages" prefHeight="200.0" prefWidth="90.0" />
+                  <ListView fx:id="lst_Users" layoutX="23.0" layoutY="9.0" onMouseClicked="#setSelectedUser" prefHeight="200.0" prefWidth="90.0" />
                </children>
             </AnchorPane>
          </right>

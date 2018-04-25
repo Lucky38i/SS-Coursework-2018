@@ -35,11 +35,12 @@ public class ChatWindowController
 
     private List<Pair<String,List<String>>> privateMessages;
     private String selectedUser;
-    private backgroundThread bgThread;
+    backgroundThread bgThread;
     private String host;
     private int portNumber;
     private Users user;
     private Timeline theTimer;
+    private Timeline speedyTimer;
 
     private Alert alertInfo = new Alert(Alert.AlertType.INFORMATION);
 
@@ -57,13 +58,19 @@ public class ChatWindowController
         thread.start();
 
         //A periodic timer that checks the list of online users
-        theTimer = new Timeline(new KeyFrame(Duration.seconds(5), event -> Platform.runLater(()-> lst_Users.setItems(bgThread.getOnlineUserList()))));
+        theTimer = new Timeline(new KeyFrame(Duration.seconds(5), event ->
+                Platform.runLater(()-> lst_Users.setItems(bgThread.getOnlineUserList()))));
+
         theTimer.setCycleCount(Timeline.INDEFINITE);
         theTimer.playFrom(Duration.seconds(4.5));
 
+        speedyTimer = new Timeline(new KeyFrame(Duration.millis(700), event -> getMessages()));
+        speedyTimer.setCycleCount(Timeline.INDEFINITE);
+        speedyTimer.play();
+
     }
 
-    public Timeline getTheTimer()
+    Timeline getTheTimer()
     {
         return theTimer;
     }
@@ -73,7 +80,10 @@ public class ChatWindowController
         return privateMessages;
     }
 
-    @FXML private void send_Chat()
+    /**
+     * Sends chat to the specified user
+     */
+    @FXML void send_Chat()
     {
         if (chat_Message.getText().equals(""))
         {
@@ -85,6 +95,13 @@ public class ChatWindowController
         else
         {
             bgThread.addNextMessage(".Message." + selectedUser + "." + chat_Message.getText());
+            for (Pair<String, List<String>> privateMessage : privateMessages)
+            {
+                if (privateMessage.getFirst().equals(selectedUser))
+                {
+                    privateMessage.getSecond().add(user.getUserName().substring(0, user.getUserName().indexOf(".Ch")) + ":" + chat_Message.getText());
+                }
+            }
             chat_Message.setText("");
         }
     }
@@ -92,23 +109,53 @@ public class ChatWindowController
     /**
      * gets the messages being discussed with a user
      */
-    public void get_Messages()
+    public void setSelectedUser()
     {
         selectedUser = lst_Users.getSelectionModel().getSelectedItem();
         txt_Messages.setText("");
-        if (privateMessages.size() > 0)
+        boolean isAFriend = false;
+
+        //Find if the selected user is a friend and parses
+        getMessages(isAFriend);
+    }
+
+    private void getMessages()
+    {
+        //Find if the selected user is a friend and parses
+        boolean isAFriend = false;
+        getMessages(isAFriend);
+    }
+
+    private void getMessages(boolean isAFriend)
+    {
+        txt_Messages.setText("");
+        if (selectedUser != null)
         {
-            for (Pair<String, List<String>> privateMessage : privateMessages)
+            if (selectedUser.indexOf("(F") > 0)
             {
-                if (privateMessage.getFirst().equals(selectedUser) || privateMessage.getFirst().equals(selectedUser.substring(0,selectedUser.indexOf("(F"))))
-                {
-                    for (int x = 0; x < privateMessage.getSecond().size(); ++x)
-                        txt_Messages.appendText(privateMessage.getSecond().get(x) + "\n");
-                }
+                isAFriend = true;
             }
+            if (privateMessages.size() > 0)
+            {
+                for (Pair<String, List<String>> privateMessage : privateMessages)
+                {
+                    if (privateMessage.getFirst().equals(selectedUser))
+                    {
+                        for (int x = 0; x < privateMessage.getSecond().size(); ++x)
+                            txt_Messages.appendText(privateMessage.getSecond().get(x) + "\n");
+
+                    } else if (isAFriend)
+                    {
+                        if (privateMessage.getFirst().equals(selectedUser.substring(0, selectedUser.indexOf("(F"))))
+                        {
+                            for (int x = 0; x < privateMessage.getSecond().size(); ++x)
+                                txt_Messages.appendText(privateMessage.getSecond().get(x) + "\n");
+                        }
+                    }
+                }
+            } else
+                txt_Messages.setText("");
         }
-        else
-            txt_Messages.setText("");
     }
 
     /**
@@ -215,7 +262,7 @@ public class ChatWindowController
                 {
                     if (getPrivateMessages().get(i).getFirst().equals(userName))
                     {
-                        getPrivateMessages().get(i).getSecond().add(message);
+                        getPrivateMessages().get(i).getSecond().add(getPrivateMessages().get(i).getFirst() + ": " + message);
                     }
                 }
             }
