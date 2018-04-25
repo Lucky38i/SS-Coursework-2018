@@ -9,21 +9,19 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.input.MouseEvent;
 import javafx.stage.FileChooser;
 import javafx.util.Duration;
 
 import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * The chatWindowController that handles all private messages between the client and selected users
@@ -59,14 +57,7 @@ public class ChatWindowController
         thread.start();
 
         //A periodic timer that checks the list of online users
-        theTimer = new Timeline(new KeyFrame(Duration.seconds(5), new EventHandler<ActionEvent>()
-        {
-            @Override
-            public void handle(ActionEvent event)
-            {
-                Platform.runLater(()-> lst_Users.setItems(bgThread.getOnlineUserList()));
-            }
-        }));
+        theTimer = new Timeline(new KeyFrame(Duration.seconds(5), event -> Platform.runLater(()-> lst_Users.setItems(bgThread.getOnlineUserList()))));
         theTimer.setCycleCount(Timeline.INDEFINITE);
         theTimer.playFrom(Duration.seconds(4.5));
 
@@ -82,7 +73,7 @@ public class ChatWindowController
         return privateMessages;
     }
 
-    @FXML private void send_Chat(ActionEvent actionEvent)
+    @FXML private void send_Chat()
     {
         if (chat_Message.getText().equals(""))
         {
@@ -100,9 +91,8 @@ public class ChatWindowController
 
     /**
      * gets the messages being discussed with a user
-     * @param mouseEvent //TODO
      */
-    public void get_Messages(MouseEvent mouseEvent)
+    public void get_Messages()
     {
         selectedUser = lst_Users.getSelectionModel().getSelectedItem();
         txt_Messages.setText("");
@@ -121,6 +111,11 @@ public class ChatWindowController
             txt_Messages.setText("");
     }
 
+    /**
+     * Retrieves the file selected and sends it to the server
+     * (Currently not working)
+     * @param actionEvent not working
+     */
     @FXML private void Open_File(ActionEvent actionEvent)
     {
         FileChooser fileChooser = new FileChooser();
@@ -136,10 +131,9 @@ public class ChatWindowController
         private int portNumber;
         private Users user;
         private boolean hasMessages = false;
-        private final LinkedList<String> messagesToSend;
-        private final ArrayList<String> messageList;
+        private final LinkedBlockingQueue<String> messagesToSend;
         private boolean hasMusic = false;
-        private final LinkedList<Pair<File,String>> musicToSend;
+        private final LinkedBlockingQueue<Pair<File,String>> musicToSend;
         private ObservableList<String> onlineUserList = FXCollections.observableArrayList();
 
         backgroundThread(String host, int portNumber, Users user)
@@ -147,9 +141,8 @@ public class ChatWindowController
             this.host = host;
             this.portNumber = portNumber;
             this.user = user;
-            messagesToSend = new LinkedList<>();
-            messageList = new ArrayList<>();
-            musicToSend = new LinkedList<>();
+            messagesToSend = new LinkedBlockingQueue<>();
+            musicToSend = new LinkedBlockingQueue<>();
         }
 
         synchronized ObservableList<String> getOnlineUserList()
@@ -169,17 +162,31 @@ public class ChatWindowController
          */
         synchronized void addNextMessage(String msg)
         {
-            hasMessages = true;
-            messagesToSend.push(msg);
+            try
+            {
+                hasMessages = true;
+                messagesToSend.put(msg);
+            }
+            catch (InterruptedException e)
+            {
+                e.printStackTrace();
+            }
         }
 
         synchronized void addNextSong(File file, String fileName)
         {
-            Pair<File, String> newSong = new Pair<>();
-            newSong.setFirst(file);
-            newSong.setSecond(fileName);
-            hasMusic = true;
-            musicToSend.push(newSong);
+            try
+            {
+                Pair<File, String> newSong = new Pair<>();
+                newSong.setFirst(file);
+                newSong.setSecond(fileName);
+                hasMusic = true;
+                musicToSend.put(newSong);
+            }
+            catch (InterruptedException e)
+            {
+                e.printStackTrace();
+            }
         }
 
         /**
@@ -224,7 +231,7 @@ public class ChatWindowController
         }
 
         @Override
-        protected Void call() throws Exception
+        protected Void call()
         {
             user.setUserName(user.getUserName() + ".ChatViewer");
             try(Socket socket = new Socket(host,portNumber);
@@ -272,7 +279,7 @@ public class ChatWindowController
                         String nextSend;
                         synchronized (messagesToSend)
                         {
-                            nextSend = messagesToSend.pop();
+                            nextSend = messagesToSend.take();
                             hasMessages = !messagesToSend.isEmpty();
                         }
 
@@ -285,7 +292,7 @@ public class ChatWindowController
                         Pair<File, String> nextSong;
                         synchronized (musicToSend)
                         {
-                            nextSong = musicToSend.pop();
+                            nextSong = musicToSend.take();
                             hasMusic = !musicToSend.isEmpty();
                         }
 

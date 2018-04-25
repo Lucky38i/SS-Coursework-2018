@@ -84,7 +84,6 @@
                                                             <ContextMenu fx:id="users_Menu">
                                                               <items>
                                                                 <MenuItem mnemonicParsing="false" onAction="#send_FriendRequest" text="Send user request" />
-                                                                  <MenuItem mnemonicParsing="false" text="Private Message" />
                                                               </items>
                                                             </ContextMenu>
                                                          </contextMenu>
@@ -171,15 +170,7 @@
                                                    <children>
                                                       <ListView fx:id="lst_Genres" disable="true" prefHeight="100.0" prefWidth="200.0" />
                                                       <AnchorPane prefHeight="100.0" prefWidth="117.0" />
-                                                      <ListView fx:id="lst_Friends" onContextMenuRequested="#open_contextMenuFriends" onMouseClicked="#getSharedSongs" prefHeight="100.0" prefWidth="200.0">
-                                                         <contextMenu>
-                                                            <ContextMenu fx:id="friends_Menu">
-                                                              <items>
-                                                                  <MenuItem mnemonicParsing="false" text="Private message" />
-                                                              </items>
-                                                            </ContextMenu>
-                                                         </contextMenu>
-                                                      </ListView>
+                                                      <ListView fx:id="lst_Friends" onContextMenuRequested="#open_contextMenuFriends" onMouseClicked="#getSharedSongs" prefHeight="100.0" prefWidth="200.0" />
                                                    </children>
                                                 </HBox>
                                                 <AnchorPane prefHeight="30.0" prefWidth="396.0">

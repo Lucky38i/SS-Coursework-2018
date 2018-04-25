@@ -10,7 +10,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -18,21 +17,18 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.ContextMenuEvent;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
-import javafx.stage.WindowEvent;
 import javafx.util.Duration;
 
 import java.io.*;
 import java.net.Socket;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.ResourceBundle;
+import java.util.concurrent.LinkedBlockingQueue;
 
 
 /**
@@ -60,13 +56,12 @@ public class mainWindowController implements Initializable
     private Timeline theLittleTimerThatCould;
     private backgroundThread bgThread;
     private Task<Void> task;
-    private Timeline theLittleTimerThatCouldBrother;
     private ObservableList<Pair<String,ObservableList<String>>> newList = FXCollections.observableArrayList();
     private MediaPlayer mediaPlayer;
-    private boolean pmWindowTimerClosed = false;
 
     /**
-     * This sets the received user to <code>this.user</code> to be used by this chatWindowController
+     * Instantiates all required data for this controller and starts the required timers
+     * as-well as starting the private message window
      * @param user receives a user object from the registerWindowController
      */
     void initData(Users user, String host, int mainPortNumber, int chatPortNumber)
@@ -94,31 +89,15 @@ public class mainWindowController implements Initializable
         thread.setDaemon(true);
         thread.start();
 
-        //A periodic timer that checks the list of online users
-        theLittleTimerThatCould = new Timeline(new KeyFrame(Duration.seconds(5), new EventHandler<ActionEvent>()
+        //A periodic timer that checks the list of online users and friend requests
+        theLittleTimerThatCould = new Timeline(new KeyFrame(Duration.seconds(5), event -> Platform.runLater(()->
         {
-            @Override
-            public void handle(ActionEvent event)
-            {
-                Platform.runLater(()-> lst_OnlineUsers.setItems(bgThread.getOnlineUserList()));
-            }
-        }));
-
-        //Time that grabs the set of friend requests
-        theLittleTimerThatCouldBrother = new Timeline(new KeyFrame(Duration.seconds(5), new EventHandler<ActionEvent>()
-        {
-            @Override
-            public void handle(ActionEvent event)
-            {
-                Platform.runLater(()-> lst_Requests.setItems(bgThread.getFriendRequests()));
-            }
-        }));
-
+            lst_OnlineUsers.setItems(bgThread.getOnlineUserList());
+            lst_Requests.setItems(bgThread.getFriendRequests());
+        })));
 
         theLittleTimerThatCould.setCycleCount(Timeline.INDEFINITE);
         theLittleTimerThatCould.playFrom(Duration.seconds(4.5));
-        theLittleTimerThatCouldBrother.setCycleCount(Timeline.INDEFINITE);
-        theLittleTimerThatCouldBrother.playFrom(Duration.seconds(4.5));
 
         StartPMWindow();
     }
@@ -177,9 +156,8 @@ public class mainWindowController implements Initializable
 
     /**
      * This handles music (incomplete javaDoc)
-     * @param actionEvent incomplete
      */
-    @FXML private void handleMusic(ActionEvent actionEvent)
+    @FXML private void handleMusic()
     {
 
         //TODO move this to the bgThread
@@ -189,7 +167,6 @@ public class mainWindowController implements Initializable
             int current;
 
             @Override
-            //TODO close the socket
             protected Void call()
             {
                 if (lst_SharedSongs.getSelectionModel().getSelectedItems().equals(""))
@@ -213,21 +190,18 @@ public class mainWindowController implements Initializable
 
                         File file = new File(tempSong);
                         file.createNewFile();
-                        FileOutputStream fileReader = new FileOutputStream(file);
-                        BufferedOutputStream bOS = new BufferedOutputStream(fileReader);
 
                         byte[] buffer = new byte[4096];
                         int fileLength = fromServer.readInt();
 
-                        while (fileLength > 0 && (current = fromServer.read(buffer, 0, Math.min(4096, fileLength))) > 0)
+                        try(BufferedOutputStream bOS = new BufferedOutputStream(new FileOutputStream(file)))
                         {
-                            bOS.write(buffer, 0, current);
-                            fileLength -= current;
+                            while (fileLength > 0 && (current = fromServer.read(buffer, 0, Math.min(4096, fileLength))) > 0)
+                            {
+                                bOS.write(buffer, 0, current);
+                                fileLength -= current;
+                            }
                         }
-
-
-                        fileReader.close();
-                        bOS.close();
                     }
                     catch (IOException e)
                     {
@@ -255,7 +229,6 @@ public class mainWindowController implements Initializable
                 Platform.runLater(() ->
                 {
                     theLittleTimerThatCould.stop();
-                    theLittleTimerThatCouldBrother.stop();
                     chatWindowController.getTheTimer().stop();
 
                     alertInfo.setTitle("");
@@ -271,9 +244,8 @@ public class mainWindowController implements Initializable
 
     /**
      * Sends a user message to the server board
-     * @param actionEvent not being used currently
      */
-    @FXML private void send_message(ActionEvent actionEvent)
+    @FXML private void send_message()
     {
         if (!txt_SendMessage.getText().equals(""))
         {
@@ -292,9 +264,8 @@ public class mainWindowController implements Initializable
     /**
      * This sends a friend request to the user specified
      * as-well as checking if an inappropriate user is not selected
-     * @param actionEvent Not currently being used
      */
-    @FXML private void send_FriendRequest(ActionEvent actionEvent)
+    @FXML private void send_FriendRequest()
     {
         String selectedName = lst_OnlineUsers.getSelectionModel().getSelectedItem();
         if (selectedName.contains(("(Friend)")) || selectedName.equals(user.getUserName()))
@@ -310,9 +281,8 @@ public class mainWindowController implements Initializable
 
     /**
      * accept the selected friend request
-     * @param actionEvent not currently being used
      */
-    @FXML private void accept_FriendRequest(ActionEvent actionEvent)
+    @FXML private void accept_FriendRequest()
     {
         String selectedName = lst_Requests.getSelectionModel().getSelectedItem();
         bgThread.addNextMessage(".Accept." + selectedName);
@@ -324,9 +294,8 @@ public class mainWindowController implements Initializable
 
     /**
      * declines a friend request
-     * @param actionEvent not currently being used
      */
-    @FXML private void decline_FriendRequest(ActionEvent actionEvent)
+    @FXML private void decline_FriendRequest()
     {
         //Retrieve the selected name and send it to the server then delete it from the list
         String selectedName = lst_Requests.getSelectionModel().getSelectedItem();
@@ -338,9 +307,8 @@ public class mainWindowController implements Initializable
 
     /**
      * This searches for the users who have a specific music interest
-     * @param actionEvent not currently being used
      */
-    public void searchMusicInterests(ActionEvent actionEvent)
+    public void searchMusicInterests()
     {
         if (txt_Search.getText().equals(""))
         {
@@ -358,9 +326,8 @@ public class mainWindowController implements Initializable
     /**
      * This get the music genres for the selected user and
      * places it in the list
-     * @param mouseEvent not currently being used
      */
-    @FXML private void getMusicInterests(MouseEvent mouseEvent)
+    @FXML private void getMusicInterests()
     {
         Boolean done = false;
         for (int i = 0; i < newList.size() && !done; ++i)
@@ -374,7 +341,10 @@ public class mainWindowController implements Initializable
         }
     }
 
-    @FXML private void getSharedSongs(MouseEvent mouseEvent)
+    /**
+     * Retrieve the songs shared with the selected friend
+     */
+    @FXML private void getSharedSongs()
     {
         boolean done = false;
         for (int i = 0; i < user.sharedSongsListProperty().get().size() && !done; ++i)
@@ -424,7 +394,10 @@ public class mainWindowController implements Initializable
         //TODO
     }
 
-    public void toggle_PMWindow(ActionEvent actionEvent)
+    /**
+     * Toggles the private message window to either hide or show
+     */
+    public void toggle_PMWindow()
     {
         if (toggle_PMWindow.selectedProperty().get())
         {
@@ -448,7 +421,7 @@ public class mainWindowController implements Initializable
         private int portNumber;
         private mainWindowController controller;
         private Users user;
-        private final LinkedList<String> messagesToSend;
+        private final LinkedBlockingQueue<String> messagesToSend;
         private ObservableList<String> friendRequest = FXCollections.observableArrayList();
         private ObservableList<String> searchedUsers = FXCollections.observableArrayList();
         private ObservableList<String> onlineUserList = FXCollections.observableArrayList();
@@ -461,7 +434,7 @@ public class mainWindowController implements Initializable
             this.host = host;
             this.portNumber = portNumber;
             this.user = user;
-            messagesToSend = new LinkedList<>();
+            messagesToSend = new LinkedBlockingQueue<>();
         }
 
         /**
@@ -471,8 +444,15 @@ public class mainWindowController implements Initializable
          */
         synchronized void addNextMessage(String msg)
         {
-            hasMessages = true;
-            messagesToSend.push(msg);
+            try
+            {
+                hasMessages = true;
+                messagesToSend.put(msg);
+            }
+            catch (InterruptedException e)
+            {
+                e.printStackTrace();
+            }
         }
 
         synchronized ObservableList<String> getFriendRequests()
@@ -490,6 +470,10 @@ public class mainWindowController implements Initializable
             Platform.runLater(()->this.onlineUserList.setAll(list));
         }
 
+        /**
+         * Handles friend requests
+         * @param input
+         */
         void handleFriendRequest(String input)
         {
             String[] names = input.split("[.]");
@@ -508,7 +492,6 @@ public class mainWindowController implements Initializable
                 ObjectInputStream fromServer = new ObjectInputStream(socket.getInputStream());
                 ObjectOutputStream toServer = new ObjectOutputStream(socket.getOutputStream()))
             {
-
                 toServer.writeUTF(".Viewer");
                 toServer.flush();
 
@@ -522,7 +505,7 @@ public class mainWindowController implements Initializable
                         //Print messages from server
                         String input = fromServer.readUTF();
 
-                        //TODO create comments for the purpose for all of these if statements
+
                         if (input.equals("Done"))
                         {
                             socket.close();
@@ -608,11 +591,11 @@ public class mainWindowController implements Initializable
                         String nextSend;
                         synchronized (messagesToSend)
                         {
-                            nextSend = messagesToSend.pop();
+
+                            nextSend = messagesToSend.take();
                             hasMessages = !messagesToSend.isEmpty();
                         }
 
-                        System.out.println(nextSend);
                         toServer.writeUTF(nextSend);
                         toServer.flush();
                     }
@@ -621,7 +604,7 @@ public class mainWindowController implements Initializable
 
 
             }
-            catch (IOException | ClassNotFoundException e)
+            catch (Exception e)
             {
                 e.printStackTrace();
             }

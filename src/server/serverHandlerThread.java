@@ -2,20 +2,17 @@ package server;
 
 import Resources.AudioUtil;
 import Resources.Pair;
-import Resources.SharedSongs;
 import Resources.Users;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.concurrent.Task;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.util.Duration;
 
-import javax.jws.soap.SOAPBinding;
 import java.io.*;
 import java.net.Socket;
-import java.sql.Time;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Task that handles all connections received from the client
@@ -505,15 +502,11 @@ public class serverHandlerThread extends Task<Void>
                         setViewer((Users) fromClient.readObject());
 
                         //A periodic updaterTimer that sends online users periodically
-                        updaterTimer = new Timeline(new KeyFrame(Duration.seconds(5), new EventHandler<ActionEvent>()
+                        updaterTimer = new Timeline(new KeyFrame(Duration.seconds(5), event ->
                         {
-                            @Override
-                            public void handle(ActionEvent event)
-                            {
-                                getOnlineUsers(toClient);
-                                getUpdatedUser(toClient, ".Get." + user.getUserName());
+                            getOnlineUsers(toClient);
+                            getUpdatedUser(toClient, ".Get." + user.getUserName());
 
-                            }
                         }));
                         updaterTimer.setCycleCount(Timeline.INDEFINITE);
                         updaterTimer.playFrom(Duration.seconds(4));
@@ -521,6 +514,7 @@ public class serverHandlerThread extends Task<Void>
                     else if (input.contains(".ChatViewer"))
                     {
                         setChatViewer((Users) fromClient.readObject());
+                        getOnlineUsers(toClient);
 
                         //TODO why is this not being instantiated?!
                         /*
