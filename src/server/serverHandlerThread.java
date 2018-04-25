@@ -338,7 +338,7 @@ public class serverHandlerThread extends Task<Void>
      * with them.
      * @param input The message to notify the receiving user that that a song
      *              was shared with them
-     * @param fromClient The Object inputstream to read the received file
+     * @param fromClient The Object input stream to read the received file
      */
     private void createNewSong(String input, ObjectInputStream fromClient)
     {
@@ -348,7 +348,7 @@ public class serverHandlerThread extends Task<Void>
             String userToTell = names[1];
             String songName = names[2];
 
-            File file = new File("src/Resources/Songs/" + songName + ".mp3");
+            File file = new File("src/Resources/Songs/" + songName);
             file.createNewFile();
 
             try (BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file)))

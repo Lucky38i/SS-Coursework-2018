@@ -168,6 +168,7 @@ public class ChatWindowController
         FileChooser fileChooser = new FileChooser();
         File file = fileChooser.showOpenDialog(txt_Messages.getScene().getWindow());
         String fileName = file.getName();
+        System.out.println("I am sending:" + fileName);
         bgThread.addNextSong(file, fileName);
     }
 
@@ -239,7 +240,7 @@ public class ChatWindowController
         /**
          * This receives a message and parses it between
          * code, user who it came from and the message received
-         * then addes it to the private message list or creates a new one
+         * then adds it to the private message list or creates a new one
          * @param input the received message
          */
         void handlePrivateMessages(String input)
