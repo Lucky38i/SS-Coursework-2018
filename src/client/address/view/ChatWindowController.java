@@ -111,12 +111,26 @@ public class ChatWindowController
      */
     public void setSelectedUser()
     {
-        selectedUser = lst_Users.getSelectionModel().getSelectedItem();
-        txt_Messages.setText("");
-        boolean isAFriend = false;
 
-        //Find if the selected user is a friend and parses
-        getMessages(isAFriend);
+
+        selectedUser = lst_Users.getSelectionModel().getSelectedItem();
+        if (selectedUser.contains(("(Friend)")) || selectedUser.equals(user.getUserName()))
+        {
+            alertInfo.setTitle("");
+            alertInfo.setHeaderText(null);
+            //TODO change the message
+            alertInfo.setContentText("Why would you do that?");
+            alertInfo.showAndWait();
+        }
+        else
+        {
+            txt_Messages.setText("");
+            boolean isAFriend = false;
+
+
+            //Find if the selected user is a friend and parses
+            getMessages(isAFriend);
+        }
     }
 
     private void getMessages()
@@ -131,6 +145,7 @@ public class ChatWindowController
         txt_Messages.setText("");
         if (selectedUser != null)
         {
+
             if (selectedUser.indexOf("(F") > 0)
             {
                 isAFriend = true;
