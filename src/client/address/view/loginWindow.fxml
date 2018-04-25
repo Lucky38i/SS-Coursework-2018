@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.image.*?>
+<?import java.lang.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="400.0" prefWidth="299.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.address.view.loginWindowController">
+   <children>
+      <BorderPane layoutX="-1.0" layoutY="-1.0" prefHeight="400.0" prefWidth="300.0">
+         <center>
+            <AnchorPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+               <children>
+                  <AnchorPane fx:id="pane_Config" layoutX="20.0" layoutY="165.0" prefHeight="132.0" prefWidth="267.0">
+                     <children>
+                        <TextField fx:id="txt_IPAddress" layoutX="80.0" prefHeight="25.0" prefWidth="110.0" promptText="IP Address" />
+                        <TextField fx:id="txt_ChatPort" layoutX="80.0" layoutY="49.0" prefHeight="25.0" prefWidth="110.0" promptText="Chat Server Port" />
+                        <TextField fx:id="txt_MainPort" layoutX="80.0" layoutY="84.0" prefHeight="25.0" prefWidth="110.0" promptText="Main Server Port" />
+                        <Label layoutY="5.0" text="IP Address" />
+                        <Label layoutY="54.0" text="Chat Port" />
+                        <Label layoutY="89.0" text="Main Port" />
+                     </children>
+                  </AnchorPane>
+                  <AnchorPane fx:id="pane_Login" layoutX="47.0" layoutY="62.0" prefHeight="118.0" prefWidth="200.0">
+                     <children>
+                        <TextField fx:id="textField_Username" layoutX="26.0" layoutY="75.0" onAction="#open_MainMenu" promptText="Username" />
+                        <Label alignment="CENTER" layoutX="83.0" layoutY="54.0" text="Sign in" textAlignment="CENTER">
+                           <font>
+                              <Font name="Arial Italic" size="11.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </AnchorPane>
+                  <Button layoutX="205.0" layoutY="299.0" mnemonicParsing="false" onAction="#open_MainMenu" text="Login" />
+                  <Button layoutX="38.0" layoutY="299.0" mnemonicParsing="false" onAction="#open_RegisterWindow" text="Register" />
+                  <Label layoutX="107.0" layoutY="35.0" text="Welcome!" textAlignment="CENTER">
+                     <font>
+                        <Font size="18.0" />
+                     </font>
+                  </Label>
+               </children>
+            </AnchorPane>
+         </center>
+         <top>
+            <AnchorPane prefHeight="30.0" prefWidth="300.0" BorderPane.alignment="CENTER">
+               <children>
+                  <ToggleButton fx:id="btn_Config" layoutX="14.0" layoutY="2.0" mnemonicParsing="false" onAction="#open_Config" prefHeight="20.0" prefWidth="25.0" />
+               </children></AnchorPane>
+         </top>
+         <bottom>
+            <AnchorPane prefHeight="30.0" prefWidth="300.0" BorderPane.alignment="CENTER">
+               <children>
+                  <Label fx:id="txt_Version" layoutX="254.0" layoutY="11.0" text="V 0.0.1">
+                     <font>
+                        <Font name="Arial" size="10.0" />
+                     </font>
+                  </Label>
+               </children></AnchorPane>
+         </bottom>
+      </BorderPane>
+   </children>
+</AnchorPane>

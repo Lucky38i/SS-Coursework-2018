@@ -1,50 +1,36 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package server;
 
-/**
- *
- * @author alexmcbean
- */
-
-import java.net.*;
+import javafx.concurrent.Task;
 import java.io.*;
+import java.net.*;
 import java.util.*;
 
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
 
-public class ChatServer
+public class ChatServer extends Task<Void>
 {
-    //Static variables
-    private static final int portNumber = 4444;
-    
     //Variables
     private int serverPort;
-    private List <ClientThread> clients;
-    
-    
-    public static void main(String[] args) 
+    private ClientManager clientManagerTemp;
+
+    public ChatServer(int serverPort, ClientManager clientManagerTemp)
     {
-        ChatServer server  = new ChatServer(portNumber);
-        server.startServer();
+        this.serverPort = serverPort;
+        this.clientManagerTemp = clientManagerTemp;
     }
-    
-    public ChatServer (int __portNumber)
-    {
-        serverPort = __portNumber;
-    }
-    
-    public List<ClientThread> getClients()
-    {
-        return clients;
-    }
-    
+
+
+    /**
+     * Starts the server and begins accepting clients
+     */
     private void startServer()
     {
-        clients = new ArrayList<ClientThread>();
-        ServerSocket serverSocket = null;
+        ServerSocket serverSocket;
         try
         {
             serverSocket = new ServerSocket(serverPort);
@@ -52,33 +38,51 @@ public class ChatServer
         }
         catch (IOException e)
         {
-            System.err.println("Could not listen on port: " + serverPort);
+            clientManagerTemp.logger("Could not listen on port: " + serverPort, "Chat");
             System.exit(1);
         }
     }
-    
-    
-    //Continuously accpt clients
+
+    /**
+     * Creates a new client and adds it to the list of clients
+     * @param acceptedSocket The socket that has been accepted
+     * @return returns a new client that has been added to the client list
+     */
+    private serverHandlerThread newClient(Socket acceptedSocket)
+    {
+        serverHandlerThread client = new serverHandlerThread(acceptedSocket,clientManagerTemp);
+        clientManagerTemp.addClient(client);
+        return client;
+    }
+
+    /**
+     * Continuously accepts clients
+     * @param serverSocket The server socket
+     */
     private void acceptClients(ServerSocket serverSocket)
     {
-        System.out.println("Server starts port = " + serverSocket.getLocalSocketAddress());
+        clientManagerTemp.logger("Server starts port = " + serverSocket.getLocalSocketAddress(), "Chat");
+        ExecutorService executorService = Executors.newCachedThreadPool();
         while (true)
         {
-            try 
+            try
             {
                 Socket socket = serverSocket.accept();
-                System.out.println("Accepts: " + socket.getRemoteSocketAddress());
-                ClientThread client = new ClientThread(this, socket);
-                Thread thread = new Thread(client);
-                thread.start();
-                clients.add(client);
+                FutureTask futureTask = new FutureTask(newClient(socket),null);
+                executorService.execute(futureTask);
             }
             catch (IOException e)
             {
                 System.err.println("Accept failed on:" + serverPort);
             }
-        }   
-    }   
+        }
+    }
+
+
+    @Override
+    protected Void call()
+    {
+        startServer();
+        return null;
+    }
 }
-
-

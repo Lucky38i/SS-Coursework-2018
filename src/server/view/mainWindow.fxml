@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Text?>
+<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="server.view.MainWindowController">
+   <children>
+      <BorderPane layoutX="167.0" layoutY="93.0" prefHeight="400.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <top>
+            <AnchorPane prefHeight="20.0" prefWidth="600.0" BorderPane.alignment="CENTER">
+               <children>
+                  <Text fx:id="lbl_Welcome" layoutX="10.0" layoutY="15.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Text" />
+               </children>
+            </AnchorPane>
+         </top>
+         <center>
+            <AnchorPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+               <children>
+                  <TabPane prefHeight="362.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <tabs>
+                      <Tab text="Main Server">
+                        <content>
+                          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                 <children>
+                                    <BorderPane prefHeight="327.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                       <left>
+                                          <AnchorPane prefHeight="327.0" prefWidth="20.0" BorderPane.alignment="CENTER" />
+                                       </left>
+                                       <right>
+                                          <AnchorPane prefHeight="327.0" prefWidth="100.0" BorderPane.alignment="CENTER" />
+                                       </right>
+                                       <center>
+                                          <TextArea fx:id="txt_MainServerLogs" prefHeight="327.0" prefWidth="471.0" BorderPane.alignment="CENTER" />
+                                       </center>
+                                       <top>
+                                          <AnchorPane prefHeight="20.0" prefWidth="600.0" BorderPane.alignment="CENTER" />
+                                       </top>
+                                    </BorderPane>
+                                 </children>
+                              </AnchorPane>
+                        </content>
+                      </Tab>
+                      <Tab text="Chat Server">
+                        <content>
+                          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                 <children>
+                                    <BorderPane prefHeight="327.0" prefWidth="600.0">
+                                       <center>
+                                          <TextArea fx:id="txt_ChatServerLogs" prefHeight="327.0" prefWidth="471.0" BorderPane.alignment="CENTER" />
+                                       </center>
+                                       <left>
+                                          <AnchorPane prefHeight="327.0" prefWidth="20.0" BorderPane.alignment="CENTER" />
+                                       </left>
+                                       <right>
+                                          <AnchorPane prefHeight="327.0" prefWidth="100.0" BorderPane.alignment="CENTER" />
+                                       </right>
+                                       <top>
+                                          <AnchorPane prefHeight="20.0" prefWidth="600.0" BorderPane.alignment="CENTER" />
+                                       </top>
+                                    </BorderPane>
+                                 </children></AnchorPane>
+                        </content>
+                      </Tab>
+                    </tabs>
+                  </TabPane>
+               </children>
+            </AnchorPane>
+         </center>
+         <bottom>
+            <AnchorPane prefHeight="35.0" prefWidth="600.0" BorderPane.alignment="CENTER">
+               <children>
+                  <Button layoutX="516.0" layoutY="2.0" mnemonicParsing="false" onAction="#shutdownServers" text="Shutdown" />
+               </children>
+            </AnchorPane>
+         </bottom>
+      </BorderPane>
+   </children>
+</AnchorPane>
