@@ -128,9 +128,14 @@ public class serverHandlerThread extends Task<Void>
     private void handlePrivateMessage(String input, Users user)
     {
         String[] names = input.split("[.]");
-        String message = names[2];
-        String userName = names[1];
+        String message = names[3];
+        String userName = names[2];
+        if (userName.contains("(Friend)"))
+        {
+            userName = userName.substring(0,userName.indexOf("(F"));
+        }
         String[] usernameToSend = user.getUserName().split("[.]");
+        clientManagerTemp.logger(usernameToSend[0] + " is sending a message to " + userName, "Chat");
 
         try
         {
@@ -144,6 +149,7 @@ public class serverHandlerThread extends Task<Void>
             }
             assert findUser != null;
             ObjectOutputStream toFindUser = findUser.getWriter();
+
             toFindUser.writeUTF(".Message." + usernameToSend[0] +"."+message);
             toFindUser.flush();
         }
@@ -441,7 +447,6 @@ public class serverHandlerThread extends Task<Void>
         try
         {
             updaterTimer.stop();
-            //chatUpdaterTimer.stop();
             logoff();
 
             //Set the user's log in state to false
@@ -514,7 +519,7 @@ public class serverHandlerThread extends Task<Void>
                     else if (input.contains(".ChatViewer"))
                     {
                         setChatViewer((Users) fromClient.readObject());
-                        chatUpdaterTimer = new Timeline(new KeyFrame(Duration.seconds(5), new EventHandler<ActionEvent>()
+                        chatUpdaterTimer = new Timeline(new KeyFrame(Duration.seconds(3), new EventHandler<ActionEvent>()
                         {
                             @Override
                             public void handle(ActionEvent event)
@@ -522,8 +527,8 @@ public class serverHandlerThread extends Task<Void>
                                 getOnlineUsers(toClient);
                             }
                         }));
-                        //chatUpdaterTimer.setCycleCount(Timeline.INDEFINITE);
-                        //chatUpdaterTimer.playFrom(Duration.seconds(3));
+                        chatUpdaterTimer.setCycleCount(Timeline.INDEFINITE);
+                        chatUpdaterTimer.playFrom(Duration.seconds(2.5));
                     }
                     else if (input.contains(".Message"))
                     {

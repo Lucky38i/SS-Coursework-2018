@@ -149,7 +149,7 @@ public class loginWindowController implements Initializable
      * the SceneSwitcher class wouldn't be modular if it sent an object to the main window specifically making it's
      * use obsolete.
      * @param actionEvent used to switch the scene
-     * @param user used to send to the main window controller
+     * @param user used to send to the main window chatWindowController
      */
     private void switchToMainMenu(ActionEvent actionEvent, Users user, String host, int mainPortNumber, int chatPortNumber)
     {
@@ -163,7 +163,7 @@ public class loginWindowController implements Initializable
             Parent windowParent = loader.load();
             Scene windowScene = new Scene(windowParent);
 
-            //Access the controller and init data
+            //Access the chatWindowController and init data
             mainWindowController controller = loader.getController();
             controller.initData(user, host, mainPortNumber, chatPortNumber);
 

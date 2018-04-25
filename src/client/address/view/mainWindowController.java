@@ -23,6 +23,7 @@ import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import javafx.util.Duration;
 
 import java.io.*;
@@ -45,6 +46,8 @@ public class mainWindowController implements Initializable
     @FXML private ListView<String> lst_Genres, lst_Friends, lst_OnlineUsers, lst_Requests, lst_SearchedUsers, lst_SearchedMusic, lst_SharedSongs;
     @FXML private TextArea txt_Messages;
     @FXML private ContextMenu friends_Menu, users_Menu, requests_Menu;
+    Stage PMWindowStage = new Stage();
+    ChatWindowController chatWindowController;
 
     //Variables
     private Alert alertInfo = new Alert(Alert.AlertType.INFORMATION);
@@ -58,9 +61,10 @@ public class mainWindowController implements Initializable
     private Timeline theLittleTimerThatCouldBrother;
     private ObservableList<Pair<String,ObservableList<String>>> newList = FXCollections.observableArrayList();
     private MediaPlayer mediaPlayer;
+    private boolean pmWindowTimerClosed = false;
 
     /**
-     * This sets the received user to <code>this.user</code> to be used by this controller
+     * This sets the received user to <code>this.user</code> to be used by this chatWindowController
      * @param user receives a user object from the registerWindowController
      */
     void initData(Users user, String host, int mainPortNumber, int chatPortNumber)
@@ -132,7 +136,6 @@ public class mainWindowController implements Initializable
         String location = "test.mp3";
         Media hit = new Media(new File(location).toURI().toString());
         mediaPlayer = new MediaPlayer(hit);
-        System.out.println("Playing");
         mediaPlayer.play();
     }
 
@@ -225,6 +228,14 @@ public class mainWindowController implements Initializable
                 {
                     theLittleTimerThatCould.stop();
                     theLittleTimerThatCouldBrother.stop();
+                    if (!pmWindowTimerClosed)
+                    {
+                        Platform.runLater(() ->
+                        {
+                            chatWindowController.getTheTimer().stop();
+                            System.out.println("Timer stopped");
+                        });
+                    }
 
                     alertInfo.setTitle("");
                     alertInfo.setHeaderText(null);
@@ -245,15 +256,12 @@ public class mainWindowController implements Initializable
             Parent root = loader.load();
             Scene scene = new Scene(root);
 
-            ChatWindowController controller = loader.getController();
-            controller.initData(host,chatPortNumber,user);
+            chatWindowController = loader.getController();
+            chatWindowController.initData(host,chatPortNumber,user);
 
-            //listView.getSelectionModel().getSelectedItem();
-            System.out.println(lst_Friends.getSelectionModel().getSelectedItem());
 
-            Stage primaryStage = new Stage();
-            primaryStage.setScene(scene);
-            primaryStage.show();
+            PMWindowStage.setScene(scene);
+            PMWindowStage.show();
 
 
         } catch (IOException e)
@@ -415,6 +423,20 @@ public class mainWindowController implements Initializable
     public void initialize(URL location, ResourceBundle resources)
     {
         //TODO Logs the user out if they close the stage
+        PMWindowStage.setOnCloseRequest(new EventHandler<WindowEvent>()
+        {
+            @Override
+            public void handle(WindowEvent event)
+            {
+                Platform.runLater(() ->
+                {
+                    chatWindowController.getTheTimer().stop();
+                    pmWindowTimerClosed = true;
+                    System.out.println("Timer stopped");
+                });
+            }
+        });
+
     }
 
 
@@ -473,7 +495,6 @@ public class mainWindowController implements Initializable
         void handleFriendRequest(String input)
         {
             String[] names = input.split("[.]");
-            System.out.println(names.length + ": " + names[2]);
             friendRequest.add(names[2]);
         }
         //Writes to the UI's text area
@@ -593,7 +614,6 @@ public class mainWindowController implements Initializable
 
                     if (hasMessages)
                     {
-                        //System.out.println("I have a message to send!");
                         String nextSend;
                         synchronized (messagesToSend)
                         {
