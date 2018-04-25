@@ -35,7 +35,7 @@ public class ChatWindowController
     @FXML private TextField chat_Message;
     @FXML private ListView<String> lst_Users;
 
-    private ArrayList<Pair<String,List<String>>> privateMessages;
+    private List<Pair<String,List<String>>> privateMessages;
     private String selectedUser;
     private backgroundThread bgThread;
     private String host;
@@ -77,7 +77,7 @@ public class ChatWindowController
         return theTimer;
     }
 
-    private synchronized ArrayList<Pair<String,List<String>>> getPrivateMessages()
+    private synchronized List<Pair<String, List<String>>> getPrivateMessages()
     {
         return privateMessages;
     }
@@ -94,6 +94,7 @@ public class ChatWindowController
         else
         {
             bgThread.addNextMessage(".Message." + selectedUser + "." + chat_Message.getText());
+            chat_Message.setText("");
         }
     }
 
@@ -107,14 +108,12 @@ public class ChatWindowController
         txt_Messages.setText("");
         if (privateMessages.size() > 0)
         {
-            for (Pair<String, List<String>> i : privateMessages)
+            for (Pair<String, List<String>> privateMessage : privateMessages)
             {
-                if (i.getFirst().equals(selectedUser))
+                if (privateMessage.getFirst().equals(selectedUser) || privateMessage.getFirst().equals(selectedUser.substring(0,selectedUser.indexOf("(F"))))
                 {
-                    for (int x = 0; x < i.getSecond().size(); ++x)
-                    {
-                        txt_Messages.appendText(i.getSecond().get(x) + "\n");
-                    }
+                    for (int x = 0; x < privateMessage.getSecond().size(); ++x)
+                        txt_Messages.appendText(privateMessage.getSecond().get(x) + "\n");
                 }
             }
         }
@@ -216,8 +215,10 @@ public class ChatWindowController
             else
             {
                 Pair<String,List<String>> newUserChat = new Pair<>();
+                List<String> tempList = new ArrayList<>();
                 newUserChat.setFirst(userName);
-                newUserChat.getSecond().add(message);
+                newUserChat.setSecond(tempList);
+                newUserChat.getSecond().add(userName + ": " + message);
                 getPrivateMessages().add(newUserChat);
             }
         }
@@ -239,36 +240,32 @@ public class ChatWindowController
 
                 while (!socket.isClosed())
                 {
-                    Thread.sleep(100);
 
-                    if (fromServer.available() > 0)
+                    String input = fromServer.readUTF();
+                    System.out.println(input);
+
+                    if (input.contains(".online"))
                     {
-                        String input = fromServer.readUTF();
-                        System.out.println(input);
+                        Object obj = fromServer.readObject();
+                        ArrayList<String> templist = (ArrayList<String>) obj;
 
-                        if (input.contains(".online"))
+                        //Checks if any of the online users are friends
+                        for (int i = 0; i < templist.size(); ++i)
                         {
-                            Object obj = fromServer.readObject();
-                            ArrayList<String> templist = (ArrayList<String>) obj;
-
-                            //Checks if any of the online users are friends
-                            for (int i = 0; i < templist.size(); ++i)
+                            for (int x = 0; x < user.getFriendsList().size(); ++x)
                             {
-                                for (int x = 0; x < user.getFriendsList().size(); ++x)
+                                if (templist.get(i).equals(user.getFriendsList().get(x)))
                                 {
-                                    if (templist.get(i).equals(user.getFriendsList().get(x)))
-                                    {
-                                        templist.set(i, templist.get(i) + "(Friend)");
-                                    }
+                                    templist.set(i, templist.get(i) + "(Friend)");
                                 }
                             }
-                            setOnlineUserList(templist);
                         }
+                        setOnlineUserList(templist);
+                    }
 
-                        else if (input.contains(".Message"))
-                        {
-                            handlePrivateMessages(input);
-                        }
+                    else if (input.contains(".Message"))
+                    {
+                        handlePrivateMessages(input);
                     }
 
                     if (hasMessages)
@@ -311,10 +308,8 @@ public class ChatWindowController
 
                     }
                 }
-                //This should never happen unless the window closes
-                System.out.println("Socket closed");
             }
-            catch (IOException e)
+            catch (Exception e)
             {
                 e.printStackTrace();
             }

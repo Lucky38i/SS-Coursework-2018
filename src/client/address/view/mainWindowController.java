@@ -519,114 +519,110 @@ public class mainWindowController implements Initializable
 
                 while (!socket.isClosed())
                 {
-                    Thread.sleep(100);
                     //Print messages from server
-                    if (fromServer.available() > 0)
+                    String input = fromServer.readUTF();
+
+                    //TODO create comments for the purpose for all of these if statements
+                    if (input.equals("Done"))
                     {
-                        //Print out messages from the server and appends the text area
-                        String input = fromServer.readUTF();
+                        socket.close();
+                    }
+                    else if (input.contains(".online"))
+                    {
+                        Object obj = fromServer.readObject();
+                        ArrayList<String> templist = (ArrayList<String>) obj;
 
-                        //TODO create comments for the purpose for all of these if statements
-                        if (input.equals("Done"))
+                        //Checks if any of the online users are friends
+                        for (int i = 0; i < templist.size(); ++i)
                         {
-                            socket.close();
-                        }
-                        else if (input.contains(".online"))
-                        {
-                            Object obj = fromServer.readObject();
-                            ArrayList<String> templist = (ArrayList<String>) obj;
-
-                            //Checks if any of the online users are friends
-                            for (int i = 0; i < templist.size(); ++i)
+                            for (int x = 0; x < user.getFriendsList().size(); ++x)
                             {
-                                for (int x = 0; x < user.getFriendsList().size(); ++x)
+                                if (templist.get(i).equals(user.getFriendsList().get(x)))
                                 {
-                                    if (templist.get(i).equals(user.getFriendsList().get(x)))
-                                    {
-                                        templist.set(i, templist.get(i) + "(Friend)");
-                                    }
+                                    templist.set(i, templist.get(i) + "(Friend)");
                                 }
                             }
-                            setOnlineUserList(templist);
                         }
-                        else if (input.contains(".Search"))
-                        {
-                            //Read the received list and set it as a temporary list
-                            ObservableList<Users> tempList = FXCollections.observableArrayList();
-                            tempList.setAll((ArrayList<Users>) fromServer.readObject());
-                            ArrayList<String> tempListForUsers = new ArrayList<>();
-
-                            for (Users i : tempList)
-                            {
-                                Pair<String, ObservableList<String>> newPair = new Pair<>();
-                                newPair.setFirst(i.getUserName());
-                                newPair.setSecond(i.musicGenreProperty().get());
-                                addToNewList(newPair);
-                            }
-
-                            for (int i = 0; i < getNewList().size(); ++i)
-                            {
-                                tempListForUsers.add(getNewList().get(i).getFirst());
-                            }
-
-                            Platform.runLater(()->
-                            {
-                                lst_SearchedUsers.refresh();
-                                searchedUsers.setAll(tempListForUsers);
-                                lst_SearchedUsers.setItems(searchedUsers);
-                            });
-
-                        }
-                        else if (input.contains(".Request"))
-                        {
-                            handleFriendRequest(input);
-                        }
-                        else if (input.contains(".Get"))
-                        {
-                            Users updateUser = (Users) fromServer.readObject();
-
-                            Platform.runLater(()->
-                            {
-                                mainWindowController.user = updateUser;
-                                lst_Friends.setItems(updateUser.friendsListProperty().get());
-                            });
-                        }
-                        else if (input.contains(".Accept"))
-                        {
-                            String[] names = input.split("[.]");
-                            writeToUI("[ADMIN]: " + names[2] + " has accepted your friend request"+"\n");
-
-                        }
-                        else if (input.contains(".Decline"))
-                        {
-                            String[] names = input.split("[.]");
-                            writeToUI("[ADMIN]: " + names[2] + " has declined your friend request"+"\n");
-
-                            for (int i = 0; i < friendRequest.size(); ++i)
-                                if (friendRequest.get(i).contains(names[2]))
-                                    friendRequest.remove(i);
-                        }
-                        else
-                        {
-                            writeToUI(input);
-                        }
+                        setOnlineUserList(templist);
                     }
-
-                    if (hasMessages)
+                    else if (input.contains(".Search"))
                     {
-                        String nextSend;
-                        synchronized (messagesToSend)
+                        //Read the received list and set it as a temporary list
+                        ObservableList<Users> tempList = FXCollections.observableArrayList();
+                        tempList.setAll((ArrayList<Users>) fromServer.readObject());
+                        ArrayList<String> tempListForUsers = new ArrayList<>();
+
+                        for (Users i : tempList)
                         {
-                            nextSend = messagesToSend.pop();
-                            hasMessages = !messagesToSend.isEmpty();
+                            Pair<String, ObservableList<String>> newPair = new Pair<>();
+                            newPair.setFirst(i.getUserName());
+                            newPair.setSecond(i.musicGenreProperty().get());
+                            addToNewList(newPair);
                         }
 
-                        toServer.writeUTF(nextSend);
-                        toServer.flush();
+                        for (int i = 0; i < getNewList().size(); ++i)
+                        {
+                            tempListForUsers.add(getNewList().get(i).getFirst());
+                        }
+
+                        Platform.runLater(()->
+                        {
+                            lst_SearchedUsers.refresh();
+                            searchedUsers.setAll(tempListForUsers);
+                            lst_SearchedUsers.setItems(searchedUsers);
+                        });
+
+                    }
+                    else if (input.contains(".Request"))
+                    {
+                        handleFriendRequest(input);
+                    }
+                    else if (input.contains(".Get"))
+                    {
+                        Users updateUser = (Users) fromServer.readObject();
+
+                        Platform.runLater(()->
+                        {
+                            mainWindowController.user = updateUser;
+                            lst_Friends.setItems(updateUser.friendsListProperty().get());
+                        });
+                    }
+                    else if (input.contains(".Accept"))
+                    {
+                        String[] names = input.split("[.]");
+                        writeToUI("[ADMIN]: " + names[2] + " has accepted your friend request"+"\n");
+
+                    }
+                    else if (input.contains(".Decline"))
+                    {
+                        String[] names = input.split("[.]");
+                        writeToUI("[ADMIN]: " + names[2] + " has declined your friend request"+"\n");
+
+                        for (int i = 0; i < friendRequest.size(); ++i)
+                            if (friendRequest.get(i).contains(names[2]))
+                                friendRequest.remove(i);
+                    }
+                    else
+                    {
+                        writeToUI(input);
                     }
                 }
+
+                if (hasMessages)
+                {
+                    String nextSend;
+                    synchronized (messagesToSend)
+                    {
+                        nextSend = messagesToSend.pop();
+                        hasMessages = !messagesToSend.isEmpty();
+                    }
+
+                    toServer.writeUTF(nextSend);
+                    toServer.flush();
+                }
+
             }
-            catch (IOException | InterruptedException | ClassNotFoundException e)
+            catch (IOException | ClassNotFoundException e)
             {
                 e.printStackTrace();
             }

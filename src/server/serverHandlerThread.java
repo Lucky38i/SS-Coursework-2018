@@ -153,7 +153,7 @@ public class serverHandlerThread extends Task<Void>
             toFindUser.writeUTF(".Message." + usernameToSend[0] +"."+message);
             toFindUser.flush();
         }
-        catch (IOException e)
+        catch (Exception e)
         {
             e.printStackTrace();
         }
@@ -194,7 +194,7 @@ public class serverHandlerThread extends Task<Void>
             toClient.flush();
 
         }
-        catch (IOException e)
+        catch (Exception e)
         {
             e.printStackTrace();
         }
@@ -489,8 +489,7 @@ public class serverHandlerThread extends Task<Void>
 
             while(!socket.isClosed())
             {
-                //If server has received a message
-                if(fromClient.available() > 0)
+                if (fromClient.available() > 0)
                 {
                     //Reads message and objects from client
                     String input = fromClient.readUTF();
@@ -508,15 +507,14 @@ public class serverHandlerThread extends Task<Void>
                             {
                                 getOnlineUsers(toClient);
 
-                                getUpdatedUser(toClient,".Get."+user.getUserName());
+                                getUpdatedUser(toClient, ".Get." + user.getUserName());
 
                             }
                         }));
 
                         updaterTimer.setCycleCount(Timeline.INDEFINITE);
                         updaterTimer.playFrom(Duration.seconds(4));
-                    }
-                    else if (input.contains(".ChatViewer"))
+                    } else if (input.contains(".ChatViewer"))
                     {
                         setChatViewer((Users) fromClient.readObject());
                         chatUpdaterTimer = new Timeline(new KeyFrame(Duration.seconds(3), new EventHandler<ActionEvent>()
@@ -529,30 +527,22 @@ public class serverHandlerThread extends Task<Void>
                         }));
                         chatUpdaterTimer.setCycleCount(Timeline.INDEFINITE);
                         chatUpdaterTimer.playFrom(Duration.seconds(2.5));
-                    }
-                    else if (input.contains(".Message"))
+                    } else if (input.contains(".Message"))
                     {
                         handlePrivateMessage(input, user);
-                    }
-                    else if (input.contains(".Music"))
+                    } else if (input.contains(".Music"))
                     {
                         findMusic(input, toClient);
-                    }
-                    else if (input.contains(".NewSong"))
+                    } else if (input.contains(".NewSong"))
                     {
                         createNewSong(input, fromClient);
-                    }
-                    else if (input.contains(".Search"))
+                    } else if (input.contains(".Search"))
                     {
                         searchMusicInterests(toClient, input);
-                    }
-
-                    else if (input.contains(".Accept") || input.contains(".Decline"))
+                    } else if (input.contains(".Accept") || input.contains(".Decline"))
                     {
                         handleRequest(input);
-                    }
-
-                    else if (input.contains(".Request"))
+                    } else if (input.contains(".Request"))
                     {
                         writeMessageToUser(input);
                     }
@@ -573,10 +563,9 @@ public class serverHandlerThread extends Task<Void>
                     {
                         Users tempUser = (Users) fromClient.readObject();
                         findUser(toClient, tempUser);
-                    }
-                    else
+                    } else
                     {
-                       writeMessageToAll(input);
+                        writeMessageToAll(input);
                     }
                 }
             }
