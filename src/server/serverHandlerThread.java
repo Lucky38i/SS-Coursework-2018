@@ -26,7 +26,6 @@ public class serverHandlerThread extends Task<Void>
     private ClientManager clientManagerTemp;
     private Users user;
     private Timeline updaterTimer;
-    //TODO fix this stupid fucking thing
     private Timeline chatTimer;
 
     /**
@@ -61,6 +60,11 @@ public class serverHandlerThread extends Task<Void>
                 clientManagerTemp.usersList().get(i).setLoggedIn(true);
     }
 
+    /**
+     * This sets the client's private message viewer that is used to receive
+     * private message from the user
+     * @param user The user that has been read from the client
+     */
     private void setChatViewer(Users user)
     {
         int testInt = clientManagerTemp.clientlist().indexOf(this);
@@ -128,10 +132,12 @@ public class serverHandlerThread extends Task<Void>
         String[] names = input.split("[.]");
         String message = names[3];
         String userName = names[2];
+
         if (userName.contains("(Friend)"))
         {
             userName = userName.substring(0,userName.indexOf("(F"));
         }
+
         String[] usernameToSend = user.getUserName().split("[.]");
         clientManagerTemp.logger(usernameToSend[0] + " is sending a message to " + userName, "Chat");
 
@@ -357,6 +363,7 @@ public class serverHandlerThread extends Task<Void>
                     fileLength -= current;
                 }
                 handlePrivateMessage(".Message." + userToTell + "." + "I shared '"+ songName+"' with you!",user);
+                clientManagerTemp.logger(userToTell + " I shared " + songName, "Chat");
 
             }
         }
@@ -529,7 +536,6 @@ public class serverHandlerThread extends Task<Void>
                         setChatViewer((Users) fromClient.readObject());
                         getOnlineUsers(toClient);
 
-                        //TODO why is this not being instantiated?!
                         chatTimer = new Timeline(new KeyFrame(Duration.seconds(4), event ->
                         {
 

@@ -346,7 +346,7 @@ public class ChatWindowController
                         Integer fileLength = (int) nextSong.getFirst().length();
                         byte[] buffer = new byte[fileLength];
 
-                        addNextMessage(".NewSong."+lst_Users.getSelectionModel().getSelectedItem() +"."+nextSong.getSecond());
+                        addNextMessage(".NewSong."+selectedUser +"."+nextSong.getSecond());
 
 
                         try(BufferedInputStream bis = new BufferedInputStream(new FileInputStream(nextSong.getFirst())))
