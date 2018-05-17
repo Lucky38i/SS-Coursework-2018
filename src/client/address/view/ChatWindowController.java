@@ -111,12 +111,23 @@ public class ChatWindowController
      */
     public void setSelectedUser()
     {
-        selectedUser = lst_Users.getSelectionModel().getSelectedItem();
-        txt_Messages.setText("");
-        boolean isAFriend = false;
+        if (lst_Users.getSelectionModel().getSelectedItem().equals(user.getUserName().substring(0, user.getUserName().indexOf((".Ch")))))
+        {
+            alertInfo.setTitle("");
+            alertInfo.setHeaderText(null);
+            //TODO change the message
+            alertInfo.setContentText("You can't select yourself");
+            alertInfo.showAndWait();
+        }
+        else
+        {
+            txt_Messages.setText("");
+            selectedUser = lst_Users.getSelectionModel().getSelectedItem();
+            boolean isAFriend = false;
 
-        //Find if the selected user is a friend and parses
-        getMessages(isAFriend);
+            //Find if the selected user is a friend and parses
+            getMessages(isAFriend);
+        }
     }
 
     private void getMessages()
