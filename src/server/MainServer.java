@@ -14,6 +14,7 @@ import javafx.scene.control.TextArea;
 
 import java.awt.*;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
@@ -31,7 +32,8 @@ public class MainServer extends Task<Void>
     private TextArea textArea;
 
     //Static variables
-    private static final int portNumber = 4444;
+    private static final int backLog = 50;
+    private static final String bdAddr = "localhost";
     
     //Variables
     private int serverPort;
@@ -45,7 +47,7 @@ public class MainServer extends Task<Void>
         ServerSocket serverSocket;
         try
         {
-            serverSocket = new ServerSocket(serverPort);
+            serverSocket = new ServerSocket(serverPort,backLog,InetAddress.getByName(bdAddr));
             acceptClients(serverSocket);
         }
         catch (IOException e)

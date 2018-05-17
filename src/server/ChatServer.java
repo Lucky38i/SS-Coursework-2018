@@ -14,6 +14,10 @@ import java.util.concurrent.FutureTask;
 
 public class ChatServer extends Task<Void>
 {
+    //Static variables
+    private static final int backLog = 50;
+    private static final String bdAddr = "localhost";
+
     //Variables
     private int serverPort;
     private ClientManager clientManagerTemp;
@@ -33,7 +37,7 @@ public class ChatServer extends Task<Void>
         ServerSocket serverSocket;
         try
         {
-            serverSocket = new ServerSocket(serverPort);
+            serverSocket = new ServerSocket(serverPort, backLog, InetAddress.getByName(bdAddr));
             acceptClients(serverSocket);
         }
         catch (IOException e)
